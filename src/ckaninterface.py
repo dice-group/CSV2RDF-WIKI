@@ -45,4 +45,13 @@ if __name__ == '__main__':
     entityName = package_list[0]
     entity = ckan.getEntity(entityName)
     print entity
-    #print ckan.getEntity(entityName)
+    #get all entities
+    getAllEntities = raw_input("Get All Entities?(y/n):")
+    if(getAllEntities == 'y'):
+        print('Getting all entities')
+        for entityName in package_list:
+            print('Getting now: '+entityName)
+            entity = ckan.getEntity(entityName)
+            break
+    else:
+        pass
