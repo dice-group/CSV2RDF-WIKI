@@ -44,7 +44,7 @@ if __name__ == '__main__':
     #getting one instance
     entityName = package_list[0]
     entity = ckan.getEntity(entityName)
-    print entity
+    print ckan.pFormat(entity)
     #get all entities
     getAllEntities = raw_input("Get All Entities?(y/n):")
     if(getAllEntities == 'y'):
@@ -54,3 +54,4 @@ if __name__ == '__main__':
             entity = ckan.getEntity(entityName)
     else:
         pass
+    
