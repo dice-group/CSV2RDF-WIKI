@@ -4,3 +4,6 @@ lib/
 local/
 util/
 ./
+*.komodoproject
+*.kpf
+*.pyc
