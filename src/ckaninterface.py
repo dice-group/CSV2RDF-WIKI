@@ -52,6 +52,5 @@ if __name__ == '__main__':
         for entityName in package_list:
             print('Getting now: '+entityName)
             entity = ckan.getEntity(entityName)
-            break
     else:
         pass
