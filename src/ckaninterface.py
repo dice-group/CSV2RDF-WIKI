@@ -60,7 +60,7 @@ class CkanInterface:
                 print "Creating new folder"
                 print "Fetching resource from URI"
                 try:
-                    r = requests.get(url)
+                    r = requests.get(url, timeout=10)
                     self.filesdb.saveDbase(filename, r.content)
                     self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' OK!\n')
                     self.log.flush()
