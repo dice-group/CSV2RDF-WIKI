@@ -2,15 +2,20 @@
 # Logic for fetching and processing CKAN data
 #
 import ckanclient
+from database import Database
+import os
+import requests
+requests.defaults.danger_mode = True
 
 class CkanInterface:
     def __init__(self, base_location=None, api_key=None):
-        from database import Database
         self.base_location = base_location
         self.api_key = api_key
         self.ckan = ckanclient.CkanClient(base_location=base_location,
                                           api_key=api_key)
         self.db = Database('data/')
+        self.errorlog = open('error.log', 'wb')
+        self.log = open('log.log', 'wb')
     def getEntity(self, entityName):
         try:
             entity = self.db.loadDbase(entityName)
@@ -35,6 +40,34 @@ class CkanInterface:
             package_list = self.ckan.package_register_get()
             self.db.saveDbase("package_list", package_list)
         return package_list
+    
+    def downloadEntityResources(self, entity):
+        entityName = entity['name']
+        newpath = 'files/'+entityName+'/'
+        self.filesdb = Database(newpath)
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        for resource in entity['resources']:
+            print resource['url']
+            url = resource['url']
+            filename = url.split('/')[-1].split('#')[0].split('?')[0]
+            try:
+                resource = self.filesdb.loadDbase(filename)
+                self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' readed from HDD\n')
+                self.log.flush()
+            except IOError as error:
+                print "I/O error({0}): {1}".format(error.errno, error.strerror)
+                print "Creating new folder"
+                print "Fetching resource from URI"
+                try:
+                    r = requests.get(url)
+                    self.filesdb.saveDbase(filename, r.content)
+                    self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' OK!\n')
+                    self.log.flush()
+                except Exception as e:
+                    self.errorlog.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' ' + str(e) + '\n')
+                    self.errorlog.flush()
+        
 
 # 
 # For execution time measure:
@@ -52,8 +85,8 @@ if __name__ == '__main__':
     #getting one instance
     entityName = package_list[0]
     entity = ckan.getEntity(entityName)
-    print ckan.pFormat(entity)
-    #get all entities
+    #print ckan.pFormat(entity)
+    #get all entities    
     getAllEntities = raw_input("Get All Entities?(y/n):")
     if(getAllEntities == 'y'):
         print('Getting all entities')
@@ -61,6 +94,6 @@ if __name__ == '__main__':
             #83.9261538982 seconds from data/ files
             #print('Getting now: '+entityName)
             entity = ckan.getEntity(entityName)
+            ckan.downloadEntityResources(entity)
     else:
         pass
-    
