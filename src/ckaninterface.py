@@ -35,6 +35,14 @@ class CkanInterface:
             package_list = self.ckan.package_register_get()
             self.db.saveDbase("package_list", package_list)
         return package_list
+
+# 
+# For execution time measure:
+# import time
+# start_time = time.time()
+# function()
+# print time.time() - start_time, "seconds"
+# 
             
 if __name__ == '__main__':
     #Test area				
@@ -50,7 +58,8 @@ if __name__ == '__main__':
     if(getAllEntities == 'y'):
         print('Getting all entities')
         for entityName in package_list:
-            print('Getting now: '+entityName)
+            #83.9261538982 seconds from data/ files
+            #print('Getting now: '+entityName)
             entity = ckan.getEntity(entityName)
     else:
         pass
