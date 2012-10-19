@@ -48,7 +48,7 @@ class CkanInterface:
         if not os.path.exists(newpath):
             os.makedirs(newpath)
         for resource in entity['resources']:
-            print resource['url']
+            print resource['url'].encode('utf-8')
             url = resource['url']
             filename = url.split('/')[-1].split('#')[0].split('?')[0]
             try:
