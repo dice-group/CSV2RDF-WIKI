@@ -5,6 +5,7 @@ local/
 util/
 ./
 /src/files/
+/src/wikiconfig.py
 *.komodoproject
 *.kpf
 *.pyc
