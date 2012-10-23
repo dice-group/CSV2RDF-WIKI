@@ -1,4 +1,4 @@
-#
+#s
 # Logic for fetching and processing CKAN data
 #
 import ckanclient
@@ -25,7 +25,21 @@ class CkanInterface:
             entity = self.ckan.package_entity_get(entityName)
             self.db.saveDbase(entityName, entity)
         return entity
-        
+    
+    def getEntityFiles(self, entityName):
+        import os
+        from subprocess import call
+        filelist = os.listdir("files/"+entityName)
+        for filename in filelist:
+            print os.getcwd()
+            sparqlify = "../lib/sparqlify/sparqlify.jar"
+            csvfile = "files/"+entityName+"/"+filename
+            print csvfile
+            configfile = "sparqlify-mappings/"+entityName+" "+filename+".sparqlify"
+            retcode = call(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile])
+            print retcode
+        pass
+    
     def pFormat(self, object):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
@@ -97,3 +111,7 @@ if __name__ == '__main__':
             ckan.downloadEntityResources(entity)
     else:
         pass
+    #working with ambulance-call-outs-to-animal-attack-incidents
+    entityName = "ambulance-call-outs-to-animal-attack-incidents"
+    ckan.getEntityFiles(entityName)
+    
