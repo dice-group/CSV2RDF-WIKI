@@ -3,6 +3,7 @@ include/
 lib/
 local/
 util/
+docs/
 ./
 /src/files/
 /src/wikiconfig.py
