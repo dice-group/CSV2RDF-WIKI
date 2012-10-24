@@ -6,6 +6,7 @@ util/
 ./
 /src/files/
 /src/wikiconfig.py
+/src/ckanconfig.py
 *.komodoproject
 *.kpf
 *.pyc
