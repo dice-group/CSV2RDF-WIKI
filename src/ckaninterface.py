@@ -4,11 +4,12 @@
 import ckanclient
 from database import Database
 import os
+import ckanconfig
 import requests
 requests.defaults.danger_mode = True
 
 class CkanInterface:
-    def __init__(self, base_location=None, api_key=None):
+    def __init__(self, base_location=ckanconfig.base_location, api_key=ckanconfig.api_key):
         self.base_location = base_location
         self.api_key = api_key
         self.ckan = ckanclient.CkanClient(base_location=base_location,
@@ -55,6 +56,12 @@ class CkanInterface:
             self.db.saveDbase("package_list", package_list)
         return package_list
     
+    def isCSV(self, resource):
+        if(re.search( r'csv', resource['format'], re.M|re.I)):
+            return true
+        else:
+            return false
+        
     def downloadEntityResources(self, entity):
         entityName = entity['name']
         newpath = 'files/'+entityName+'/'
@@ -99,18 +106,31 @@ if __name__ == '__main__':
     #getting one instance
     entityName = package_list[0]
     entity = ckan.getEntity(entityName)
+    entity = ckan.getEntity("01-bve-adressen-instellingen--ministerie-van-ocw")
+    print ckan.pFormat(entity)
+    
     #print ckan.pFormat(entity)
     #get all entities    
     getAllEntities = raw_input("Get All Entities?(y/n):")
+    import re
     if(getAllEntities == 'y'):
         print('Getting all entities')
+        i = 0
+        j = 0
         for entityName in package_list:
             #83.9261538982 seconds from data/ files
             #print('Getting now: '+entityName)
             entity = ckan.getEntity(entityName)
-            ckan.downloadEntityResources(entity)
+            for resource in entity['resources']:
+                j = j + 1
+                if():
+                    i = i + 1
+                    #print entity['name'] +' has CSV format'
+            #ckan.downloadEntityResources(entity)
     else:
         pass
+    #CSV: 12224
+    #Overall: 55846
     #working with ambulance-call-outs-to-animal-attack-incidents
     entityName = "ambulance-call-outs-to-animal-attack-incidents"
     ckan.getEntityFiles(entityName)
