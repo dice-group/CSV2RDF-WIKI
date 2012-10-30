@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+{{> header}}
+
+<body bgcolor="white" text="blue">
+
+{{#entity}}
+    <form name="input" action="processResource" method="get">
+        
+            <input type=hidden name="entityName" value="{{name}}"/>    
+            {{#resources}}
+                <input type="radio" name="resourceUrl" value="{{url}}">{{format}} file<br/></input>
+            {{/resources}}
+        
+        <input type="submit" value="Submit">
+    </form> 
+{{/entity}}
+    
+</body>
+
+{{> footer}}
+
+</html>
