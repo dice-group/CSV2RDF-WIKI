@@ -17,6 +17,7 @@ class CkanInterface:
         self.db = Database('data/')
         self.errorlog = open('error.log', 'wb')
         self.log = open('log.log', 'wb')
+        
     def getEntity(self, entityName):
         try:
             entity = self.db.loadDbase(entityName)
@@ -61,6 +62,25 @@ class CkanInterface:
             return true
         else:
             return false
+    
+    def rewriteEntity(self, entity):
+        entityName = entity['name']
+        newpath = 'files/'+entityName+'/'
+        self.filesdb = Database(newpath)
+        for resource in entity['resources']:
+            url = resource['url']
+            filename = url.split('/')[-1].split('#')[0].split('?')[0]
+            try:
+                resource = self.filesdb.loadDbase(filename)
+                self.filesdb.saveDbaseRaw(filename, resource)
+            except:
+                pass
+            
+    def getResourceId(self, entityName, resourceUrl):
+        entity = self.getEntity(entityName)
+        for resource in entity['resources']:
+            if(resource['url'] == resourceUrl):
+                return resource['id']
         
     def downloadEntityResources(self, entity):
         entityName = entity['name']
@@ -82,13 +102,34 @@ class CkanInterface:
                 print "Fetching resource from URI"
                 try:
                     r = requests.get(url, timeout=10)
-                    self.filesdb.saveDbase(filename, r.content)
+                    self.filesdb.saveDBaseRaw(filename, r.content)
                     self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' OK!\n')
                     self.log.flush()
                 except Exception as e:
                     self.errorlog.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' ' + str(e) + '\n')
                     self.errorlog.flush()
-        
+    
+    def downloadResource(self, entityName, resourceUrl):
+        newpath = 'files/'+entityName+'/'
+        self.filesdb = Database(newpath)
+        if not os.path.exists(newpath):
+            os.makedirs(newpath)
+        filename = resourceUrl.split('/')[-1].split('#')[0].split('?')[0]
+        try:
+            resource = self.filesdb.loadDbase(filename)
+            self.filesdb.saveDbaseRaw(filename, resource)
+            return newpath + filename
+        except:
+            try:
+                r = requests.get(resourceUrl, timeout=10)
+                self.filesdb.saveDbaseRaw(filename, r.content)
+                self.log.write(entityName.encode('utf-8') + ' ' + resourceUrl.encode('utf-8') + ' file downloaded OK!\n')
+                self.log.flush()
+                return newpath + filename
+            except Exception as e:
+                self.errorlog.write(entityName.encode('utf-8') + ' ' + resourceUrl.encode('utf-8') + ' ' + str(e) + '\n')
+                self.errorlog.flush()
+                return False
 
 # 
 # For execution time measure:
@@ -108,6 +149,13 @@ if __name__ == '__main__':
     entity = ckan.getEntity(entityName)
     entity = ckan.getEntity("01-bve-adressen-instellingen--ministerie-van-ocw")
     print ckan.pFormat(entity)
+    
+    #Read all existing files and save them as a raw string
+    for entityName in package_list:
+        entity = ckan.getEntity(entityName)
+        ckan.rewriteEntity(entity)
+        
+    print 'rewriting complete!'
     
     #print ckan.pFormat(entity)
     #get all entities    
