@@ -17,5 +17,18 @@ class Database:
         file.close()
         return object
     
+    def saveDbaseRaw(self, filename, string):
+        "save string to file"
+        file = open(self.path + filename, 'wb')
+        file.write(string)
+        file.close()
+        
+    def loadDbaseRaw(self, filename):
+        "load string from file"
+        file = open(self.path + filename, 'rb')
+        return file.read()
+    
 if __name__ == '__main__':
+    #reimport all objects as strings
+    
     pass
