@@ -52,14 +52,4 @@ $(document).ready(function(){
         });
     }
     
-    
-    var $idown;  // Keep it outside of the function, so it's initialized once.
-    function downloadURL(url) {
-        if ($idown) {
-            $idown.attr('src',url);
-        } else {
-            $idown = $('<iframe>', { id:'idown', src:url }).hide().appendTo('body');
-        }
-    }
-    
 });
