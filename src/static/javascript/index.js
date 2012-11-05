@@ -45,17 +45,21 @@ $(document).ready(function(){
     function processResource(CKANEntryId, CKANResourceId) {
         var action = "processResource/";
         var url = baseUrl + action + CKANEntryId + '/' + CKANResourceId;
-        $.getJSON(url, function(model) {
-            
+        $.getJSON(url, function(string) {
+            url = baseUrl + string;
+            element = "<a href="+url+">Your RDF file!</a>";
+            $("#SparqlifiedDownloadLink").html(element);        
         });
     }
     
-    function getSparqlifiedResource(CKANEntryId, CKANResourceId) {
-        var action = "processResource/";
-        var url = baseUrl + action + CKANEntryId + '/' + CKANResourceId;
-        $.getJSON(url, function(model) {
-            
-        });
+    
+    var $idown;  // Keep it outside of the function, so it's initialized once.
+    function downloadURL(url) {
+        if ($idown) {
+            $idown.attr('src',url);
+        } else {
+            $idown = $('<iframe>', { id:'idown', src:url }).hide().appendTo('body');
+        }
     }
     
 });

@@ -39,9 +39,9 @@ class CSV2RDFApp(object):
             f = open(rdfoutput, 'w')
             Popen(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile], stdout=f)
             f.close()
-            return rdfoutput
+            return json.dumps(rdfoutput)
         else:
-            return "something went wrong"    
+            return ''    
         #Save to file?
         #csvfile = "files/"+entityName+"/"+filename
         #read configuration from the wiki and save to the 
