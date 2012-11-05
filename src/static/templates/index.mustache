@@ -1,20 +1,41 @@
 <!DOCTYPE html>
 {{> header}}
 
-<body bgcolor="white" text="blue">
-
-{{#entity}}
-    <form name="input" action="processResource" method="get">
+<body>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+                <div class="navbar-inner">
+                        <div class="container">
+                                <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                </a>
+                                <a class="brand" href="#">CSV2RDF Wiki</a>
+                                <div class="nav-collapse collapse">
+                                        <ul class="nav">
+                                                <li class="active"><a href="#">Home</a></li>
+                                                <li><a href="#about">About</a></li>
+                                                <li><a href="#contact">Contact</a></li>
+                                        </ul>
+                                </div><!--/.nav-collapse -->
+                        </div>
+                </div>
+        </div>
         
-            <input type=hidden name="entityName" value="{{name}}"/>    
-            {{#resources}}
-                <input type="radio" name="resourceUrl" value="{{url}}">{{format}} file<br/></input>
-            {{/resources}}
+        <div id="container">
+                <fieldset>
+                        <legend>Choose the CKAN entry.</legend>
+                        <label>Write a CKAN entry id inside:</label>
+                        <input id="CKANEntryId_Input" type="text" placeholder="CKAN Entry id...">
+                        <span class="help-block">For dataset at <a href="http://publicdata.eu/dataset/staff-organograms-and-pay-joint-nature-conservation-committee">Organogram and staff pay data...</a> id will be: staff-organograms-and-pay-joint-nature-conservation-committee</span>
+                        <button id="CKANEntryId_SubmitButton" type="submit" class="btn">Submit</button>
+                </fieldset>
+                <br/>
+                <br/>
+                <br/>
+                <div id="CKANEntityContainer"></div>
+        </div>
         
-        <input type="submit" value="Submit">
-    </form> 
-{{/entity}}
-    
 </body>
 
 {{> footer}}

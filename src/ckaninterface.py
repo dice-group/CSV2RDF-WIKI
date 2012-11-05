@@ -75,13 +75,7 @@ class CkanInterface:
                 self.filesdb.saveDbaseRaw(filename, resource)
             except:
                 pass
-            
-    def getResourceId(self, entityName, resourceUrl):
-        entity = self.getEntity(entityName)
-        for resource in entity['resources']:
-            if(resource['url'] == resourceUrl):
-                return resource['id']
-        
+       
     def downloadEntityResources(self, entity):
         entityName = entity['name']
         newpath = 'files/'+entityName+'/'
@@ -109,15 +103,17 @@ class CkanInterface:
                     self.errorlog.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' ' + str(e) + '\n')
                     self.errorlog.flush()
     
-    def downloadResource(self, entityName, resourceUrl):
+    def downloadResource(self, entityName, resourceId):
+        #hack here
+        resourceUrl = self.getResourceUrl(entityName, resourceId)
+        
         newpath = 'files/'+entityName+'/'
         self.filesdb = Database(newpath)
         if not os.path.exists(newpath):
             os.makedirs(newpath)
         filename = resourceUrl.split('/')[-1].split('#')[0].split('?')[0]
         try:
-            resource = self.filesdb.loadDbase(filename)
-            self.filesdb.saveDbaseRaw(filename, resource)
+            resource = self.filesdb.loadDbaseRaw(filename)
             return newpath + filename
         except:
             try:
@@ -130,6 +126,18 @@ class CkanInterface:
                 self.errorlog.write(entityName.encode('utf-8') + ' ' + resourceUrl.encode('utf-8') + ' ' + str(e) + '\n')
                 self.errorlog.flush()
                 return False
+            
+    def getResourceId(self, entityName, resourceUrl):
+        entity = self.getEntity(entityName)
+        for resource in entity['resources']:
+            if(resource['url'] == resourceUrl):
+                return resource['id']
+    
+    def getResourceUrl(self, entityName, resourceId):
+        entity = self.getEntity(entityName)
+        for resource in entity['resources']:
+            if(resource['id'] == resourceId):
+                return resource['url']
 
 # 
 # For execution time measure:

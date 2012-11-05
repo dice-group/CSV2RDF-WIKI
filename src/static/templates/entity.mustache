@@ -1,0 +1,12 @@
+<fieldset>
+    <legend>Choose the CKAN entry resource.</legend>
+    <label>Choose from the list:</label>
+    {{#resources}}
+        <label class="radio">
+            <input class="CKANResourceId_RadioButton" type="radio" name="optionsRadios" value="{{id}}" checked="">
+            {{description}}
+        </label>
+    {{/resources}}
+    <span class="help-block">This resource will be transformed to RDF.</span>
+    <button id="CKANResourceId_SubmitButton" type="submit" class="btn">Submit</button>
+</fieldset>

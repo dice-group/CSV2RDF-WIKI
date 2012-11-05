@@ -2,19 +2,18 @@
 # Server interface - views here
 #
 import cherrypy
+import json
 from ckaninterface import CkanInterface
 import pystache
 import pystachetempl
-import ckanconfig
 from wikitoolsinterface import WikiToolsInterface
 from subprocess import Popen
 from subprocess import PIPE
 from os import path
+import os
 
 class CSV2RDFApp(object):
-    def __init__(self,base_location=None, api_key=None):
-        self.base_location = base_location
-        self.api_key = api_key
+    def __init__(self):
         self.renderer = pystache.Renderer(search_dirs="static/templates/")
         
     @cherrypy.expose
@@ -23,20 +22,24 @@ class CSV2RDFApp(object):
         return self.renderer.render(index)
         
     @cherrypy.expose
-    def processResource(self, entityName, resourceUrl):
+    def processResource(self, entityName, resourceId):
         # get resource from the URL
         ckan = CkanInterface()
         sparqlify = "../lib/sparqlify/sparqlify.jar"
-        csvfile = ckan.downloadResource(entityName,resourceUrl)
+        csvfile = ckan.downloadResource(entityName,resourceId)
         wiki = WikiToolsInterface()
-        configfile = 'sparqlify-mappings/' + entityName + '/'  + wiki.getResourceConfiguration(entityName, resourceUrl)
-        print path.abspath(csvfile)
-        print path.abspath(configfile)
-        print path.abspath(sparqlify)
+        configfile = wiki.getResourceConfiguration(entityName, resourceId)
+        rdfoutputpath = 'sparqlified/'+entityName+'/'
+        if not os.path.exists(rdfoutputpath):
+            os.makedirs(rdfoutputpath)
+        rdfoutput = rdfoutputpath+resourceId+'.rdf'
+        
         if(csvfile and configfile):
-            sparqlify = Popen(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile], stdout=PIPE)
-            output = sparqlify.communicate()[0]
-            return output
+            print ' '.join(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile, ">", rdfoutput])
+            f = open(rdfoutput, 'w')
+            Popen(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile], stdout=f)
+            f.close()
+            return rdfoutput
         else:
             return "something went wrong"    
         #Save to file?
@@ -46,11 +49,32 @@ class CSV2RDFApp(object):
         #print retcode
         
     def showEntity(self, entityName):
-        ckan = CkanInterface(base_location=self.base_location, api_key=self.api_key)
+        ckan = CkanInterface()
         entity = ckan.getEntity(entityName)
         return ckan.pFormat(entity)
         
+    ####### AJAX calls
+    
+    @cherrypy.expose
+    def getCKANEntity(self, entityName):
+        ckan = CkanInterface()
+        entity = ckan.getEntity(entityName)
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        return json.dumps(entity)
+    
+    @cherrypy.expose    
+    def getSparqlifiedResource(self, entityName, resourceId):
+        rdfoutputpath = 'sparqlified/'+entityName+'/'
+        rdfoutput = rdfoutputpath+resourceId+'.rdf'
+        try:
+            f = open(rdfoutput, 'r')
+            rdfdata = f.read()
+            f.close()
+            return rdfdata
+        except:
+            return ''
+        
 if __name__ == '__main__':
-    publicdataeu = CSV2RDFApp(base_location=ckanconfig.base_location, api_key=ckanconfig.api_key)
+    publicdataeu = CSV2RDFApp()
     cherrypy.quickstart(publicdataeu, '/', 'csv2rdf.cherrypy.config')
     cherrypy.config.update('cherrypy.config')

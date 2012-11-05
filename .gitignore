@@ -6,6 +6,8 @@ util/
 docs/
 ./
 /src/files/
+/src/sparqlify-mappings/
+/src/sparqlified/
 /src/wikiconfig.py
 /src/ckanconfig.py
 *.komodoproject
