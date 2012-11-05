@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+{{> header}}
+
+<!-- page specific scripts -->
+<script src="static/javascript/csv2rdf.js"></script>
+
+<body>
+    {{> navigation}}
+
+    <div class="container">
+        <div class="row">
+            <fieldset>
+                    <legend>Choose the CKAN entry.</legend>
+                    <label>Write a CKAN entry id inside:</label>
+                    <input id="CKANEntryId_Input" type="text" placeholder="CKAN Entry id...">
+                    <span class="help-block">For dataset at <a href="http://publicdata.eu/dataset/staff-organograms-and-pay-joint-nature-conservation-committee">Organogram and staff pay data...</a> id will be: staff-organograms-and-pay-joint-nature-conservation-committee</span>
+                    <button id="CKANEntryId_SubmitButton" type="submit" class="btn">Submit</button>
+            </fieldset>
+            <br/>
+            <br/>
+            <br/>
+            <div id="CKANEntityContainer"></div>
+            <div id="SparqlifiedDownloadLink"></div>
+        </div>
+    </div>
+</body>
+{{> footer}}
+
+</html>

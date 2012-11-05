@@ -16,10 +16,15 @@ class CSV2RDFApp(object):
     def __init__(self):
         self.renderer = pystache.Renderer(search_dirs="static/templates/")
         
-    @cherrypy.expose
+    @cherrypy.expose(alias='index.html')
     def index(self):
         index = pystachetempl.Index()
         return self.renderer.render(index)
+    
+    @cherrypy.expose(alias='csv2rdf.html')
+    def csv2rdf(self):
+        csv2rdf = pystachetempl.Csv2rdf()
+        return self.renderer.render(csv2rdf)
         
     @cherrypy.expose
     def processResource(self, entityName, resourceId):
@@ -29,6 +34,7 @@ class CSV2RDFApp(object):
         csvfile = ckan.downloadResource(entityName,resourceId)
         wiki = WikiToolsInterface()
         configfile = wiki.getResourceConfiguration(entityName, resourceId)
+        print configfile
         rdfoutputpath = 'sparqlified/'+entityName+'/'
         if not os.path.exists(rdfoutputpath):
             os.makedirs(rdfoutputpath)

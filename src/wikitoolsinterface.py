@@ -100,11 +100,10 @@ class WikiToolsInterface:
         
         for prop in properties:
             csv2rdfconfig += "      ?obs "+ self._extractProp(properties[prop]) +" ?"+ prop + " .\n"
-        print properties
         csv2rdfconfig += "  }" + "\n"
         csv2rdfconfig += "  With" + "\n"
         #TODO: Check Claus e-mail and fix it!!! fn:rowId()
-        csv2rdfconfig += "      ?obs = uri(concat('http://wiki.publicdata.eu/observation', ''))" + "\n"
+        csv2rdfconfig += "      ?obs = uri(concat('http://wiki.publicdata.eu/observation', ?rowId))" + "\n"
         for prop in properties:
             csv2rdfconfig += "      ?" + prop + " = " + self._extractType(properties[prop], prop) + "\n"
         
