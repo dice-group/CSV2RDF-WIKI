@@ -71,7 +71,6 @@ class WikiToolsInterface:
     
     def _convertToSparqlifyML(self, resourceConfigs):
         import re
-        print resourceConfigs
         csv2rdfconfig = ''
         prefixcc = PrefixCC()
         #scan all colX values and extract prefixes

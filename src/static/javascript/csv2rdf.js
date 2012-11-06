@@ -1,9 +1,6 @@
 $(document).ready(function(){
     
     //for AJAX requests
-    var baseUrl = 'http://localhost:8090/';
-    var wikiBaseUrl = "http://wiki.publicdata.eu/wiki/";
-    var wikiNamespace = "Csv2rdf:"
     var CKANEntryId = '';
     var CKANResourceId = '';
     
@@ -53,9 +50,10 @@ $(document).ready(function(){
                 element = "<a href="+configUrl+">Please create a config for this resource.</a>"
                 $("#SparqlifiedDownloadLink").html(element);        
             } else {
+                $("#entityName").val(CKANEntryId);
+                $("#resourceId").val(CKANResourceId);
+                $("#proceedToRDF").show();
                 url = baseUrl + string;
-                element = "<a href="+url+">Your RDF file!</a>";
-                $("#SparqlifiedDownloadLink").html(element);
             }
                     
         });

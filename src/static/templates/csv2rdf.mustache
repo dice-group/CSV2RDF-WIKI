@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 {{> header}}
 
+{{> globaljs}}
 <!-- page specific scripts -->
 <script src="static/javascript/csv2rdf.js"></script>
 
@@ -20,6 +21,15 @@
             <br/>
             <br/>
             <div id="CKANEntityContainer"></div>
+            <br/>
+            <br/>
+            <br/>
+            <form id="proceedToRDF" action="rdfedit.html" method=get style="display: none;">
+                <input id="entityName" type=hidden name=entityName value=''>
+                <input id="resourceId" type=hidden name=resourceId value=''>
+                <input type=submit value='Show RDF' class="btn">
+            </form>
+            </fieldset>
             <div id="SparqlifiedDownloadLink"></div>
         </div>
     </div>

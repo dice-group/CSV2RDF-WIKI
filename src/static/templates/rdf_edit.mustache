@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{{> header}}
+
+{{> navigation}}
+
+{{> codemirror}}
+
+{{> globaljs}}
+<!-- page specific script -->
+<script type="text/javascript">
+    var CKANEntryId = "{{entityName}}";
+    var CKANResourceId = "{{resourceId}}";
+</script>
+
+<script src="static/javascript/rdfedit.js"></script>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <h4>
+                You are working with CKAN entry: <a href="{{> ckaninstance}}dataset/{{entityName}}">{{entityName}}</a>
+                <br/>
+                Transforming <a href="{{> ckaninstance}}dataset/{{entityName}}/resource/{{resourceId}}">{{resourceDescription}}</a>
+            </h4>
+            <h5>Showing first 50 triples</h5>
+            <div id="myTextArea"></div>    
+        </div>
+        <div class="row"></div>
+        <div class="row">
+            <div class="span2">
+                <a href="{{> baseUrl}}sparqlified/{{entityName}}/{{resourceId}}.rdf">
+                    <button id="GetRDF_SubmitButton" type="submit" class="btn-block">
+                        <i class="icon-download-alt"></i>Download RDF
+                    </button>
+                </a>
+            </div>
+            <div class="span6"></div>
+            <div class="span2">
+                <a href="{{> wikiBaseUrl}}{{> wikiNamespace}}{{resourceId}}">
+                    <button id="GoToConfiguration_SubmitButton" type="submit" class="btn-block">
+                        <i class="icon-cog"></i>Configure
+                    </button>
+                </a>
+            </div>
+            <div class="span2">
+                <button id="Transform_SubmitButton" type="submit" class="btn-block">
+                    <i class="icon-play"></i>Transform
+                </button>
+            </div>
+        </div>
+    </div>
+</body>
+
+{{> footer}}
+</html>

@@ -25,7 +25,17 @@ class CSV2RDFApp(object):
     def csv2rdf(self):
         csv2rdf = pystachetempl.Csv2rdf()
         return self.renderer.render(csv2rdf)
+
+    @cherrypy.expose(alias="rdfedit.html")
+    def rdfEdit(self, entityName, resourceId):
+        ckan = CkanInterface()
+        entity = ckan.getEntity(entityName)
+        resourceDescription = ckan.getResourceKey(entityName, resourceId, 'description')
         
+        rdfEdit = pystachetempl.RdfEdit(entityName, resourceId, resourceDescription)
+        return self.renderer.render(rdfEdit)
+        #TODO: make page with the editor!
+
     @cherrypy.expose
     def processResource(self, entityName, resourceId):
         # get resource from the URL
@@ -69,16 +79,17 @@ class CSV2RDFApp(object):
         return json.dumps(entity)
     
     @cherrypy.expose    
-    def getSparqlifiedResource(self, entityName, resourceId):
+    def getSparqlifiedResourceNLines(self, entityName, resourceId, n):
+        n = int(n)
         rdfoutputpath = 'sparqlified/'+entityName+'/'
         rdfoutput = rdfoutputpath+resourceId+'.rdf'
+        print rdfoutput
         try:
-            f = open(rdfoutput, 'r')
-            rdfdata = f.read()
-            f.close()
-            return rdfdata
+            with open(rdfoutput, 'r') as rdffile:
+                head=[rdffile.next() for x in xrange(n)]
+            return json.dumps(head)
         except:
-            return ''
+            return json.dumps('')
         
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()

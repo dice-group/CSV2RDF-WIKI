@@ -138,6 +138,12 @@ class CkanInterface:
         for resource in entity['resources']:
             if(resource['id'] == resourceId):
                 return resource['url']
+                
+    def getResourceKey(self, entityName, resourceId, key):
+        entity = self.getEntity(entityName)
+        for resource in entity['resources']:
+            if(resource['id'] == resourceId):
+                return resource[key]
 
 # 
 # For execution time measure:
