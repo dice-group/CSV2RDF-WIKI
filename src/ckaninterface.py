@@ -6,6 +6,7 @@ from database import Database
 import os
 import ckanconfig
 import requests
+import json
 requests.defaults.danger_mode = True
 
 class CkanInterface:
@@ -144,6 +145,22 @@ class CkanInterface:
         for resource in entity['resources']:
             if(resource['id'] == resourceId):
                 return resource[key]
+                
+    def getResourceById(self, resourceId):
+        data = json.dumps({'id': resourceId})
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        url = 'http://publicdata.eu/api/action/resource_show'
+        r = requests.post(url, timeout=10, data=data, headers=headers)
+        resource = json.loads(r.content)
+        resource = resource["result"]
+        return resource
+    
+    def getResourcePackage(self, resourceId):
+        resource = self.getResourceById(resourceId)
+        url = 'http://publicdata.eu/api/rest/revision/' + resource['revision_id']
+        r = requests.get(url, timeout=10)
+        revision = json.loads(r.content)
+        return revision["packages"][0]
 
 # 
 # For execution time measure:
@@ -158,18 +175,16 @@ if __name__ == '__main__':
     #getting package list
     ckan = CkanInterface(base_location='http://publicdata.eu/api', api_key='e7a928be-a3e8-4a34-b25e-ef641045bbaf')
     package_list = ckan.getPackageList()
-    #getting one instance
-    entityName = package_list[0]
-    entity = ckan.getEntity(entityName)
-    entity = ckan.getEntity("01-bve-adressen-instellingen--ministerie-van-ocw")
-    print ckan.pFormat(entity)
     
-    #Read all existing files and save them as a raw string
-    for entityName in package_list:
-        entity = ckan.getEntity(entityName)
-        ckan.rewriteEntity(entity)
-        
-    print 'rewriting complete!'
+    entityName = ckan.getResourcePackage('13b79d5d-6acf-4667-9279-081b1002740d')
+    print ckan.getEntity(entityName)
+   
+    #getting one instance
+    #entityName = package_list[0]
+    #entity = ckan.getEntity(entityName)
+    #entity = ckan.getEntity("01-bve-adressen-instellingen--ministerie-van-ocw")
+    #print ckan.pFormat(entity)
+    
     
     #print ckan.pFormat(entity)
     #get all entities    
@@ -193,7 +208,4 @@ if __name__ == '__main__':
         pass
     #CSV: 12224
     #Overall: 55846
-    #working with ambulance-call-outs-to-animal-attack-incidents
-    entityName = "ambulance-call-outs-to-animal-attack-incidents"
-    ckan.getEntityFiles(entityName)
     
