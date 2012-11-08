@@ -59,10 +59,11 @@ class CkanInterface:
         return package_list
     
     def isCSV(self, resource):
+        import re
         if(re.search( r'csv', resource['format'], re.M|re.I)):
-            return true
+            return True
         else:
-            return false
+            return False
     
     def rewriteEntity(self, entity):
         entityName = entity['name']
@@ -112,7 +113,7 @@ class CkanInterface:
         self.filesdb = Database(newpath)
         if not os.path.exists(newpath):
             os.makedirs(newpath)
-        filename = resourceUrl.split('/')[-1].split('#')[0].split('?')[0]
+        filename = self.extractFilenameFromUrl(resourceUrl)
         try:
             resource = self.filesdb.loadDbaseRaw(filename)
             return newpath + filename
@@ -127,6 +128,9 @@ class CkanInterface:
                 self.errorlog.write(entityName.encode('utf-8') + ' ' + resourceUrl.encode('utf-8') + ' ' + str(e) + '\n')
                 self.errorlog.flush()
                 return False
+    
+    def extractFilenameFromUrl(self, resourceUrl):
+        return resourceUrl.split('/')[-1].split('#')[0].split('?')[0]
             
     def getResourceId(self, entityName, resourceUrl):
         entity = self.getEntity(entityName)
@@ -161,6 +165,34 @@ class CkanInterface:
         r = requests.get(url, timeout=10)
         revision = json.loads(r.content)
         return revision["packages"][0]
+    
+    def getCSVResourceList(self):
+        output = []
+        package_list = ckan.getPackageList()
+                
+        db = Database('')
+        return db.loadDbase('csvResourceIdList')
+    
+    def updateCSVResourceList(self):
+        output = []
+        package_list = ckan.getPackageList()
+                
+        for package in package_list:
+            entity = self.getEntity(package)
+            for resource in entity['resources']:
+                if(self.isCSV(resource)):
+                    output.append(resource['id'])
+        
+        db = Database('')
+        db.saveDbase('csvResourceIdList', output)
+        
+    def createDefaultPageForAllCSV(self):
+        from wikitoolsinterface import WikiToolsInterface
+        wt = WikiToolsInterface()
+        csvResources = self.getCSVResourceList()
+        for resourceId in csvResources:
+            text = wt.generateDefaultPageForResource(resourceId)
+            wt.createPage(resourceId, text)
 
 # 
 # For execution time measure:
@@ -176,36 +208,10 @@ if __name__ == '__main__':
     ckan = CkanInterface(base_location='http://publicdata.eu/api', api_key='e7a928be-a3e8-4a34-b25e-ef641045bbaf')
     package_list = ckan.getPackageList()
     
-    entityName = ckan.getResourcePackage('13b79d5d-6acf-4667-9279-081b1002740d')
-    print ckan.getEntity(entityName)
-   
-    #getting one instance
-    #entityName = package_list[0]
-    #entity = ckan.getEntity(entityName)
-    #entity = ckan.getEntity("01-bve-adressen-instellingen--ministerie-van-ocw")
-    #print ckan.pFormat(entity)
-    
-    
-    #print ckan.pFormat(entity)
-    #get all entities    
-    getAllEntities = raw_input("Get All Entities?(y/n):")
-    import re
-    if(getAllEntities == 'y'):
-        print('Getting all entities')
-        i = 0
-        j = 0
-        for entityName in package_list:
-            #83.9261538982 seconds from data/ files
-            #print('Getting now: '+entityName)
-            entity = ckan.getEntity(entityName)
-            for resource in entity['resources']:
-                j = j + 1
-                if():
-                    i = i + 1
-                    #print entity['name'] +' has CSV format'
-            #ckan.downloadEntityResources(entity)
-    else:
-        pass
+    #create a list of csv resources (?)
+    #ckan.updateCSVResourceList()
+    #csvResources = ckan.getCSVResourceList()
+    #print len(csvResources)
     #CSV: 12224
     #Overall: 55846
     

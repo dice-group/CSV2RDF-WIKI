@@ -1,5 +1,6 @@
 from wikitools import wiki
 from wikitools import api
+import wikitools
 from prefixcc import PrefixCC
 import wikiconfig
 
@@ -10,10 +11,71 @@ class WikiToolsInterface:
         #login with the data from wikiconfig.py
         self.site.login(wikiconfig.username, password=wikiconfig.password)
         self.site.setMaxlag = -1 #will wait forever
+        self.csvHeaderThreshold = 0.2
+        self.namespace = 'Csv2rdf:'
+    
+    def createPage(self, resourceId, text):
+        title = self.namespace + resourceId
+        page = wikitools.Page(self.site, title=title)
+        page.edit(text=text)
+        return True
+    
+    def extractCSVHeader(self, csv):
+        for position, line in enumerate(csv):
+            items = line.split(',')
+            overall = len(items)
+            empty = 0
+            for item in items:
+                if(item == ''):
+                    empty = empty + 1
+            
+            if(float(empty) / float(overall) < self.csvHeaderThreshold):
+                return (position, line)
+        return ''
+        
+    def generateDefaultPageForResource(self, resourceId):
+        #getting necessary info
+        from ckaninterface import CkanInterface
+        ckan = CkanInterface()
+        entityName = ckan.getResourcePackage(resourceId)
+        resourceDescription = ckan.getResourceKey(entityName, resourceId, 'description')
+        
+        page = '{{CSV2RDFHeader}} \n'
+        page += '\n'
+        
+        #link to the publicdata.eu dataset
+        wikilink = '[http://publicdata.eu/dataset/'+entityName+'/resource/'+resourceId+' "'+resourceDescription+'" resource]'
+        page += 'This configuration is used to transform '+wikilink+' to RDF. \n'
+        page += '\n'
+        
+        #get the header from the csv file
+        from database import Database
+        db = Database('')
+        csv = db.loadResourceCSV(resourceId, n=15)
+        (headerPosition, header) = self.extractCSVHeader(csv)
+        #TODO: test different threshold values
+        
+        #CSV2RDF Template
+        page += '{{RelCSV2RDF|\n'
+        page += 'name = default tranformation configuration |\n'
+        page += 'header = '+str(headerPosition)+' |\n'
+        page += 'omitRows = -1 |\n'
+        page += 'omitCols = -1 |\n'
+        
+        #Split header and create column definition
+        i = 1
+        for item in header.split(','):
+            page += 'col'+str(i)+' = '+str(''.join(item.split()))+' |\n'
+            i = i + 1
+        
+        #Close template
+        page += '}}\n'
+        page += '\n'
+                
+        return page
         
     def getPageContent(self, resourceId):
-        namespace = 'Csv2rdf:'
-        title = namespace + resourceId
+        title = self.namespace + resourceId
         params = {'action':'query', 'prop':'revisions', 'rvprop':'content', 'titles':title}
         request = api.APIRequest(self.site, params)
         result = request.query()
@@ -36,7 +98,7 @@ class WikiToolsInterface:
         pageContent = self.getPageContent(resourceId)
         if(pageContent):
             resourceConfigs = self._extractConfig(pageContent)
-            sparqlifyConfig = self._convertToSparqlifyML(resourceConfigs)
+            sparqlifyConfig = self._convertToSparqlifyML(resourceConfigs, resourceId)
             filename = self._saveConfigToFile(entityName, resourceId, sparqlifyConfig)
             return filename
         else:
@@ -69,7 +131,7 @@ class WikiToolsInterface:
                 config[prop] = value        
         return configs
     
-    def _convertToSparqlifyML(self, resourceConfigs):
+    def _convertToSparqlifyML(self, resourceConfigs, resourceId):
         import re
         csv2rdfconfig = ''
         prefixcc = PrefixCC()
@@ -102,7 +164,7 @@ class WikiToolsInterface:
         csv2rdfconfig += "  }" + "\n"
         csv2rdfconfig += "  With" + "\n"
         #TODO: Check Claus e-mail and fix it!!! fn:rowId()
-        csv2rdfconfig += "      ?obs = uri(concat('http://wiki.publicdata.eu/observation', ?rowId))" + "\n"
+        csv2rdfconfig += "      ?obs = uri(concat('http://data.publicdata.eu/"+resourceId+"#', ?rowId))" + "\n"
         for prop in properties:
             csv2rdfconfig += "      ?" + prop + " = " + self._extractType(properties[prop], prop) + "\n"
         
@@ -139,5 +201,8 @@ class WikiToolsInterface:
 if __name__ == '__main__':
     wt = WikiToolsInterface()
     entityName = 'staff-organograms-and-pay-joint-nature-conservation-committee'
-    resourceId = '6023100d-1c76-4bee-9429-105caa061b9f'
-    print wt.getResourceConfiguration(entityName, resourceId)
+    resourceId = '6023100d-1c76-4bee-9429-105caa061b9f' #Okay header here
+    resourceId = '0967cb11-4384-425a-8565-94ed36a514df' #big bad header
+    #wt.createPage("00000000-0000-0000-0000-000000000000")
+    #print wt.createDefaultPageForResource(resourceId)
+    #print wt.getResourceConfiguration(entityName, resourceId)

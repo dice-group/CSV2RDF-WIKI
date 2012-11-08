@@ -27,8 +27,9 @@ class CSV2RDFApp(object):
         return self.renderer.render(csv2rdf)
 
     @cherrypy.expose(alias="rdfedit.html")
-    def rdfEdit(self, entityName, resourceId):
+    def rdfEdit(self, resourceId):
         ckan = CkanInterface()
+        entityName = ckan.getResourcePackage(resourceId)
         entity = ckan.getEntity(entityName)
         resourceDescription = ckan.getResourceKey(entityName, resourceId, 'description')
         
