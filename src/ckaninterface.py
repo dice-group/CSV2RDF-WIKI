@@ -193,6 +193,8 @@ class CkanInterface:
         for resourceId in csvResources:
             text = wt.generateDefaultPageForResource(resourceId)
             wt.createPage(resourceId, text)
+            self.log.write(resourceId.encode('utf-8') + ' successfully created a page!\n')
+            break
 
 # 
 # For execution time measure:
@@ -207,6 +209,8 @@ if __name__ == '__main__':
     #getting package list
     ckan = CkanInterface(base_location='http://publicdata.eu/api', api_key='e7a928be-a3e8-4a34-b25e-ef641045bbaf')
     package_list = ckan.getPackageList()
+    
+    ckan.createDefaultPageForAllCSV()
     
     #create a list of csv resources (?)
     #ckan.updateCSVResourceList()
