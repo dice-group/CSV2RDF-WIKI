@@ -2,5 +2,7 @@ CherryPy==3.2.2
 argparse==1.2.1
 ckanclient==0.10
 distribute==0.6.24
+pystache==0.5.2
 requests==0.14.1
+wikitools==1.1.1
 wsgiref==0.1.2
