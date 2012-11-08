@@ -18,14 +18,11 @@ class WikiToolsInterface:
         title = self.namespace + resourceId
         page = wikitools.Page(self.site, title=title)
         result = page.edit(text=text, bot=True, createonly=True)
-        print result
         captchaid = result['edit']['captcha']['id']
         captchaword = result['edit']['captcha']['question']
         captchaword = '-'.join(captchaword.split(u'\u2212'))
         captchaword = str(eval(captchaword))
-        print captchaword
         result = page.edit(text=text, bot=True, createonly=True, captchaid=captchaid, captchaword=captchaword)
-        print result
         return True
     
     def extractCSVHeader(self, csv):
