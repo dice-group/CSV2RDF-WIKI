@@ -14,20 +14,36 @@ class WikiToolsInterface:
         self.csvHeaderThreshold = 0.2
         self.namespace = 'Csv2rdf:'
     
-    def createPage(self, resourceId, text):
+    def createPage(self, resourceId, text, captchaid=None, captchaword=None):
+        import time
         title = self.namespace + resourceId
         page = wikitools.Page(self.site, title=title)
-        result = page.edit(text=text, bot=True, createonly=True)
-        captchaid = result['edit']['captcha']['id']
-        captchaword = result['edit']['captcha']['question']
-        captchaword = '-'.join(captchaword.split(u'\u2212'))
-        captchaword = str(eval(captchaword))
-        result = page.edit(text=text, bot=True, createonly=True, captchaid=captchaid, captchaword=captchaword)
-        return True
+        print 'Creating page ' + str(page)
+        
+        try:
+            if captchaid and captchaword:
+                result = page.edit(text=text, bot=True, captchaid=captchaid, captchaword=captchaword)
+            else:
+                result = page.edit(text=text, bot=True)
+        except BaseException as e:
+            print 'Exception occured ' + str(e)
+            return False 
+        
+        if ('edit' in result) and ('result' in result['edit']) and (result['edit']['result'] == 'Success'):
+            return result
+        elif 'captcha' in result['edit']:
+            captchaid = result['edit']['captcha']['id']
+            captchaword = result['edit']['captcha']['question']
+            captchaword = '-'.join(captchaword.split(u'\u2212'))
+            captchaword = str(eval(captchaword))
+            self.createPage(resourceId, text, captchaid=captchaid, captchaword=captchaword)
+        elif ('edit' in result) and ('result' in result['edit']) and (result['edit']['result'] != 'Success'):
+            time.sleep(0.1)
+            self.createPage(resourceId, text)
     
-    def extractCSVHeader(self, csv):
+    def extractCSVHeader(self, csv):     
         for position, line in enumerate(csv):
-            items = line.split(',')
+            items = line.split(',')                
             overall = len(items)
             empty = 0
             for item in items:
@@ -35,42 +51,54 @@ class WikiToolsInterface:
                     empty = empty + 1
             
             if(float(empty) / float(overall) < self.csvHeaderThreshold):
-                return (position, line)
-        return ''
+                return (position + 1, line)
         
     def generateDefaultPageForResource(self, resourceId):
         #getting necessary info
         from ckaninterface import CkanInterface
         ckan = CkanInterface()
         entityName = ckan.getResourcePackage(resourceId)
+        packageName = ckan.getPackageKey(entityName, 'title')
         resourceDescription = ckan.getResourceKey(entityName, resourceId, 'description')
         
         page = '{{CSV2RDFHeader}} \n'
         page += '\n'
         
         #link to the publicdata.eu dataset
-        wikilink = '[http://publicdata.eu/dataset/'+entityName+'/resource/'+resourceId+' "'+resourceDescription+'" resource]'
-        page += 'This configuration is used to transform '+wikilink+' to RDF. \n'
+        page += '{{CSV2RDFResourceLink | \n'
+        page += 'packageId = '+entityName+' | \n'
+        page += 'packageName = "'+packageName+'" | \n'
+        page += 'resourceId = '+resourceId+' | \n'
+        page += 'resourceName = "'+resourceDescription+'" | \n'
+        page += '}} \n'
         page += '\n'
         
         #get the header from the csv file
+        
         from database import Database
         db = Database('')
         csv = db.loadResourceCSV(resourceId, n=15)
-        (headerPosition, header) = self.extractCSVHeader(csv)
+        try:
+            (headerPosition, header) = self.extractCSVHeader(csv)
+        except BaseException as e:
+            print "Exception occured! " + str(e)
+            headerPosition = -1
+            header = ''
         #TODO: test different threshold values
         
         #CSV2RDF Template
         page += '{{RelCSV2RDF|\n'
-        page += 'name = default tranformation configuration |\n'
+        page += 'name = default-tranformation-configuration |\n'
         page += 'header = '+str(headerPosition)+' |\n'
         page += 'omitRows = -1 |\n'
         page += 'omitCols = -1 |\n'
         
         #Split header and create column definition
+        from unidecode import unidecode
         i = 1
         for item in header.split(','):
-            page += 'col'+str(i)+' = '+str(''.join(item.split()))+' |\n'
+            item = unidecode(item)
+            page += 'col'+str(i)+' = '+item.rstrip()+' |\n'
             i = i + 1
         
         #Close template
@@ -207,7 +235,8 @@ if __name__ == '__main__':
     wt = WikiToolsInterface()
     entityName = 'staff-organograms-and-pay-joint-nature-conservation-committee'
     resourceId = '6023100d-1c76-4bee-9429-105caa061b9f' #Okay header here
-    resourceId = '0967cb11-4384-425a-8565-94ed36a514df' #big bad header
+    #resourceId = '0967cb11-4384-425a-8565-94ed36a514df' #big bad header
+    print wt.generateDefaultPageForResource(resourceId)
     #wt.createPage("00000000-0000-0000-0000-000000000000")
     #print wt.createDefaultPageForResource(resourceId)
     #print wt.getResourceConfiguration(entityName, resourceId)

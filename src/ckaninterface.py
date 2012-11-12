@@ -16,8 +16,10 @@ class CkanInterface:
         self.ckan = ckanclient.CkanClient(base_location=base_location,
                                           api_key=api_key)
         self.db = Database('data/')
-        self.errorlog = open('error.log', 'wb')
-        self.log = open('log.log', 'wb')
+        self.errorlog = open('error.log', 'a+')
+        self.log = open('log.log', 'a+')
+        self.errorlogfile = 'error.log'
+        self.logfile = 'log.log'
         
     def getEntity(self, entityName):
         try:
@@ -97,7 +99,7 @@ class CkanInterface:
                 print "Creating new folder"
                 print "Fetching resource from URI"
                 try:
-                    r = requests.get(url, timeout=10)
+                    r = requests.get(url, timeout=100)
                     self.filesdb.saveDBaseRaw(filename, r.content)
                     self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' OK!\n')
                     self.log.flush()
@@ -119,7 +121,7 @@ class CkanInterface:
             return newpath + filename
         except:
             try:
-                r = requests.get(resourceUrl, timeout=10)
+                r = requests.get(resourceUrl, timeout=100)
                 self.filesdb.saveDbaseRaw(filename, r.content)
                 self.log.write(entityName.encode('utf-8') + ' ' + resourceUrl.encode('utf-8') + ' file downloaded OK!\n')
                 self.log.flush()
@@ -128,6 +130,10 @@ class CkanInterface:
                 self.errorlog.write(entityName.encode('utf-8') + ' ' + resourceUrl.encode('utf-8') + ' ' + str(e) + '\n')
                 self.errorlog.flush()
                 return False
+    
+    def getPackageKey(self, entityName, key):
+        entity = self.getEntity(entityName)
+        return entity[key]
     
     def extractFilenameFromUrl(self, resourceUrl):
         return resourceUrl.split('/')[-1].split('#')[0].split('?')[0]
@@ -160,7 +166,10 @@ class CkanInterface:
         return resource
     
     def getResourcePackage(self, resourceId):
+        import time
         resource = self.getResourceById(resourceId)
+        #w8 for 1 second
+        time.sleep(1)
         url = 'http://publicdata.eu/api/rest/revision/' + resource['revision_id']
         r = requests.get(url, timeout=10)
         revision = json.loads(r.content)
@@ -176,7 +185,7 @@ class CkanInterface:
     def updateCSVResourceList(self):
         output = []
         package_list = ckan.getPackageList()
-                
+        
         for package in package_list:
             entity = self.getEntity(package)
             for resource in entity['resources']:
@@ -190,11 +199,18 @@ class CkanInterface:
         from wikitoolsinterface import WikiToolsInterface
         wt = WikiToolsInterface()
         csvResources = self.getCSVResourceList()
-        for resourceId in csvResources:
-            text = wt.generateDefaultPageForResource(resourceId)
-            wt.createPage(resourceId, text)
-            self.log.write(resourceId.encode('utf-8') + ' successfully created a page!\n')
-            break
+        for position, resourceId in enumerate(csvResources):
+            try:
+                text = wt.generateDefaultPageForResource(resourceId)
+                print wt.createPage(resourceId, text)
+            except BaseException as e:
+                print "Exception occured! " + str(e) 
+            try:
+                open(self.errorlogfile, "a+").write(resourceId.encode('utf-8') + ',')
+                open(self.logfile, "a+").write('Element number from csvResource array: ' + str(position) + ' page created!\n')
+            except:
+                print 'cant write log files'
+        return "Created all pages!"
 
 # 
 # For execution time measure:
@@ -210,7 +226,8 @@ if __name__ == '__main__':
     ckan = CkanInterface(base_location='http://publicdata.eu/api', api_key='e7a928be-a3e8-4a34-b25e-ef641045bbaf')
     package_list = ckan.getPackageList()
     
-    ckan.createDefaultPageForAllCSV()
+    #print ckan.getEntity("staff-organograms-and-pay-joint-nature-conservation-committee")
+    print ckan.createDefaultPageForAllCSV()
     
     #create a list of csv resources (?)
     #ckan.updateCSVResourceList()

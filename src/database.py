@@ -40,17 +40,14 @@ class Database:
         filename = ckan.extractFilenameFromUrl(resource['url'])
         entityName = ckan.getResourcePackage(resourceId)
         csvpath = 'files/'+entityName+'/' + filename
-
-        file = open(csvpath, 'rb')
-        output = self._readnlines(file, n)
-        file.close()
+        try:
+            file = open(csvpath, 'rb')
+            output = self._readnlines(file, n)
+            file.close()
+        except BaseException as e:
+            print 'File read error: ' + str(e)
+            output = ''
         return output
-        #try:
-        #    with open(csvpath, 'r') as csvfile:
-        #        head=[csvfile.next() for x in xrange(n)]
-        #    return head
-        #except BaseException as e:
-        #    return e
     
     def _readnlines(self,file, n):
         lines = []
