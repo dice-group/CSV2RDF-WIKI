@@ -27,15 +27,35 @@ class CSV2RDFApp(object):
         return self.renderer.render(csv2rdf)
 
     @cherrypy.expose(alias="rdfedit.html")
-    def rdfEdit(self, resourceId):
+    def rdfEdit(self, resourceId, configName):
         ckan = CkanInterface()
         entityName = ckan.getResourcePackage(resourceId)
         entity = ckan.getEntity(entityName)
         resourceDescription = ckan.getResourceKey(entityName, resourceId, 'description')
         
-        rdfEdit = pystachetempl.RdfEdit(entityName, resourceId, resourceDescription)
+        #convert CSV to RDF
+        self._processResource(entityName, resourceId, configName)
+        
+        rdfEdit = pystachetempl.RdfEdit(entityName, resourceId, resourceDescription, configName)
         return self.renderer.render(rdfEdit)
         #TODO: make page with the editor!
+        
+    def _processResource(self, entityName, resourceId, configName):
+        ckan = CkanInterface()
+        sparqlify = "../lib/sparqlify/sparqlify.jar"
+        csvfile = ckan.downloadResource(entityName,resourceId)
+        wiki = WikiToolsInterface()
+        configfile = wiki.getResourceConfiguration(entityName, resourceId, configName)
+        rdfoutputpath = 'sparqlified/'
+        rdfoutput = rdfoutputpath+resourceId+'_'+configName+'.rdf'       
+        if(csvfile and configfile):
+            #print ' '.join(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile, ">", rdfoutput])
+            f = open(rdfoutput, 'w')
+            Popen(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile], stdout=f)
+            f.close()
+            return json.dumps(rdfoutput)
+        else:
+            return ''
 
     @cherrypy.expose
     def processResource(self, entityName, resourceId):

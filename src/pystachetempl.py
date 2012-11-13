@@ -9,10 +9,11 @@ class Csv2rdf(object):
         pass
     
 class RdfEdit(object):
-    def __init__(self, entityName, resourceId, resourceDescription):
+    def __init__(self, entityName, resourceId, resourceDescription, configName):
         self.entityName = entityName
         self.resourceId = resourceId
         self.resourceDescription = resourceDescription
+        self.configName = configName
     
     def entityName(self):
         return self.entityName
@@ -23,6 +24,9 @@ class RdfEdit(object):
     def resourceDescription(self):
         return self.resourceDescription
         
+    def configName(self):
+        return self.configName
+    
 if __name__ == '__main__':
     entityName = "ambulance-call-outs-to-animal-attack-incidents"
     index = Index(entityName)

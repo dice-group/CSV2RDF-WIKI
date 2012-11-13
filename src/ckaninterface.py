@@ -227,7 +227,7 @@ if __name__ == '__main__':
     package_list = ckan.getPackageList()
     
     #print ckan.getEntity("staff-organograms-and-pay-joint-nature-conservation-committee")
-    print ckan.createDefaultPageForAllCSV()
+    #print ckan.createDefaultPageForAllCSV()
     
     #create a list of csv resources (?)
     #ckan.updateCSVResourceList()

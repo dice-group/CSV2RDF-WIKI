@@ -122,7 +122,7 @@ class WikiToolsInterface:
             #Config does not exist
             return False
             
-    def getResourceConfiguration(self, entityName, resourceId):
+    def getResourceConfiguration(self, entityName, resourceId, configName):
         
         from ckaninterface import CkanInterface
         ckan = CkanInterface()
@@ -130,7 +130,9 @@ class WikiToolsInterface:
                 
         pageContent = self.getPageContent(resourceId)
         if(pageContent):
+            print pageContent
             resourceConfigs = self._extractConfig(pageContent)
+            
             sparqlifyConfig = self._convertToSparqlifyML(resourceConfigs, resourceId)
             filename = self._saveConfigToFile(entityName, resourceId, sparqlifyConfig)
             return filename
@@ -139,17 +141,19 @@ class WikiToolsInterface:
     
     def _extractConfig(self, pageContent):
         import re
+        import urllib2
         lines = pageContent.split('\n')
         configs = []
+        inside_config = False
         for line in lines:
-            if(re.match('^{{', line)):
+            if(re.match('^{{RelCSV2RDF', line)):
                 inside_config = True
                 config = {}
                 config['type'] = line[2:] #'RelCSV2RDF|'
                 config['type'] = config['type'][:-1] # 'RelCSV2RDF'
                 continue
             
-            if(re.match('^}}', line)):
+            if(inside_config and re.match('^}}', line)):
                 #push config to the configs
                 configs.append(config)
                 del config
@@ -160,7 +164,8 @@ class WikiToolsInterface:
                 prop = line.split('=')[0]
                 value = str(line.split('=')[1])
                 prop = prop.strip()
-                value = ' '.join(value[:-1].split())
+                value = ''.join(value[:-1].split())
+                #value = urllib2.quote(value.encode("utf8"))
                 config[prop] = value        
         return configs
     
