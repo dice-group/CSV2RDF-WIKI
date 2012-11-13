@@ -44,10 +44,13 @@ class CSV2RDFApp(object):
         ckan = CkanInterface()
         sparqlify = "../lib/sparqlify/sparqlify.jar"
         csvfile = ckan.downloadResource(entityName,resourceId)
+        print csvfile
         wiki = WikiToolsInterface()
         configfile = wiki.getResourceConfiguration(entityName, resourceId, configName)
+        print configfile
         rdfoutputpath = 'sparqlified/'
         rdfoutput = rdfoutputpath+resourceId+'_'+configName+'.rdf'       
+        print rdfoutput
         if(csvfile and configfile):
             #print ' '.join(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile, ">", rdfoutput])
             f = open(rdfoutput, 'w')
