@@ -4,18 +4,18 @@ class PrefixCC:
     def __init__(self):
         pass
     
-    def getNamespace(self, prefix):
+    def get_namespace(self, prefix):
         r_string = 'http://prefix.cc/' + prefix + '.file.ini'
         r = requests.get(r_string)
         return r.text
     
-    def getSparqlifyNamespace(self, prefix):
-        ns = self.getNamespace(prefix)
+    def get_sparqlify_namespace(self, prefix):
+        ns = self.get_namespace(prefix)
         ns = ns.split('=')
         ns = "Prefix " + ns[0].strip() + ':' + '<' + ns[1].strip() + '>'
         return ns
     
-    def extractPrefixes(self, string):
+    def extract_prefixes(self, string):
         #format here: foaf:birthday->xsd:date
         prefixes = []
         string = string.split('->')

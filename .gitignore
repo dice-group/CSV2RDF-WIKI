@@ -6,10 +6,12 @@ util/
 docs/
 ./
 /src/files/
-/src/sparqlify-mappings/
+/src/files_old/
+/src/sparqlify_mappings/
 /src/sparqlified/
 /src/wikiconfig.py
 /src/ckanconfig.py
+/src/csv2rdfconfig.py
 *.komodoproject
 *.kpf
 *.pyc

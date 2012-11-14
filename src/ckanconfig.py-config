@@ -1,2 +1,4 @@
-base_location='http://publicdata.eu/api'
-api_key='YourKeyHere'
+ckan_base_url='http://publicdata.eu'
+api_url=ckan_base_url+'/api'
+api_key=''
+resource_dir = 'files/'

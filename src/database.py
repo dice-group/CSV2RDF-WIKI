@@ -1,8 +1,11 @@
 import pickle
+import os
 
 class Database:
     def __init__(self, path):
         self.path = path
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
     
     def saveDbase(self, filename, object):
         "save object to file"
@@ -57,5 +60,4 @@ class Database:
     
 if __name__ == '__main__':
     #reimport all objects as strings
-    
     pass
