@@ -40,59 +40,6 @@ class CSV2RDFApp(object):
         return self.renderer.render(rdfEdit)
         #TODO: make page with the editor!
         
-    def _processResource(self, entityName, resourceId, configName):
-        ckan = CkanInterface()
-        sparqlify = "../lib/sparqlify/sparqlify.jar"
-        csvfile = ckan.downloadResource(entityName,resourceId)
-        print csvfile
-        wiki = WikiToolsInterface()
-        configfile = wiki.getResourceConfiguration(entityName, resourceId, configName)
-        print configfile
-        rdfoutputpath = 'sparqlified/'
-        rdfoutput = rdfoutputpath+resourceId+'_'+configName+'.rdf'       
-        print rdfoutput
-        if(csvfile and configfile):
-            #print ' '.join(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile, ">", rdfoutput])
-            f = open(rdfoutput, 'w')
-            Popen(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile], stdout=f)
-            f.close()
-            return json.dumps(rdfoutput)
-        else:
-            return ''
-
-    @cherrypy.expose
-    def processResource(self, entityName, resourceId):
-        # get resource from the URL
-        ckan = CkanInterface()
-        sparqlify = "../lib/sparqlify/sparqlify.jar"
-        csvfile = ckan.downloadResource(entityName,resourceId)
-        wiki = WikiToolsInterface()
-        configfile = wiki.getResourceConfiguration(entityName, resourceId)
-        print configfile
-        rdfoutputpath = 'sparqlified/'+entityName+'/'
-        if not os.path.exists(rdfoutputpath):
-            os.makedirs(rdfoutputpath)
-        rdfoutput = rdfoutputpath+resourceId+'.rdf'
-        
-        if(csvfile and configfile):
-            print ' '.join(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile, ">", rdfoutput])
-            f = open(rdfoutput, 'w')
-            Popen(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile], stdout=f)
-            f.close()
-            return json.dumps(rdfoutput)
-        else:
-            return ''    
-        #Save to file?
-        #csvfile = "files/"+entityName+"/"+filename
-        #read configuration from the wiki and save to the 
-        #configfile = "sparqlify-mappings/"+entityName+" "+filename+".sparqlify"
-        #print retcode
-        
-    def showEntity(self, entityName):
-        ckan = CkanInterface()
-        entity = ckan.getEntity(entityName)
-        return ckan.pFormat(entity)
-        
     ####### AJAX calls
     
     @cherrypy.expose

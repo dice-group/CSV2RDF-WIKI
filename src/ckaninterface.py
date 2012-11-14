@@ -7,6 +7,7 @@ from unidecode import unidecode
 import re
 import urllib2
 from prefixcc import PrefixCC
+import subprocess
 
 #Configs
 import ckanconfig
@@ -18,160 +19,36 @@ import json
 requests.defaults.danger_mode = True
 
 #
-# CKAN scripting
-#
-
-class CkanInterface:
-    def __init__(self, base_location=ckanconfig.api_url, api_key=ckanconfig.api_key):
-        self.base_location = base_location
-        self.api_key = api_key
-        self.ckan = ckanclient.CkanClient(base_location=base_location,
-                                          api_key=api_key)
-        self.db = Database('data/')
-        self.errorlog = open('error.log', 'a+')
-        self.log = open('log.log', 'a+')
-        self.errorlogfile = 'error.log'
-        self.logfile = 'log.log'
-    
-    def getEntityFiles(self, entityName):
-        import os
-        from subprocess import call
-        filelist = os.listdir("files/"+entityName)
-        for filename in filelist:
-            print os.getcwd()
-            sparqlify = "../lib/sparqlify/sparqlify.jar"
-            csvfile = "files/"+entityName+"/"+filename
-            print csvfile
-            configfile = "sparqlify-mappings/"+entityName+" "+filename+".sparqlify"
-            retcode = call(["java", "-cp", sparqlify, "org.aksw.sparqlify.csv.CsvMapperCliMain", "-f", csvfile, "-c", configfile])
-            print retcode
-        pass
-    
-    def pFormat(self, object):
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4)
-        return pp.pformat(object)
-            
-    def getPackageList(self):
-        try:
-            package_list = self.db.loadDbase("package_list")
-        except IOError as error:
-            print "I/O error({0}): {1}".format(error.errno, error.strerror)
-            print "Creating new package list"
-            package_list = self.ckan.package_register_get()
-            self.db.saveDbase("package_list", package_list)
-        return package_list
-    
-    def isCSV(self, resource):
-        import re
-        if(re.search( r'csv', resource['format'], re.M|re.I)):
-            return True
-        else:
-            return False
-    
-    def rewriteEntity(self, entity):
-        entityName = entity['name']
-        newpath = 'files/'+entityName+'/'
-        self.filesdb = Database(newpath)
-        for resource in entity['resources']:
-            url = resource['url']
-            filename = url.split('/')[-1].split('#')[0].split('?')[0]
-            try:
-                resource = self.filesdb.loadDbase(filename)
-                self.filesdb.saveDbaseRaw(filename, resource)
-            except:
-                pass
-       
-    def downloadEntityResources(self, entity):
-        entityName = entity['name']
-        newpath = 'files/'+entityName+'/'
-        self.filesdb = Database(newpath)
-        if not os.path.exists(newpath):
-            os.makedirs(newpath)
-        for resource in entity['resources']:
-            print resource['url'].encode('utf-8')
-            url = resource['url']
-            filename = url.split('/')[-1].split('#')[0].split('?')[0]
-            try:
-                resource = self.filesdb.loadDbase(filename)
-                self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' readed from HDD\n')
-                self.log.flush()
-            except IOError as error:
-                print "I/O error({0}): {1}".format(error.errno, error.strerror)
-                print "Creating new folder"
-                print "Fetching resource from URI"
-                try:
-                    r = requests.get(url, timeout=100)
-                    self.filesdb.saveDBaseRaw(filename, r.content)
-                    self.log.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' OK!\n')
-                    self.log.flush()
-                except Exception as e:
-                    self.errorlog.write(entityName.encode('utf-8') + ' ' + url.encode('utf-8') + ' ' + str(e) + '\n')
-                    self.errorlog.flush()
-    
-    def getCSVResourceList(self):
-        output = []
-        package_list = ckan.getPackageList()
-                
-        db = Database('')
-        return db.loadDbase('csvResourceIdList')
-    
-    def updateCSVResourceList(self):
-        output = []
-        package_list = ckan.getPackageList()
-        
-        for package in package_list:
-            entity = self.getEntity(package)
-            for resource in entity['resources']:
-                if(self.isCSV(resource)):
-                    output.append(resource['id'])
-        
-        db = Database('')
-        db.saveDbase('csvResourceIdList', output)
-        
-    def createDefaultPageForAllCSV(self):
-        from wikitoolsinterface import WikiToolsInterface
-        wt = WikiToolsInterface()
-        csvResources = self.getCSVResourceList()
-        for position, resourceId in enumerate(csvResources):
-            try:
-                text = wt.generateDefaultPageForResource(resourceId)
-                print wt.createPage(resourceId, text)
-            except BaseException as e:
-                print "Exception occured! " + str(e) 
-            try:
-                open(self.errorlogfile, "a+").write(resourceId.encode('utf-8') + ',')
-                open(self.logfile, "a+").write('Element number from csvResource array: ' + str(position) + ' page created!\n')
-            except:
-                print 'cant write log files'
-        return "Created all pages!"
-
-#
 # Auxilary interfaces
 #
 
 class LoggingInterface():
     pass
 
-class PrintingInterface():
+class AuxilaryInterface():
     def __str__(self):
         #print self.__class__
         output = {}
         for attr, value in self.__dict__.iteritems():
             output[attr] = value
         return str(output)
+    
+    def extract_filename_url(self, url):
+        return url.split('/')[-1].split('#')[0].split('?')[0]
 
 class ConfigurationInterface():
+    sparqlify_jar = sparqlifyconfig.sparqlify_jar
     ckan_base_url = ckanconfig.ckan_base_url
     api_url = ckanconfig.api_url #no trailing slash
     timeout = 10 #timeout for requesting info from CKAN API
     server_base_url = csv2rdfconfig.server_base_url
+    resource_dir = ckanconfig.resource_dir
     
 #
 # CKAN interface - Actual API for the other pieces (server itself)
 #
 
-class Resource(PrintingInterface, ConfigurationInterface):
+class Resource(AuxilaryInterface, ConfigurationInterface):
     """ Reflects the CKAN resource.
         Properties:
             resource_group_id, cache_last_updated, revision_timestamp, 
@@ -192,7 +69,6 @@ class Resource(PrintingInterface, ConfigurationInterface):
     
     def __init__(self, resource_id):
         #Resource specific config params
-        self.resource_dir = ckanconfig.resource_dir
         self.wiki_namespace = wikiconfig.wiki_namespace
         #CSV related
         self.csv_header_threshold = csv2rdfconfig.csv_header_threshold
@@ -209,7 +85,7 @@ class Resource(PrintingInterface, ConfigurationInterface):
         self.id = resource_id
         self.initialize()
         self.package_name = self.request_package_name()
-        self.filename = self.extract_filename_url()
+        self.filename = self.extract_filename_url(self.url)
     
     def initialize(self):
         data = json.dumps({'id': self.id})
@@ -226,9 +102,6 @@ class Resource(PrintingInterface, ConfigurationInterface):
         r = requests.get(url, timeout=self.timeout)
         revision = json.loads(r.content)
         return revision["packages"][0]
-        
-    def extract_filename_url(self):
-        return self.url.split('/')[-1].split('#')[0].split('?')[0]
 
     def _download(self):
         try:
@@ -439,10 +312,28 @@ class Resource(PrintingInterface, ConfigurationInterface):
             sparqlifyml = self._convert_csv_config_to_sparqlifyml(config)
             filename = self.id + '_' + config['name'] + '.sparqlify'
             db.saveDbaseRaw(filename, sparqlifyml)
+    
+    #
+    # Sparqlify
+    #
+    
+    def transform_to_rdf(self, configuration_name):
+        sparqlify_call = ["java",
+                          "-cp", self.sparqlify_jar,
+                          "org.aksw.sparqlify.csv.CsvMapperCliMain",
+                          "-f", self.get_csv_file_path(),
+                          "-c", self.get_sparqlify_configuration_path(configuration_name)]
+        
+        rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
+        f = open(rdf_filename, 'w')
+        subprocess.Popen(sparqlify_call, stdout=f)
+        f.close()
             
     #
     # Interface methods - getters
+    # Use these methods to get all the necessary info!
     #
+    
     def get_id(self):
         return self.id
     
@@ -450,25 +341,36 @@ class Resource(PrintingInterface, ConfigurationInterface):
         return str(self.ckan_base_url) + '/dataset/' + str(self.package_name) + '/resource/' + str(self.id)
     
     def get_csv_file_path(self):
-        return os.path.realpath(self.resource_dir + self.filename)
+        if(os.path.exists(self.resource_dir + self.filename)):
+            return self.resource_dir + self.filename
+        else:
+            self._download()
+            return self.resource_dir + self.filename
     
     def get_csv_file_url(self):
         return str(self.server_base_url) + str(self.resource_dir) + str(self.filename)
         
     def get_sparqlify_configuration_path(self, configuration_name):
-        if(os.path.exists(self.sparqlify_mappings_path + self.id + '_' + configuration_name + '.sparqlify')):
-            return self.sparqlify_mappings_path + self.id + '_' + configuration_name + '.sparqlify'
-        else:
-            self.save_csv_configurations()
-            return self.sparqlify_mappings_path + self.id + '_' + configuration_name + '.sparqlify'
+        self.save_csv_configurations()
+        return self.sparqlify_mappings_path + self.id + '_' + configuration_name + '.sparqlify'
     
-    def get_sparqlify_configuration_url(self):
-        pass
+    def get_sparqlify_configuration_url(self, configuration_name):
+        return self.server_base_url + self.get_sparqlify_configuration_path(configuration_name)
     
     def get_wiki_url(self):
         return self.wiki_base_url + '/wiki/' + self.wiki_namespace + self.id
+    
+    def get_rdf_file_path(self, configuration_name):
+        if(os.path.exists(self.rdf_files_path + self.id + '_' + configuration_name + '.rdf')):
+            return self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
+        else:
+            self.transform_to_rdf(configuration_name)
+            return self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         
-class Package(PrintingInterface, ConfigurationInterface):
+    def get_rdf_file_url(self, configuration_name):
+        return self.server_base_url + self.get_rdf_file_path(configuration_name)
+        
+class Package(AuxilaryInterface, ConfigurationInterface):
     """ Reflects the CKAN package.
         CKAN package contains one or several CKAN resources
         Properties:
@@ -498,6 +400,27 @@ class Package(PrintingInterface, ConfigurationInterface):
         entity = self.ckan.package_entity_get(self.name)
         for key in entity:
             setattr(self, key, entity[key])
+    
+    def download_all_resources(self):
+        db = Database(self.resource_dir)
+        for resource in self.resources:
+            url = resource['url']
+            filename = self.extract_filename_url(url)
+            try:
+                r = requests.get(url, timeout=self.timeout)
+                db.saveDbaseRaw(filename, r.content)
+            except BaseException as e:
+                print "Could not get the resource " + str(resource['id']) + " ! " + str(e)
+            
+    def is_resource_csv(self, resource):
+        if(re.search( r'csv', resource['format'], re.M|re.I)):
+            return True
+        else:
+            return False
+    
+    #
+    # Interface - getters
+    #
         
     def get_ckan_url(self):
         return str(self.ckan_base_url) + '/dataset/' + str(self.name)
@@ -518,17 +441,20 @@ if __name__ == '__main__':
     #package_id
     
     resource = Resource('6023100d-1c76-4bee-9429-105caa061b9f')
+    #print resource.get_sparqlify_configuration_url('default-tranformation-configuration')
+    #print resource.get_rdf_file_url('default-tranformation-configuration')
     #print resource.get_ckan_url()
     #print resource.filename
     #print resource.get_csv_file_path()
     #print resource.get_csv_file_url()
-    #print resource.get_wiki_url()
+    print resource.get_wiki_url()
     #print resource.generate_default_wiki_page()
     #configs = resource.extract_csv_configurations()
     #print resource._convert_csv_config_to_sparqlifyml(configs[1])
     #print resource.get_sparqlify_configuration_path('default-tranformation-configuration')
-    package = Package(resource.package_name)
-    print package.name
+    #package = Package(resource.package_name)
+    #print package.resources
+    #package.download_all_resources()
     
     #print ckan.createDefaultPageForAllCSV()
     
