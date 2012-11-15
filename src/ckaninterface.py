@@ -1,22 +1,21 @@
 from ckanclient import CkanClient
 import wikitools
 from database import Database
-import requests
 import os
 from unidecode import unidecode
 import re
 import urllib2
 from prefixcc import PrefixCC
 import subprocess
+import json
+import requests
+requests.defaults.danger_mode = True
 
 #Configs
 import ckanconfig
 import csv2rdfconfig
 import wikiconfig
 import sparqlifyconfig
-
-import json
-requests.defaults.danger_mode = True
 
 #
 # Auxilary interfaces
@@ -86,6 +85,8 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         self.initialize()
         self.package_name = self.request_package_name()
         self.filename = self.extract_filename_url(self.url)
+        self.ckan_url = self.get_ckan_url()
+        self.wiki_url = self.get_wiki_url()
     
     def initialize(self):
         data = json.dumps({'id': self.id})

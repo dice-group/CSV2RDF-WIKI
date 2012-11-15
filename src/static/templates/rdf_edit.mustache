@@ -17,36 +17,16 @@
 <body>
     <div class="container">
         <div class="row">
+        {{#item}}
             <h4>
-                You are working with CKAN entry: <a href="{{> ckaninstance}}dataset/{{entityName}}">{{entityName}}</a>
-                <br/>
-                Transforming <a href="{{> ckaninstance}}dataset/{{entityName}}/resource/{{resourceId}}">{{resourceDescription}}</a>
+                Transformation complete! <a href="{{rdf_file_url}}">Download RDF!</a>
             </h4>
-            <h5>Showing first 50 triples</h5>
-            <div id="myTextArea"></div>    
-        </div>
-        <div class="row"></div>
-        <div class="row">
-            <div class="span2">
-                <a href="{{> baseUrl}}sparqlified/{{resourceId}}_{{configName}}.rdf">
-                    <button id="GetRDF_SubmitButton" type="submit" class="btn-block">
-                        <i class="icon-download-alt"></i>Download RDF
-                    </button>
-                </a>
-            </div>
-            <div class="span6"></div>
-            <div class="span2">
-                <a href="{{> wikiBaseUrl}}{{> wikiNamespace}}{{resourceId}}">
-                    <button id="GoToConfiguration_SubmitButton" type="submit" class="btn-block">
-                        <i class="icon-cog"></i>Configure
-                    </button>
-                </a>
-            </div>
-            <div class="span2">
-                <button id="Transform_SubmitButton" type="submit" class="btn-block">
-                    <i class="icon-play"></i>Transform
-                </button>
-            </div>
+            
+            
+            You have just transformed <a href="{{ckan_url}}">{{description}}</a> CKAN resource to RDF. <br/>
+            You can review transformation config on <a href="{{wiki_url}}">publicdata.eu wiki</a>. <br/>
+            To run the transformation one more time, just reload the page. <br/>
+        {{/item}}    
         </div>
     </div>
 </body>

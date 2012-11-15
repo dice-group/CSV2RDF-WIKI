@@ -3,14 +3,9 @@
 #
 import cherrypy
 import json
-from ckaninterface import CkanInterface
+import ckaninterface
 import pystache
 import pystachetempl
-from wikitoolsinterface import WikiToolsInterface
-from subprocess import Popen
-from subprocess import PIPE
-from os import path
-import os
 
 class CSV2RDFApp(object):
     def __init__(self):
@@ -23,21 +18,21 @@ class CSV2RDFApp(object):
     
     @cherrypy.expose(alias='csv2rdf.html')
     def csv2rdf(self):
-        csv2rdf = pystachetempl.Csv2rdf()
+        #read several resource, give navigation link to wiki and CKAN
+        #let transform each of them
+        res1 = ckaninterface.Resource('676e2f9b-c05f-4fd5-844a-25497c3c2c9e')
+        res2 = ckaninterface.Resource('6023100d-1c76-4bee-9429-105caa061b9f')
+        resources = [res1, res2]
+        csv2rdf = pystachetempl.Csv2rdf(resources)
         return self.renderer.render(csv2rdf)
 
-    @cherrypy.expose(alias="rdfedit.html")
-    def rdfEdit(self, resourceId, configName):
-        ckan = CkanInterface()
-        entityName = ckan.getResourcePackage(resourceId)
-        entity = ckan.getEntity(entityName)
-        resourceDescription = ckan.getResourceKey(entityName, resourceId, 'description')
+    @cherrypy.expose(alias="rdf_edit.html")
+    def rdf_edit(self, resource_id, configuration_name='default-tranformation-configuration'):
         
-        #convert CSV to RDF
-        self._processResource(entityName, resourceId, configName)
-        
-        rdfEdit = pystachetempl.RdfEdit(entityName, resourceId, resourceDescription, configName)
-        return self.renderer.render(rdfEdit)
+        resource = ckaninterface.Resource(resource_id)
+        rdf_file_url = resource.get_rdf_file_url(configuration_name)
+        rdf_edit = pystachetempl.RdfEdit(resource, rdf_file_url)
+        return self.renderer.render(rdf_edit)
         #TODO: make page with the editor!
         
     ####### AJAX calls

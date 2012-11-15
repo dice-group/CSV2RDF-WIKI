@@ -1,31 +1,42 @@
 import pystache
+import json
 
 class Index(object):
     def __init__(self):
         pass
 
 class Csv2rdf(object):
-    def __init__(self):
-        pass
-    
-class RdfEdit(object):
-    def __init__(self, entityName, resourceId, resourceDescription, configName):
-        self.entityName = entityName
-        self.resourceId = resourceId
-        self.resourceDescription = resourceDescription
-        self.configName = configName
-    
-    def entityName(self):
-        return self.entityName
-    
-    def resourceId(self):
-        return self.resourceId
-    
-    def resourceDescription(self):
-        return self.resourceDescription
+    def __init__(self, resources):
+        self.resources = resources
         
-    def configName(self):
-        return self.configName
+    def resources(self):
+        return resources
+    
+    def item(self):
+        items = []
+        for resource in self.resources:
+            print resource.ckan_url
+            items.append({'ckan_url': resource.ckan_url,
+                          'description': resource.description,
+                          'wiki_url': resource.wiki_url,
+                          'server_base_url': resource.server_base_url,
+                          'id': resource.id})
+        return items
+        
+class RdfEdit(object):
+    def __init__(self, resource, rdf_file_url):
+        self.resource = resource
+        self.rdf_file_url = rdf_file_url
+    
+    def item(self):
+        items = []
+        items.append({'ckan_url': self.resource.ckan_url,
+                      'description': self.resource.description,
+                      'wiki_url': self.resource.wiki_url,
+                      'server_base_url': self.resource.server_base_url,
+                      'id': self.resource.id,
+                      'rdf_file_url': self.rdf_file_url})
+        return items
     
 if __name__ == '__main__':
     entityName = "ambulance-call-outs-to-animal-attack-incidents"
