@@ -2,7 +2,7 @@ import pickle
 import os
 
 class Database:
-    def __init__(self, path):
+    def __init__(self, path = './'):
         self.path = path
         if not os.path.exists(self.path):
             os.makedirs(self.path)
@@ -30,6 +30,13 @@ class Database:
         "load string from file"
         file = open(self.path + filename, 'rb')
         return file.read()
+        
+    def addDbaseRaw(self, filename, string):
+        if not os.path.exists(self.path + filename) :
+            open(self.path + filename, 'w').close()
+        file = open(self.path + filename, 'a+')
+        file.write(string)
+        file.close()
     
     #
     # CKAN specific functions

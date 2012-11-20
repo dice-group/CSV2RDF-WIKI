@@ -1,57 +1,57 @@
+import ckaninterface
+from database import Database
 #
 # CKAN scripting
 #
 
 class CkanInterface:
-    def __init__(self, base_location=ckanconfig.api_url, api_key=ckanconfig.api_key):
-        self.base_location = base_location
-        self.api_key = api_key
-        self.ckan = ckanclient.CkanClient(base_location=base_location,
-                                          api_key=api_key)
-        self.db = Database('data/')
-        self.errorlog = open('error.log', 'a+')
-        self.log = open('log.log', 'a+')
-        self.errorlogfile = 'error.log'
-        self.logfile = 'log.log'
+    def __init__(self):
+        self.log_folder = 'script_logs/'
     
     def pFormat(self, object):
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         return pp.pformat(object)
-    
-    def getCSVResourceList(self):
-        output = []
-        package_list = ckan.getPackageList()
-                
-        db = Database('')
-        return db.loadDbase('csvResourceIdList')
-    
-    def updateCSVResourceList(self):
-        output = []
-        package_list = ckan.getPackageList()
-        
-        for package in package_list:
-            entity = self.getEntity(package)
-            for resource in entity['resources']:
-                if(self.isCSV(resource)):
-                    output.append(resource['id'])
-        
-        db = Database('')
-        db.saveDbase('csvResourceIdList', output)
         
     def createDefaultPageForAllCSV(self):
-        from wikitoolsinterface import WikiToolsInterface
-        wt = WikiToolsInterface()
-        csvResources = self.getCSVResourceList()
-        for position, resourceId in enumerate(csvResources):
+        pass
+    
+    def download_n_random_csv(self, n):
+        db = Database(self.log_folder)
+        random_csv_filename = "random_csv.txt"
+        import random
+        ckan = ckaninterface.CKAN_Application()
+        csv_resource_list = ckan.get_csv_resource_list()
+        csv_resource_list_max = len(csv_resource_list) - 1
+        for i in range(n):
+            rand = random.randint(0, csv_resource_list_max)
+            db.addDbaseRaw(random_csv_filename, str(rand) + "\n")
+            resource = ckaninterface.Resource(csv_resource_list[rand])
             try:
-                text = wt.generateDefaultPageForResource(resourceId)
-                print wt.createPage(resourceId, text)
-            except BaseException as e:
-                print "Exception occured! " + str(e) 
-            try:
-                open(self.errorlogfile, "a+").write(resourceId.encode('utf-8') + ',')
-                open(self.logfile, "a+").write('Element number from csvResource array: ' + str(position) + ' page created!\n')
+                resource._download()
             except:
-                print 'cant write log files'
-        return "Created all pages!"
+                pass
+    
+    def download_all_csv_resources(self):
+        """ Download csv resources
+            if resource unaccessible (404 or 503) - add to the list
+            post-processing
+                - check mimetype of the file
+                - if not csv - report
+        """
+        db = Database(self.log_folder)
+        download_all_log = "download_all_log.txt"
+        ckan = ckaninterface.CKAN_Application()
+        csv_resource_list = ckan.get_csv_resource_list()
+        csv_resource_list_max = len(csv_resource_list) - 1
+        for i in range(csv_resource_list_max):
+            resource = ckaninterface.Resource(csv_resource_list[i])
+            db.addDbaseRaw(download_all_log, resource._download())
+    
+    
+if __name__ == '__main__':
+    ckan = CkanInterface()
+    ckan.download_all_csv_resources()
+    #ckan.download_n_random_csv(100)
+    #resource = ckaninterface.Resource('726120e3-1188-4473-9f77-27e011ab1438')
+    #resource._download()

@@ -22,7 +22,17 @@ import sparqlifyconfig
 #
 
 class LoggingInterface():
-    pass
+    
+    log_file = "log.log"
+    error_file = "error.log"
+    
+    def log(self, string):
+        db = Database()
+        db.addDbaseRaw(log_file, string)
+    
+    def error(self, string):
+        db = Database()
+        db.addDbaseRaw(error_file, string)
 
 class AuxilaryInterface():
     def __str__(self):
@@ -84,7 +94,8 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         self.id = resource_id
         self.initialize()
         self.package_name = self.request_package_name()
-        self.filename = self.extract_filename_url(self.url)
+        #self.filename = self.extract_filename_url(self.url)
+        self.filename = self.id
         self.ckan_url = self.get_ckan_url()
         self.wiki_url = self.get_wiki_url()
     
@@ -109,8 +120,9 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
             r = requests.get(self.url, timeout=self.timeout)
             file = Database(self.resource_dir)
             file.saveDbaseRaw(self.filename, r.content)
+            return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
         except BaseException as e:
-            print "Could not download the resource! " + str(e)
+            return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
     
     def read_resource_file(self):
         try:
@@ -425,6 +437,36 @@ class Package(AuxilaryInterface, ConfigurationInterface):
         
     def get_ckan_url(self):
         return str(self.ckan_base_url) + '/dataset/' + str(self.name)
+        
+        
+class CKAN_Application(AuxilaryInterface, ConfigurationInterface):
+    """ Reflects the CKAN application itself,
+        interfaces for getting packages etc.
+    """
+    def __init__(self):
+        self.ckan = CkanClient(base_location=ckanconfig.api_url,
+                               api_key=ckanconfig.api_key)
+        self.csv_resource_list_filename = 'csv_resource_list'
+        
+    def update_csv_resource_list(self):
+        output = []
+        package_list = self.get_package_list()
+        
+        for package in package_list:
+            entity = Package(package)
+            for resource in entity['resources']:
+                if(self.isCSV(resource)):
+                    output.append(resource['id'])
+        
+        db = Database()
+        db.saveDbase(self.csv_resource_list_filename, output)
+        
+    def get_package_list(self):
+        return self.ckan.package_list()
+        
+    def get_csv_resource_list(self):
+        db = Database()
+        return db.loadDbase(self.csv_resource_list_filename)
 # 
 # For execution time measure:
 # import time
@@ -452,7 +494,7 @@ if __name__ == '__main__':
     #print resource.generate_default_wiki_page()
     #configs = resource.extract_csv_configurations()
     #print resource._convert_csv_config_to_sparqlifyml(configs[1])
-    #print resource.get_sparqlify_configuration_path('default-tranformation-configuration')
+    print resource.get_sparqlify_configuration_path('default-tranformation-configuration')
     #package = Package(resource.package_name)
     #print package.resources
     #package.download_all_resources()
