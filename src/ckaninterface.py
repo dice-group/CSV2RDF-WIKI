@@ -136,27 +136,26 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         except BaseException as e:
             print "Could not read the resource! " + str(e)
             
-    def _extract_csv_header_and_position(self):
+    def _extract_csv_header_and_position_first_line(self):
+        """
+            This function take the first line of the csv file
+            as a header. Should work in 60% of all cases.
+        """
         csv = None
         while(csv == None):
             csv = self.read_resource_file()
-        
-        # csv library implementation?    
         csv = csv.split('\n')
-        for position, line in enumerate(csv):
-            items = line.split(',')                
-            overall = len(items)
-            empty = 0
-            for item in items:
-                if(item == ''):
-                    empty = empty + 1
-            if(float(empty) / float(overall) < self.csv_header_threshold):
-                return (position + 1, line)
+        
+        csv[0] = csv[0].split(',')
+        if(len(csv[0]) == 0):
+            csv[0] = csv[0].split(';')
+        
+        return csv[0]
 
     #
     # Wiki related methods (csv functions)
     #
-    def create_wiki_page(self, captchaid=None, captchaword=None):
+    def create_wiki_page(self, text, captchaid=None, captchaword=None):
         """ Replace the whole resource page with the self.text
             DO NOT USE IN THE DEPLOYMENT MODE!!!
         """
@@ -178,10 +177,10 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
             captchaword = result['edit']['captcha']['question']
             captchaword = '-'.join(captchaword.split(u'\u2212'))
             captchaword = str(eval(captchaword))
-            self.createPage(captchaid=captchaid, captchaword=captchaword)
+            self.create_wiki_page(captchaid=captchaid, captchaword=captchaword)
         elif ('edit' in result) and ('result' in result['edit']) and (result['edit']['result'] != 'Success'):
             time.sleep(0.1)
-            self.createPage(resourceId, text)
+            self.create_wiki_page(text, captchaid=captchaid, captchaword=captchaword)
             
     def generate_default_wiki_page(self):
         package = Package(self.package_name)
@@ -200,7 +199,8 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         
         #get the header from the csv file
         
-        (headerPosition, header) = self._extract_csv_header_and_position()
+        headerPosition = 1
+        header = self._extract_csv_header_and_position_first_line()
         
         #CSV2RDF Template
         page += '{{RelCSV2RDF|\n'
@@ -211,7 +211,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         
         #Split header and create column definition
         i = 1
-        for item in header.split(','):
+        for item in header:
             item = unidecode(item)
             page += 'col'+str(i)+' = '+item.rstrip()+' |\n'
             i = i + 1
