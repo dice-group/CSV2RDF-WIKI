@@ -191,7 +191,6 @@ class CkanInterface:
     
     def create_wiki_pages_for_all(self):
         all_ids = self.get_all_ids()
-        print all_ids[:20]
         for resource_id in all_ids:
             resource = ckaninterface.Resource(resource_id)
             wiki_page = resource.generate_default_wiki_page()

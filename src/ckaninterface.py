@@ -159,6 +159,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         """ Replace the whole resource page with the self.text
             DO NOT USE IN THE DEPLOYMENT MODE!!!
         """
+        print text
         title = self.wiki_namespace + self.id
         page = wikitools.Page(self.site, title=title)
         result = ''
@@ -172,15 +173,15 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         
         if ('edit' in result) and ('result' in result['edit']) and (result['edit']['result'] == 'Success'):
             return result
-        elif 'captcha' in result['edit']:
+        elif ('edit' in result) and ('captcha' in result['edit']):
             captchaid = result['edit']['captcha']['id']
             captchaword = result['edit']['captcha']['question']
             captchaword = '-'.join(captchaword.split(u'\u2212'))
             captchaword = str(eval(captchaword))
-            self.create_wiki_page(captchaid=captchaid, captchaword=captchaword)
+            self.create_wiki_page(text=text, captchaid=captchaid, captchaword=captchaword)
         elif ('edit' in result) and ('result' in result['edit']) and (result['edit']['result'] != 'Success'):
             time.sleep(0.1)
-            self.create_wiki_page(text, captchaid=captchaid, captchaword=captchaword)
+            self.create_wiki_page(text=text, captchaid=captchaid, captchaword=captchaword)
             
     def generate_default_wiki_page(self):
         package = Package(self.package_name)
@@ -219,6 +220,8 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         #Close template
         page += '}}\n'
         page += '\n'
+        
+        page = page.encode('utf-8')
                 
         return page
     
