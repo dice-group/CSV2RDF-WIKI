@@ -161,7 +161,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         """
         title = self.wiki_namespace + self.id
         page = wikitools.Page(self.site, title=title)
-        
+        result = ''
         try:
             if captchaid and captchaword:
                 result = page.edit(text=text, bot=True, captchaid=captchaid, captchaword=captchaword)
