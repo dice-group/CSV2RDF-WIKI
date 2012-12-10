@@ -7,6 +7,7 @@ from database import Database
 class CkanInterface:
     def __init__(self):
         self.log_folder = 'script_logs/'
+        self.conversion_log_folder = self.log_folder + 'rdf_conversion/'
         self.all_resources_folder = 'files/.all_resources/'
     
     def pFormat(self, object):
@@ -189,17 +190,60 @@ class CkanInterface:
         pp = pprint.PrettyPrinter(indent=4)
         print pp.pprint(output)
     
-    def create_wiki_pages_for_all(self):
+    def create_wiki_pages_for_all(self, start_from=0):
         all_ids = self.get_all_ids()
-        for resource_id in all_ids:
+        overall = len(all_ids)
+        for num, resource_id in enumerate(all_ids):
+            if(num < start_from):
+                continue
+            print "creating page for resource " + str(num) + " out of " + str(overall)
+            print str(resource_id)
+            if(resource_id == ".analyzed" or resource_id == '.all-resources' or resource_id =='.broken_retrieved'
+               or resource_id == "files.tar.gz"):
+                continue
             resource = ckaninterface.Resource(resource_id)
             wiki_page = resource.generate_default_wiki_page()
-            resource.create_wiki_page(wiki_page)
-        
+            print resource.create_wiki_page(wiki_page)
+            
         
     def get_all_ids(self):
         import os
         return os.listdir('files/')
+        
+    def convert_all_to_rdf(self, start_from = 0):        
+        conversion_log = Database(self.conversion_log_folder)
+        process_log = Database(self.log_folder)
+        process_log_filename = "rdf_conversion.log"
+        all_ids = self.get_all_ids()
+        overall = len(all_ids)
+        for num, resource_id in enumerate(all_ids):
+            if(num < start_from):
+                continue
+            print "Converting resource to RDF " + str(num) + " out of " + str(overall)
+            print str(resource_id)
+            string = "Converting resource to RDF " + str(num) + " out of " + str(overall) + "\n"
+            process_log.addDbaseRaw(process_log_filename, string)
+            string = str(resource_id) + "\n"
+            process_log.addDbaseRaw(process_log_filename, string)
+            
+            #Skip folders
+            if(resource_id == ".analyzed" or resource_id == '.all-resources' or resource_id =='.broken_retrieved'
+               or resource_id == "files.tar.gz"):
+                continue
+            
+            #Init the resource
+            resource = ckaninterface.Resource(resource_id)
+            
+            #create wiki-page for resource
+            string = "creating wiki page for resource" + "\n"
+            process_log.addDbaseRaw(process_log_filename, string)
+            wiki_page = resource.generate_default_wiki_page()
+            string = str(resource.create_wiki_page(wiki_page))
+            process_log.addDbaseRaw(process_log_filename, string)
+            
+            #transform resource to RDF
+            sparqlify_message, returncode = resource.transform_to_rdf('default-tranformation-configuration')
+            conversion_log.addDbaseRaw(resource_id + '.log', sparqlify_message + "\n" + str(returncode))
     
 if __name__ == '__main__':
     ckan = CkanInterface()
@@ -207,7 +251,12 @@ if __name__ == '__main__':
     #ckan.check_good_response()
     #ckan.delete_html_pages()
     #ckan.choose_n_random(22)
-    ckan.create_wiki_pages_for_all()
+    #8050
+    #ckan.create_wiki_pages_for_all(start_from=9502)
+    try:
+        ckan.convert_all_to_rdf(start_from=9061)
+    except BaseException as e:
+        print str(e)
     
     #ckan.download_n_random_csv(100)
     #resource = ckaninterface.Resource('c15e1fff-f9d8-41c7-9434-5d302a08be61')

@@ -10,6 +10,9 @@ import subprocess
 import json
 import requests
 requests.defaults.danger_mode = True
+import time
+import csv
+import urllib
 
 #Configs
 import ckanconfig
@@ -49,7 +52,7 @@ class ConfigurationInterface():
     sparqlify_jar = sparqlifyconfig.sparqlify_jar
     ckan_base_url = ckanconfig.ckan_base_url
     api_url = ckanconfig.api_url #no trailing slash
-    timeout = 10 #timeout for requesting info from CKAN API
+    timeout = 25 #timeout for requesting info from CKAN API
     server_base_url = csv2rdfconfig.server_base_url
     resource_dir = ckanconfig.resource_dir
     
@@ -141,25 +144,28 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
             This function take the first line of the csv file
             as a header. Should work in 60% of all cases.
         """
-        csv = None
-        while(csv == None):
-            csv = self.read_resource_file()
-        csv = csv.split('\n')
+        with open(self.resource_dir + self.filename, 'rU') as csvfile:
+            #dialect does not work good!
+            #dialect = csv.Sniffer().sniff(csvfile.read(1024))
+            #csvfile.seek(0)
+            reader = csv.reader(csvfile)
+            try:
+                for row in reader:
+                    return row
+            except BaseException as e:
+                print str(e)
+                return []
+            #print csv.Sniffer().has_header(csvfile.read(1024))
+            #csvfile.seek(0)
+            
         
-        csv[0] = csv[0].split(',')
-        if(len(csv[0]) == 0):
-            csv[0] = csv[0].split(';')
-        
-        return csv[0]
-
     #
     # Wiki related methods (csv functions)
     #
     def create_wiki_page(self, text, captchaid=None, captchaword=None):
-        """ Replace the whole resource page with the self.text
-            DO NOT USE IN THE DEPLOYMENT MODE!!!
+        """ Replace the whole resource page with the text
+            DO NOT USE IN THE PRODUCTION!!!
         """
-        print text
         title = self.wiki_namespace + self.id
         page = wikitools.Page(self.site, title=title)
         result = ''
@@ -178,6 +184,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
             captchaword = result['edit']['captcha']['question']
             captchaword = '-'.join(captchaword.split(u'\u2212'))
             captchaword = str(eval(captchaword))
+            time.sleep(0.1)
             self.create_wiki_page(text=text, captchaid=captchaid, captchaword=captchaword)
         elif ('edit' in result) and ('result' in result['edit']) and (result['edit']['result'] != 'Success'):
             time.sleep(0.1)
@@ -244,8 +251,8 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         wiki_page = self.request_wiki_page()
         lines = wiki_page.split('\n')
         configs = []
-        inside_config = False
-        for line in lines:
+        inside_config = False        
+        for num, line in enumerate(lines):
             if(re.match('^{{RelCSV2RDF', line)):
                 inside_config = True
                 config = {}
@@ -261,11 +268,16 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                 continue
             
             if(inside_config):
+                if(len(line.split('=')) < 2):
+                    continue
+                    #line = lines[num-1] + lines[num]
                 prop = line.split('=')[0]
                 value = str(line.split('=')[1])
                 prop = prop.strip()
-                value = ''.join(value[:-1].split())
-                #value = urllib2.quote(value.encode("utf8"))
+                #Encode value to URL
+                value = value[:-1]
+                value = value.strip()
+                value = urllib.quote(value)
                 config[prop] = value        
         return configs
     
@@ -282,7 +294,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         #remove duplicates from prefixes
         prefixes = dict.fromkeys(prefixes).keys()
         #inject qb prefix
-        prefixes += ['qb']
+        #prefixes += ['qb']
         for prefix in prefixes:
             csv2rdfconfig += prefixcc.get_sparqlify_namespace(prefix) + "\n"
         #Add custom prefix to non-prefixed values
@@ -292,13 +304,12 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         
         csv2rdfconfig += "Create View Template DefaultView As" + "\n"
         csv2rdfconfig += "  CONSTRUCT {" + "\n"
-        csv2rdfconfig += "      ?obs a qb:Observation ." + "\n"
+        #csv2rdfconfig += "      ?obs a qb:Observation ." + "\n"
         
         for prop in properties:
             csv2rdfconfig += "      ?obs "+ self._extract_property(properties[prop]) +" ?"+ prop + " .\n"
         csv2rdfconfig += "  }" + "\n"
         csv2rdfconfig += "  With" + "\n"
-        #TODO: Check Claus e-mail and fix it!!! fn:rowId()
         csv2rdfconfig += "      ?obs = uri(concat('http://data.publicdata.eu/"+self.id+"#', ?rowId))" + "\n"
         for prop in properties:
             csv2rdfconfig += "      ?" + prop + " = " + self._extract_type(properties[prop], prop) + "\n"
@@ -308,7 +319,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
     def _extract_property(self, prop):
         prop = prop.split('->')[0]
         if(len(prop.split(':')) == 1):
-            return "publicdata:"+prop
+            return "<http://wiki.publicdata.eu/ontology/"+str(prop)+">"
         else:
             return prop
     
@@ -342,8 +353,12 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         
         rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         f = open(rdf_filename, 'w')
-        subprocess.Popen(sparqlify_call, stdout=f)
+        pipe = subprocess.Popen(sparqlify_call, stdout=f, stderr=subprocess.PIPE)
+        sparqlify_message = pipe.stderr.read()
+        pipe.stderr.close()
         f.close()
+        
+        return sparqlify_message, pipe.returncode
             
     #
     # Interface methods - getters
@@ -486,18 +501,23 @@ if __name__ == '__main__':
     #print ckan.getEntity("staff-organograms-and-pay-joint-nature-conservation-committee")
     #package_id
     
-    resource = Resource('6023100d-1c76-4bee-9429-105caa061b9f')
+    resource = Resource('ff9db8cb-d38e-41b9-ac4a-e75f1a6afd0d')
+    wiki_text = resource.generate_default_wiki_page()
+    resource.create_wiki_page(wiki_text)
+    (sparqlify_message, return_code) = resource.transform_to_rdf('default-tranformation-configuration')
+    print sparqlify_message
+    
     #print resource.get_sparqlify_configuration_url('default-tranformation-configuration')
     #print resource.get_rdf_file_url('default-tranformation-configuration')
     #print resource.get_ckan_url()
     #print resource.filename
     #print resource.get_csv_file_path()
     #print resource.get_csv_file_url()
-    print resource.get_wiki_url()
+    #print resource.get_wiki_url()
     #print resource.generate_default_wiki_page()
     #configs = resource.extract_csv_configurations()
     #print resource._convert_csv_config_to_sparqlifyml(configs[1])
-    print resource.get_sparqlify_configuration_path('default-tranformation-configuration')
+    #print resource.get_sparqlify_configuration_path('default-tranformation-configuration')
     #package = Package(resource.package_name)
     #print package.resources
     #package.download_all_resources()
