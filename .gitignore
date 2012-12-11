@@ -10,6 +10,7 @@ docs/
 /src/sparqlify_mappings/
 /src/sparqlified/
 /src/script_logs/
+/src/files_processed/
 /src/wikiconfig.py
 /src/ckanconfig.py
 /src/csv2rdfconfig.py

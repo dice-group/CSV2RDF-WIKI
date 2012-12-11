@@ -14,6 +14,21 @@ class CkanInterface:
         import pprint
         pp = pprint.PrettyPrinter(indent=4)
         return pp.pformat(object)
+        
+    def is_file_xml(self, filename):
+        import re
+        f = open(filename, "rU")
+        validation_string = ".*<?xml.*"
+        file_excerpt = f.read(1024)
+        xml = re.match(validation_string, file_excerpt)
+        f.close()
+        if(xml):
+            print filename
+        
+    def is_all_files_xml(self):
+        files = self.get_all_ids()
+        for element in files:
+            self.is_file_xml('files/'+element)
     
     def download_n_random_csv(self, n):
         db = Database(self.log_folder)
@@ -208,7 +223,9 @@ class CkanInterface:
         
     def get_all_ids(self):
         import os
-        return os.listdir('files/')
+        directory = 'files/'
+        file_list = os.listdir(directory)
+        return file_list
         
     def convert_all_to_rdf(self, start_from = 0):        
         conversion_log = Database(self.conversion_log_folder)
@@ -253,10 +270,12 @@ if __name__ == '__main__':
     #ckan.choose_n_random(22)
     #8050
     #ckan.create_wiki_pages_for_all(start_from=9502)
-    try:
-        ckan.convert_all_to_rdf(start_from=9061)
-    except BaseException as e:
-        print str(e)
+    #try:
+    #    ckan.convert_all_to_rdf(start_from=9061)
+    #except BaseException as e:
+    #    print str(e)
+    
+    ckan.is_all_files_xml()
     
     #ckan.download_n_random_csv(100)
     #resource = ckaninterface.Resource('c15e1fff-f9d8-41c7-9434-5d302a08be61')
