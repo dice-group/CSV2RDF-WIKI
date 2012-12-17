@@ -11,6 +11,7 @@ docs/
 /src/sparqlified/
 /src/script_logs/
 /src/files_processed/
+/src/sparqlified_hashes/
 /src/wikiconfig.py
 /src/ckanconfig.py
 /src/csv2rdfconfig.py

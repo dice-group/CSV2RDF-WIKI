@@ -1,2 +1,6 @@
 for wikitools:
 add 'captchaid' and 'captchaword' to valid args for page.edit function
+
+Requirements:
+lib/sparqlify/sparqlify.jar
+gnumeric

@@ -13,6 +13,7 @@ requests.defaults.danger_mode = True
 import time
 import csv
 import urllib
+import magic
 
 #Configs
 import ckanconfig
@@ -310,7 +311,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
             csv2rdfconfig += "      ?obs "+ self._extract_property(properties[prop]) +" ?"+ prop + " .\n"
         csv2rdfconfig += "  }" + "\n"
         csv2rdfconfig += "  With" + "\n"
-        csv2rdfconfig += "      ?obs = uri(concat('http://data.publicdata.eu/"+self.id+"#', ?rowId))" + "\n"
+        csv2rdfconfig += "      ?obs = uri(concat('http://data.publicdata.eu/"+self.id+"/', ?rowId))" + "\n"
         for prop in properties:
             csv2rdfconfig += "      ?" + prop + " = " + self._extract_type(properties[prop], prop) + "\n"
         
@@ -359,6 +360,119 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         f.close()
         
         return sparqlify_message, pipe.returncode
+    
+    #
+    # Validation methods here
+    #
+    
+    def validate(self):
+        """ Destructive, be careful to use
+        """
+        filename = self.resource_dir + self.filename
+        mgc_encoding = magic.Magic(mime=False, magic_file=None, mime_encoding=True)
+        mgc_string = magic.Magic(mime=False, magic_file=None, mime_encoding=False)
+        encoding = mgc_encoding.from_file(filename)
+        info = mgc_string.from_file(filename)
+        if(encoding == "utf-16le"):
+            self._process_utf16(filename)
+        elif(re.match("^binary", encoding) or
+             re.match("^application/.*", encoding)):
+            self._process_based_on(info, filename)
+        else:
+            return True
+            
+    def _process_based_on(self, info, filename):
+        """
+            The order is significant here
+        """
+        if(re.match(".*archive.*", info)):
+            self.process_archive(filename)
+        elif(re.match(".*Composite Document File V2 Document.*Excel.*", info) or
+           re.match(".*Microsoft Excel 2007+.*", info) or
+           not re.match(".*Composite Document File V2 Document.*Word.*", info)):
+            self.process_xls(filename)
+        elif(re.match(".*Composite Document File V2 Document.*Word.*", info)):
+            #Word document
+            self._delete(filename)
+            return False
+            
+    def _process_xls(self, resource_id):
+        print resource_id
+        ssconvert_call = ["ssconvert", #from gnumeric package
+                          "-T",
+                          "Gnumeric_stf:stf_csv",
+                          resource_id,
+                          resource_id]
+        pipe = subprocess.Popen(ssconvert_call, stdout=subprocess.PIPE)
+        pipe_message = pipe.stdout.read()
+        self.validate()
+    
+    def _process_archive(self, filename):
+        #unzip archive
+        #check number of files
+        sevenza_call = ["7za", 
+                          "l",
+                          filename]
+        pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
+        pipe_message = pipe.stdout.read()
+        pattern = "(\d+) files"
+        number_of_files = re.search(pattern, pipe_message)
+        number_of_files = int(number_of_files.group(0).split()[0])
+        if(number_of_files < 2):
+            #get the file name
+            pattern = "\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+.{5}\s+\d+\s+\d+\s+(.*)\n"
+            original_filename = re.search(pattern, pipe_message)
+            original_filename = original_filename.group(0).split()[-1]
+            #extract
+            sevenza_call = ["7za", 
+                            "e",
+                            filename]
+            pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
+            pipe_message = pipe.stdout.read()
+            #move to original
+            mv_call = ["mv",
+                       original_filename,
+                       filename]
+            pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
+            pipe_message = pipe.stdout.read()
+        else:
+            #more than 1 file in the archive
+            self._delete(filename)
+            return False
+    
+    def _process_utf16(self, filename):
+        f_in = open(filename, 'rU')
+        f_out = open(filename+"-converted", 'wb')
+        
+        for piece in self._read_in_chunks(f_in):
+            converted_piece = piece.decode('utf-16-le', errors='ignore')
+            converted_piece = converted_piece.encode('ascii', errors='ignore')
+            f_out.write(converted_piece)
+        
+        f_in.close()
+        f_out.close()
+        
+        #move converted to original
+        mv_call = ["mv",
+                    filename+"-converted",
+                    filename]
+        pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
+        pipe_message = pipe.stdout.read()
+        
+    def _read_in_chunks(self, file_object, chunk_size=1024):
+        """Lazy function (generator) to read a file piece by piece.
+        Default chunk size: 1k."""
+        while True:
+            data = file_object.read(chunk_size)
+            if not data:
+                break
+            yield data
+            
+    def _delete(self, filename):
+        rm_call = ["rm",
+                    filename]
+        pipe = subprocess.Popen(rm_call, stdout=subprocess.PIPE)
+        pipe_message = pipe.stdout.read()
             
     #
     # Interface methods - getters
@@ -501,15 +615,22 @@ if __name__ == '__main__':
     #print ckan.getEntity("staff-organograms-and-pay-joint-nature-conservation-committee")
     #package_id
     
-    resource = Resource('ff9db8cb-d38e-41b9-ac4a-e75f1a6afd0d')
-    wiki_text = resource.generate_default_wiki_page()
-    resource.create_wiki_page(wiki_text)
-    (sparqlify_message, return_code) = resource.transform_to_rdf('default-tranformation-configuration')
-    print sparqlify_message
+    #UTF-16 files
+    resource = Resource('bc86b8a8-d7f9-479b-a105-040098b66bfa')
+    resource.detect_type()
+    resource = Resource('94b3db8b-7f76-45aa-8b62-37ae0f910694')
+    resource.detect_type()
+    resource = Resource('8f1ee810-13a0-44e4-b583-f6ccf03448df')
+    resource.detect_type()
+    
+    #wiki_text = resource.generate_default_wiki_page()
+    #resource.create_wiki_page(wiki_text)
+    #(sparqlify_message, return_code) = resource.transform_to_rdf('default-tranformation-configuration')
+    #print sparqlify_message
+    #print resource.get_ckan_url()
     
     #print resource.get_sparqlify_configuration_url('default-tranformation-configuration')
     #print resource.get_rdf_file_url('default-tranformation-configuration')
-    #print resource.get_ckan_url()
     #print resource.filename
     #print resource.get_csv_file_path()
     #print resource.get_csv_file_url()

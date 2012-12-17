@@ -1,5 +1,11 @@
 import ckaninterface
 from database import Database
+
+import re
+import magic
+import os
+import subprocess
+from unidecode import unidecode
 #
 # CKAN scripting
 #
@@ -16,19 +22,19 @@ class CkanInterface:
         return pp.pformat(object)
         
     def is_file_xml(self, filename):
-        import re
         f = open(filename, "rU")
         validation_string = ".*<?xml.*"
         file_excerpt = f.read(1024)
         xml = re.match(validation_string, file_excerpt)
         f.close()
         if(xml):
-            print filename
+            return True
         
-    def is_all_files_xml(self):
-        files = self.get_all_ids()
-        for element in files:
-            self.is_file_xml('files/'+element)
+    def delete_xml(self):
+        files = self.get_files()
+        for resource in files:
+            if(self.is_file_xml('files/'+resource)):
+                os.remove('files/'+resource)
     
     def download_n_random_csv(self, n):
         db = Database(self.log_folder)
@@ -63,7 +69,6 @@ class CkanInterface:
             db.addDbaseRaw(download_all_log, resource._download())
             
     def process_download_all_log(self):
-        import re
         db_logs = Database(self.log_folder)
         
         download_all_log = db_logs.loadDbaseRaw('download_all_log.txt')
@@ -93,7 +98,6 @@ class CkanInterface:
         pp.pprint(resources_check)
     
     def delete_bad_response(self):
-        import re
         db_logs = Database(self.log_folder)
         
         download_all_log = db_logs.loadDbaseRaw('download_all_log.txt')
@@ -115,8 +119,6 @@ class CkanInterface:
                 resources_success.append(resource_id)
             else:
                 resources_check.append(resource_id)
-        
-        import os
         
         for resource in resources_check:
             if(os.path.exists('files/'+resource)):
@@ -124,7 +126,6 @@ class CkanInterface:
         print 'resources clean-up complete!'
         
     def check_good_response(self):
-        import re
         db_logs = Database(self.log_folder)
         
         download_all_log = db_logs.loadDbaseRaw('download_all_log.txt')
@@ -147,7 +148,6 @@ class CkanInterface:
             else:
                 resources_check.append(resource_id)
         
-        import os
         bad_resources = []        
         for resource in resources_success:
             max_size_bytes = 1048576
@@ -167,7 +167,6 @@ class CkanInterface:
                 print str(resource) + ' ok!'
                 
     def delete_html_pages(self):
-        import os
         db_logs = Database(self.log_folder)
         html_pages = db_logs.loadDbaseRaw('html_pages.txt')
         html_pages = html_pages.split('\n')
@@ -191,7 +190,7 @@ class CkanInterface:
         db = Database('files/.analyzed/')
         analyzed_ids = db.loadDbaseRaw('100_analyze_ids')
         analyzed_ids = analyzed_ids.split('\n')
-        all_ids=self.get_all_ids()
+        all_ids=self.get_files()
         csv_resource_list_max = len(all_ids) - 1
         
         output = []
@@ -206,7 +205,7 @@ class CkanInterface:
         print pp.pprint(output)
     
     def create_wiki_pages_for_all(self, start_from=0):
-        all_ids = self.get_all_ids()
+        all_ids = self.get_files()
         overall = len(all_ids)
         for num, resource_id in enumerate(all_ids):
             if(num < start_from):
@@ -221,9 +220,13 @@ class CkanInterface:
             print resource.create_wiki_page(wiki_page)
             
         
-    def get_all_ids(self):
-        import os
+    def get_files(self):
         directory = 'files/'
+        file_list = os.listdir(directory)
+        return file_list
+    
+    def get_sparqlified(self):
+        directory = 'sparqlified/'
         file_list = os.listdir(directory)
         return file_list
         
@@ -231,7 +234,7 @@ class CkanInterface:
         conversion_log = Database(self.conversion_log_folder)
         process_log = Database(self.log_folder)
         process_log_filename = "rdf_conversion.log"
-        all_ids = self.get_all_ids()
+        all_ids = self.get_files()
         overall = len(all_ids)
         for num, resource_id in enumerate(all_ids):
             if(num < start_from):
@@ -261,9 +264,211 @@ class CkanInterface:
             #transform resource to RDF
             sparqlify_message, returncode = resource.transform_to_rdf('default-tranformation-configuration')
             conversion_log.addDbaseRaw(resource_id + '.log', sparqlify_message + "\n" + str(returncode))
+            
+            
+    def sync_files_sparqlified(self):
+        #read files/
+        files = self.get_files()
+        #read sparqlified
+        sparqlified = self.get_sparqlified()
+        for num, resource in enumerate(sparqlified):
+            sparqlified[num] = sparqlified[num][:36]
+            resource_id = resource[:36]
+            if not resource_id in files:
+                os.remove('sparqlified/'+resource)
+                
+    def change_hash_to_slash(self):
+        identificator = "[a-zA-Z0-9_]{8}-[a-zA-Z0-9_]{4}-[a-zA-Z0-9_]{4}-[a-zA-Z0-9_]{4}-[a-zA-Z0-9_]{12}"
+        expr = "(<.*"+identificator+")#(\d+>)"
+        replacement = r"\g<1>/\g<2>"
+        sparqlified = self.get_sparqlified()
+        for resource in sparqlified:
+            #read and replace # with /
+            f = open('sparqlified/'+resource, 'rU')
+            string = f.read()
+            new_string = re.sub(expr, replacement, string)
+            f.close()
+            
+            f = open('sparqlified/'+resource, 'wb')
+            f.write(new_string)
+            f.close()
+    
+    #
+    # Insert this code in the Resource class
+    #
+    
+            
+    def file_type_detect(self):
+        print("xls")
+        #excel file
+        #self.detect_type('c00f3909-87a2-4874-aca7-c036638e2ec9') #ok
+        self.detect_type('b9a2e1a8-bb97-414b-b8f8-9f93b2a8e09f') #word
+        self.detect_type('da9fdb34-e592-4753-9b75-b1fbe9740653') #excel ?
+        #self.detect_type('658ec97f-2345-4944-a9f5-6c963ee7cdee') #ok
+        #self.detect_type('cd48e8e1-0708-44c8-87de-5428b04e4c3a') #ok
+        #xlsx
+        print("\nxlsx")
+        self.detect_type('6bf556fe-8ef9-457c-bfd5-b2acf5e69ce2')
+        self.detect_type('ed9b97cb-2269-492c-8684-fb7c73c948f4')
+        self.detect_type('8873e873-aea4-4d40-94e9-bfe62830d17d')
+        self.detect_type('28281ff8-b212-434f-9466-24574219cd4b')
+        
+        print("\narchives")
+        #archives
+        self.detect_type('efcd20f0-fd93-4649-8403-2d59d256ed32')
+        self.detect_type('6f5a23f9-6130-4497-bc03-c6dd910e4baa')
+        self.detect_type('9aed34e0-b50b-4417-aa1f-aeb18808b075')
+        self.detect_type('cd8c19a9-8e9d-476a-acb1-0864231084a8')
+        
+        print("\nUTF-16")
+        #UTF-16
+        """
+        self.detect_type('6c50ec67-8d52-44d4-8f7d-b4872783b638', folder='files/')
+        self.detect_type('4fe6e99e-1f4b-416a-aa41-e302a0a06180', folder='files/')
+        self.detect_type('49e7ca7f-1ee2-497d-bf5e-d92169526f38', folder='files/')
+        self.detect_type('47055b3f-26f7-4869-a1a5-2ec6bf3a3618', folder='files/')
+        self.detect_type('bc86b8a8-d7f9-479b-a105-040098b66bfa', folder='files/')
+        self.detect_type('06a13464-5ff0-42c2-9690-4fa2eaeae37f', folder='files/')
+        self.detect_type('94b3db8b-7f76-45aa-8b62-37ae0f910694', folder='files/')
+        self.detect_type('bc86b8a8-d7f9-479b-a105-040098b66bfa', folder='files/')
+        self.detect_type('8f1ee810-13a0-44e4-b583-f6ccf03448df', folder='files/')
+        self.detect_type('3019d37d-4f3d-42a2-81a5-7824c153397d', folder='files/')
+        self.detect_type('47055b3f-26f7-4869-a1a5-2ec6bf3a3618', folder='files/')
+        self.detect_type('6c50ec67-8d52-44d4-8f7d-b4872783b638', folder='files/')
+        self.detect_type('7d236042-5ff9-4f00-8fa1-a87fcf2b8f53', folder='files/')
+        self.detect_type('4fe6e99e-1f4b-416a-aa41-e302a0a06180', folder='files/')
+        self.detect_type('49e7ca7f-1ee2-497d-bf5e-d92169526f38', folder='files/')
+        self.detect_type('ecc754dc-f7c8-4ca3-9ff1-98c5a720ffee', folder='files/')
+        self.detect_type('e4487d64-5882-48ec-81db-20a89883f811', folder='files/')
+        self.detect_type('15547cb7-8dc2-4f9f-9e11-12f8401d93bc', folder='files/')
+        self.detect_type('25d95a3b-071d-453f-a8b4-28df254fc3ac', folder='files/')
+        self.detect_type('53e3c309-59b0-4d83-9e58-9ddd9b97c6b6', folder='files/')
+        self.detect_type('cbfdb8ac-f381-45ad-bffb-3086fd4dd746', folder='files/')
+        self.detect_type('80ec8965-c48b-48c0-875f-3050f33abfad', folder='files/')
+        self.detect_type('9377c95f-ec6b-4a37-a8ad-66577191b940', folder='files/')
+        self.detect_type('c201283d-adfd-414d-972a-67b941cee9e0', folder='files/')
+        self.detect_type('8587d5e4-3917-4283-930b-6548afbbd28d', folder='files/')
+        self.detect_type('a715bcc2-f13e-4096-9132-f3bdb2ec6178', folder='files/')
+        self.detect_type('b2ef9159-2f75-4d88-9875-c2bcf406e6ee', folder='files/')
+        self.detect_type('ec041042-1952-4726-bbe3-39f02553d8c1', folder='files/')
+        self.detect_type('3019d37d-4f3d-42a2-81a5-7824c153397d', folder='files/')        
+        """
+        
+        
+        
+        
+        
+        print("\nokay files")
+        #ok files
+        self.detect_type('7e7c446c-e688-458e-b1b4-18709f1453e2')
+        self.detect_type('fa31135e-a11d-4f73-9c9d-330404731073')
+        self.detect_type('f768466a-977a-4980-8541-9588c443bd4c')
+        self.detect_type('756cd753-43ce-486b-aff4-f4610b4d3b3f')
+        
+    def detect_type(self, id, folder = 'files_processed/.all-resources/'):
+        """ Destructive, be careful to use
+        """
+        filename = folder + id
+        mgc_encoding = magic.Magic(mime=False, magic_file=None, mime_encoding=True)
+        mgc_string = magic.Magic(mime=False, magic_file=None, mime_encoding=False)
+        #print mgc_string.from_file(filename)
+        encoding = mgc_encoding.from_file(filename)
+        info = mgc_string.from_file(filename)
+        if(encoding == "utf-16le"):
+            self.process_utf16(filename)
+        elif(re.match("^binary", encoding) or
+             re.match("^application/.*", encoding)):
+            self.process_based_on(info, filename)
+        else:
+            print "File is okay"
+            
+    def process_based_on(self, info, filename):
+        """
+            The order is significant here
+        """
+        if(re.match(".*archive.*", info)):
+            self.process_archive(filename)
+        elif(re.match(".*Composite Document File V2 Document.*Excel.*", info) or
+           re.match(".*Microsoft Excel 2007+.*", info) or
+           not re.match(".*Composite Document File V2 Document.*Word.*", info)):
+            self.process_xls(filename)
+        elif(re.match(".*Composite Document File V2 Document.*Word.*", info)):
+            #Word document
+            #delete file
+            pass
+            
+    def process_xls(self, resource_id):
+        print resource_id
+        ssconvert_call = ["ssconvert", #from gnumeric package
+                          "-T",
+                          "Gnumeric_stf:stf_csv",
+                          resource_id,
+                          resource_id]
+        pipe = subprocess.Popen(ssconvert_call, stdout=subprocess.PIPE)
+        pipe_message = pipe.stdout.read()
+        print pipe_message
+    
+    def process_archive(self, filename):
+        #unzip archive
+        #check number of files
+        sevenza_call = ["7za", 
+                          "l",
+                          filename]
+        pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
+        pipe_message = pipe.stdout.read()
+        pattern = "(\d+) files"
+        number_of_files = re.search(pattern, pipe_message)
+        number_of_files = int(number_of_files.group(0).split()[0])
+        if(number_of_files < 2):
+            #get the file name
+            pattern = "\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\s+.{5}\s+\d+\s+\d+\s+(.*)\n"
+            original_filename = re.search(pattern, pipe_message)
+            original_filename = original_filename.group(0).split()[-1]
+            #extract
+            sevenza_call = ["7za", 
+                            "e",
+                            filename]
+            pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
+            pipe_message = pipe.stdout.read()
+            #move to original
+            mv_call = ["mv",
+                       original_filename,
+                       filename]
+            pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
+            pipe_message = pipe.stdout.read()
+        else:
+            #delete file
+            pass
+    
+    def process_utf16(self, filename):
+        #decode to ascii
+        #big files? memoryError
+        #do it line by line!
+        #iconv --from-code UTF-16LE --to-code ASCII//TRANSLIT 4fe6e99e-1f4b-416a-aa41-e302a0a06180 --output test
+        f_in = open(filename, 'rU')
+        f_out = open(filename+"-converted", 'wb')
+        
+        for piece in self.read_in_chunks(f_in):
+            converted_piece = piece.decode('utf-16-le', errors='ignore')
+            converted_piece = converted_piece.encode('ascii', errors='ignore')
+            f_out.write(converted_piece)
+        
+        f_in.close()
+        f_out.close()
+        
+    def read_in_chunks(self, file_object, chunk_size=1024):
+        """Lazy function (generator) to read a file piece by piece.
+        Default chunk size: 1k."""
+        while True:
+            data = file_object.read(chunk_size)
+            if not data:
+                break
+            yield data
+    
     
 if __name__ == '__main__':
     ckan = CkanInterface()
+    ckan.file_type_detect()
     #ckan.get_failed_resources_ckan_urls()
     #ckan.check_good_response()
     #ckan.delete_html_pages()
@@ -275,7 +480,8 @@ if __name__ == '__main__':
     #except BaseException as e:
     #    print str(e)
     
-    ckan.is_all_files_xml()
+    #ckan.sync_files_sparqlified()
+    #ckan.change_hash_to_slash()
     
     #ckan.download_n_random_csv(100)
     #resource = ckaninterface.Resource('c15e1fff-f9d8-41c7-9434-5d302a08be61')
