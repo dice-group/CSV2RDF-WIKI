@@ -9,6 +9,7 @@ docs/
 /src/files_old/
 /src/sparqlify_mappings/
 /src/sparqlified/
+/src/sparqlified_exposed/
 /src/script_logs/
 /src/files_processed/
 /src/sparqlified_hashes/

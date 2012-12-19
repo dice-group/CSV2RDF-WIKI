@@ -57,6 +57,11 @@ class ConfigurationInterface():
     server_base_url = csv2rdfconfig.server_base_url
     resource_dir = ckanconfig.resource_dir
     
+    #Sparqlify related
+    rdf_files_exposed_path = sparqlifyconfig.rdf_files_exposed_path
+    rdf_files_path = sparqlifyconfig.rdf_files_path
+    sparqlify_mappings_path = sparqlifyconfig.sparqlify_mappings_path
+    
 #
 # CKAN interface - Actual API for the other pieces (server itself)
 #
@@ -85,9 +90,6 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         self.wiki_namespace = wikiconfig.wiki_namespace
         #CSV related
         self.csv_header_threshold = csv2rdfconfig.csv_header_threshold
-        #Sparqlify related
-        self.sparqlify_mappings_path = sparqlifyconfig.sparqlify_mappings_path
-        self.rdf_files_path = sparqlifyconfig.rdf_files_path
         #Wiki init
         #TODO: exception: wikipedia not accessible
         self.site = wikitools.Wiki(wikiconfig.api_url)
@@ -350,8 +352,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                           "-cp", self.sparqlify_jar,
                           "org.aksw.sparqlify.csv.CsvMapperCliMain",
                           "-f", self.get_csv_file_path(),
-                          "-c", self.get_sparqlify_configuration_path(configuration_name)]
-        
+                          "-c", self.get_sparqlify_configuration_path(configuration_name)]        
         rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         f = open(rdf_filename, 'w')
         pipe = subprocess.Popen(sparqlify_call, stdout=f, stderr=subprocess.PIPE)
@@ -386,11 +387,11 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
             The order is significant here
         """
         if(re.match(".*archive.*", info)):
-            self.process_archive(filename)
+            self._process_archive(filename)
         elif(re.match(".*Composite Document File V2 Document.*Excel.*", info) or
            re.match(".*Microsoft Excel 2007+.*", info) or
            not re.match(".*Composite Document File V2 Document.*Word.*", info)):
-            self.process_xls(filename)
+            self._process_xls(filename)
         elif(re.match(".*Composite Document File V2 Document.*Word.*", info)):
             #Word document
             self._delete(filename)
@@ -599,6 +600,28 @@ class CKAN_Application(AuxilaryInterface, ConfigurationInterface):
     def get_csv_resource_list(self):
         db = Database()
         return db.loadDbase(self.csv_resource_list_filename)
+        
+    def get_sparqlified_list(self):
+        return os.listdir(self.rdf_files_exposed_path)
+        
+    def update_sparqlified_list(self):
+        #update list - make soft links to the files
+        rdf_files = os.listdir(self.rdf_files_path)
+        for rdf_file in rdf_files:
+            #make a soft link
+            link_to = os.path.abspath(self.rdf_files_path + rdf_file)
+            resource_id = rdf_file[:36] #take resource_id part only
+            link = self.rdf_files_exposed_path + resource_id
+            make_soft_link = ["ln",
+                              "-f",
+                              "-s",
+                              link_to,
+                              link]
+            pipe = subprocess.Popen(make_soft_link, stdout=subprocess.PIPE)
+            pipe_message = pipe.stdout.read()
+            print pipe_message
+        
+    
 # 
 # For execution time measure:
 # import time
@@ -608,20 +631,14 @@ class CKAN_Application(AuxilaryInterface, ConfigurationInterface):
 # 
             
 if __name__ == '__main__':
+    ckan = CKAN_Application()
+    ckan.get_sparqlified_list()
     #Test area				
     #getting package list
     #ckan = CkanInterface(base_location='http://publicdata.eu/api', api_key='e7a928be-a3e8-4a34-b25e-ef641045bbaf')
     #package_list = ckan.getPackageList()
     #print ckan.getEntity("staff-organograms-and-pay-joint-nature-conservation-committee")
     #package_id
-    
-    #UTF-16 files
-    resource = Resource('bc86b8a8-d7f9-479b-a105-040098b66bfa')
-    resource.detect_type()
-    resource = Resource('94b3db8b-7f76-45aa-8b62-37ae0f910694')
-    resource.detect_type()
-    resource = Resource('8f1ee810-13a0-44e4-b583-f6ccf03448df')
-    resource.detect_type()
     
     #wiki_text = resource.generate_default_wiki_page()
     #resource.create_wiki_page(wiki_text)

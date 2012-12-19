@@ -37,13 +37,6 @@ class CSV2RDFApp(object):
         
     ####### AJAX calls
     
-    @cherrypy.expose
-    def getCKANEntity(self, entityName):
-        ckan = CkanInterface()
-        entity = ckan.getEntity(entityName)
-        cherrypy.response.headers['Content-Type'] = "application/json"
-        return json.dumps(entity)
-    
     @cherrypy.expose    
     def getSparqlifiedResourceNLines(self, entityName, resourceId, n):
         n = int(n)
@@ -56,6 +49,11 @@ class CSV2RDFApp(object):
             return json.dumps(head)
         except:
             return json.dumps('')
+    
+    @cherrypy.expose        
+    def get_exposed_rdf_list(self):
+        ckan = ckaninterface.CKAN_Application()
+        return json.dumps(ckan.get_sparqlified_list())
         
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()

@@ -464,11 +464,29 @@ class CkanInterface:
             if not data:
                 break
             yield data
+            
+            
+    def convert_again(self):
+        file = open('convert-again.csv')
+        data = file.read()
+        data = data.split('\n')
+        for num, line in enumerate(data):
+            print num
+            resource_id = line.split()[0]
+            print resource_id
+            resource = ckaninterface.Resource(resource_id)
+            print resource.validate()
+            wiki_text = resource.generate_default_wiki_page()
+            print resource.create_wiki_page(wiki_text)
+            return_code = resource.transform_to_rdf('default-tranformation-configuration')
+            print return_code
+        file.close()
     
     
 if __name__ == '__main__':
     ckan = CkanInterface()
-    ckan.file_type_detect()
+    ckan.convert_again()
+    #ckan.file_type_detect()
     #ckan.get_failed_resources_ckan_urls()
     #ckan.check_good_response()
     #ckan.delete_html_pages()
