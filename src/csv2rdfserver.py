@@ -29,6 +29,12 @@ class CSV2RDFApp(object):
     @cherrypy.expose(alias="rdf_edit.html")
     def rdf_edit(self, resource_id, configuration_name='default-tranformation-configuration'):
         
+        #black_list
+        black_list = self._get_black_list()
+        if(resource_id in black_list):
+            index = pystachetempl.Index()
+            return self.renderer.render(index)
+        
         resource = ckaninterface.Resource(resource_id)
         rdf_file_url = resource.get_rdf_file_url(configuration_name)
         rdf_edit = pystachetempl.RdfEdit(resource, rdf_file_url)
@@ -54,6 +60,12 @@ class CSV2RDFApp(object):
     def get_exposed_rdf_list(self):
         ckan = ckaninterface.CKAN_Application()
         return json.dumps(ckan.get_sparqlified_list())
+        
+    def _get_black_list(self):
+        f = open('black_list', 'rU')
+        black_list = f.read()
+        f.close()
+        return black_list.split('\n')
         
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()

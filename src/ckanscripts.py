@@ -482,10 +482,13 @@ class CkanInterface:
             print return_code
         file.close()
     
+
+        
     
 if __name__ == '__main__':
     ckan = CkanInterface()
-    ckan.convert_again()
+    print ckan._get_black_list()
+    #ckan.convert_again()
     #ckan.file_type_detect()
     #ckan.get_failed_resources_ckan_urls()
     #ckan.check_good_response()
