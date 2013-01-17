@@ -122,6 +122,9 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         return revision["packages"][0]
 
     def _download(self):
+        """
+            TODO: log errors!
+        """
         try:
             r = requests.get(self.url, timeout=self.timeout)
             file = Database(self.resource_dir)
@@ -368,6 +371,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
     
     def validate(self):
         """ Destructive, be careful to use
+            TODO: include html, xml check (see scripts)
         """
         filename = self.resource_dir + self.filename
         mgc_encoding = magic.Magic(mime=False, magic_file=None, mime_encoding=True)

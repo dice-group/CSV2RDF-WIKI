@@ -482,12 +482,278 @@ class CkanInterface:
             print return_code
         file.close()
     
+    def count_resources(self):
+        import pickle
+        data_folder = 'data/'
+        file_list = os.listdir(data_folder)
+        counter = 0
+        for num, file in enumerate(file_list):
+            if(file == "package_list"):
+                continue
+            f = open(data_folder + file)
+            object = pickle.load(f)
+            f.close()
+            for resource in object['resources']:
+                counter = counter + 1
+        
+        print counter    
+        
+    def read_data_folder(self):
+        import pickle
+        #get data folder list
+        data_folder = 'data/'
+        file_list = os.listdir(data_folder)
+        
+        stats = {
+            'maintainer': {},
+            'isopen': {},
+            'author': {},
+            'version': {},
+            'license_id': {},
+            'type': {},
+            'mimetype': {},
+            'format': {},
+            'resource_type': {},
+            'tags': {},
+            'groups': {},
+            'license': {},
+            'license_title': {},
+            'geographic_coverage': {},
+            'geographical_granularity': {},
+            'temporal_coverage-from': {},
+            'temporal_coverage-to': {},
+            'temporal_granularity': {},
+            'national_statistic': {},
+            'precision': {},
+            'series': {},
+            'date_released': {},
+            'categories': {}            
+        }
+        
+        import pprint
+        printer = pprint.PrettyPrinter(indent=4)
+        db = Database('stats/')    
+        
+        stats = db.loadDbase('stats14061')
+                
+        for num, file in enumerate(file_list):
+            print num
+            if(num < 14061 or file == "package_list"):
+                continue
+            f = open(data_folder + file)
+            object = pickle.load(f)
+            f.close()
+            self.add_to_stats(object['maintainer'], 'maintainer', stats)
+            self.add_to_stats(object['isopen'], 'isopen', stats)
+            self.add_to_stats(object['author'], 'author', stats)
+            self.add_to_stats(object['version'], 'version', stats)
+            self.add_to_stats(object['type'], 'type', stats)
+            for resource in object['resources']:
+                self.add_to_stats(resource['mimetype'], 'mimetype', stats)
+                self.add_to_stats(resource['format'], 'format', stats)
+                self.add_to_stats(resource['resource_type'], 'resource_type', stats)
+            
+            for tag in object['tags']:
+                self.add_to_stats(tag, 'tags', stats)
+            
+            for group in object['groups']:
+                self.add_to_stats(group, 'groups', stats)
+                
+            self.add_to_stats(object['license'], 'license', stats)
+            self.add_to_stats(object['license_title'], 'license_title', stats)
+            
+            try:
+                self.add_to_stats(object['extras']['geographic_coverage'], 'geographic_coverage', stats)
+                self.add_to_stats(object['extras']['geographical_granularity'], 'geographical_granularity', stats)
+                self.add_to_stats(object['extras']['temporal_coverage-from'], 'temporal_coverage-from', stats)
+                self.add_to_stats(object['extras']['temporal_coverage-to'], 'temporal_coverage-to', stats)
+                self.add_to_stats(object['extras']['temporal_granularity'], 'temporal_granularity', stats)
+                self.add_to_stats(object['extras']['series'], 'series', stats)
+                self.add_to_stats(object['extras']['precision'], 'precision', stats)
+                self.add_to_stats(object['extras']['national_statistic'], 'national_statistic', stats)
+                self.add_to_stats(object['extras']['date_released'], 'date_released', stats)
+                self.add_to_stats(object['extras']['categories'], 'categories', stats)
+            except BaseException as e:
+                pass
+                #print str(e)
+            
+            db.saveDbase('stats' + str(num), stats)    
+            
+        #output stats to file
+        print 'script executed!'
+    
+    def get_tag_count(self):
+        import pickle
+        #get data folder list
+        data_folder = 'data/'
+        file_list = os.listdir(data_folder)
+        
+        tag_usage = 0
+        for num, file in enumerate(file_list):
+            if(file == "package_list"):
+                continue
+            f = open(data_folder + file)
+            object = pickle.load(f)
+            if(not object['tags']):
+                print "no tags here!"
+            else:
+                tag_usage = tag_usage + 1
+                
+        print tag_usage
+    
+    def get_stats(self):
+        import pprint
+        printer = pprint.PrettyPrinter(indent=4)
+        db = Database('stats/')
+        stats = db.loadDbase('stats17028')
+        
+        #tag cloud
+        """
+        tag_cloud = []
+        for tag in stats['tags']:
+            if stats['tags'][tag] > 15: #5 is okay
+                for i in range(int(stats['tags'][tag] / 15)):
+                    tag_cloud.append(tag)
+            
+        import json
+        db.saveDbaseRaw('tag_cloud', json.dumps(tag_cloud))
+        """
+        
+        #tags overall
+        tag_usage = 0
+        tag_count = 0
+        for tag in stats['tags']:
+            tag_usage = tag_usage + stats['tags'][tag]
+            tag_count = tag_count + 1
+        
+        print tag_usage
+        print tag_count
+        
+        
+        #format statistics
+        """
+        import re
+        csv = 0
+        xml = 0
+        excel = 0
+        html = 0
+        rdf = 0
+        txt = 0
+        pdf = 0
+        doc = 0
+        image = 0
+        geo = 0
+        unverified = 0
+        zip = 0
+        all = 0
+        for format in stats['format']:
+            all = all + stats['format'][format]
+            
+            if(re.match(".*csv.*", format, re.I)):
+                csv = csv + stats['format'][format]
+            
+            if(re.match(".*xml.*", format, re.I) and
+               not re.match(".*spreadsheet.*", format, re.I)):
+                xml = xml + stats['format'][format]
+            
+            if(re.match(".*excel.*", format, re.I) or
+               re.match(".*xls.*", format, re.I) or #4052!!
+               re.match(".*spreadsheet.*", format, re.I) or
+               re.match(".*ODS.*", format, re.I) or
+               re.match(".*tsv.*", format, re.I)):
+                excel = excel + stats['format'][format]
+            
+            if(re.match(".*html.*", format, re.I) or
+               re.match(".*asp.*", format, re.I)):
+                if(not re.match(".*rdf.*", format, re.I)):
+                    html = html + stats['format'][format]
+            
+            if(re.match(".*rdf.*", format, re.I) or
+               re.match(".*text/turtle.*", format, re.I) or
+               re.match(".*bz2:nt.*", format, re.I)):
+                rdf = rdf + stats['format'][format]
+                
+            if(re.match(".*txt.*", format, re.I) or
+               re.match(".*text/plain.*", format, re.I) or
+               re.match(".*Texto.*", format, re.I)):
+                txt = txt + stats['format'][format]
+            
+            if(re.match(".*pdf.*", format, re.I)):
+                pdf = pdf + stats['format'][format]
+            
+            if(re.match(".*DOC.*", format, re.I)):
+                doc = doc + stats['format'][format]
+            
+            #graphical formats
+            if(re.match(".*DXF.*", format, re.I) or
+               re.match(".*GIF.*", format, re.I) or
+               re.match(".*Imagen.*", format, re.I) or
+               re.match(".*image.*", format, re.I) or
+               re.match(".*jpeg.*", format, re.I) or
+               re.match(".*shp.*", format, re.I) or
+               re.match(".*tif.*", format, re.I)):
+                image = image + stats['format'][format]
+            
+            #geographical
+            if(re.match(".*WFS.*", format, re.I) or
+               re.match(".*WMS.*", format, re.I) or
+               re.match(".*google-earth.*", format, re.I)  or
+               re.match(".*gpx.*", format, re.I) or
+               re.match(".*kmz.*", format, re.I)):
+                geo = geo + stats['format'][format]
+            
+            if(re.match(".*Unverified.*", format, re.I)):
+                unverified = unverified + stats['format'][format]
+            
+            if(re.match(".*zip.*", format, re.I)):
+                zip = zip + stats['format'][format]
+                
+            if(stats['format'][format] > 10):
+                pass
+                #print format
+        print "all: " + str(all)
+        print "csv: " + str(csv)
+        print "xml: " + str(xml)
+        print "excel: " + str(excel)
+        print "html: " +  str(html)
+        print "rdf: " + str(rdf)
+        print "txt: " + str(txt)
+        print "pdf: " + str(pdf)
+        print "doc: " + str(doc)
+        print "image: " + str(image)
+        print "geo: " + str(geo)
+        print "zip: " + str(zip)
+        print "unverified: " + str(unverified)
+        """
+                
+        
+        #printer.pprint(stats)
+    
+    def add_to_stats(self, new_value, key, stats):
+        #scan through the stats
+        not_new = False
+        
+        if new_value in stats[key]:
+            not_new = True
+        
+        #for stat in stats[key]:
+        #    if(stat == new_value):
+        #        not_new = True
+                
+        if(not_new):
+            stats[key][new_value] = stats[key][new_value] + 1
+        else:
+            stats[key][new_value] = 1
+    
 
         
     
 if __name__ == '__main__':
     ckan = CkanInterface()
-    print ckan._get_black_list()
+    #ckan.get_tag_count()
+    #ckan.count_resources()
+    ckan.get_stats()
+    #print ckan._get_black_list()
     #ckan.convert_again()
     #ckan.file_type_detect()
     #ckan.get_failed_resources_ckan_urls()
