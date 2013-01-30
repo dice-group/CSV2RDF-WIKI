@@ -355,7 +355,10 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                           "-cp", self.sparqlify_jar,
                           "org.aksw.sparqlify.csv.CsvMapperCliMain",
                           "-f", self.get_csv_file_path(),
-                          "-c", self.get_sparqlify_configuration_path(configuration_name)]        
+                          "-c", self.get_sparqlify_configuration_path(configuration_name)]
+        
+        print str(' '.join(sparqlify_call))
+        
         rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         f = open(rdf_filename, 'w')
         pipe = subprocess.Popen(sparqlify_call, stdout=f, stderr=subprocess.PIPE)
