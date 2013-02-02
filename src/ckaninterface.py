@@ -104,6 +104,9 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         self.filename = self.id
         self.ckan_url = self.get_ckan_url()
         self.wiki_url = self.get_wiki_url()
+        #delimiter extraction
+        self.delimiter = {}
+        self._extract_csv_configurations()
     
     def initialize(self):
         data = json.dumps({'id': self.id})
@@ -283,8 +286,16 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                 #Encode value to URL
                 value = value[:-1]
                 value = value.strip()
-                value = urllib.quote(value)
-                config[prop] = value        
+                if not prop == 'delimiter':
+                    value = urllib.quote(value)
+                config[prop] = value
+        
+        for config in configs:
+            if('delimiter' in config):
+                self.delimiter[config['name']] = config['delimiter']
+            else:
+                self.delimiter[config['name']] = ','
+            
         return configs
     
     def _convert_csv_config_to_sparqlifyml(self, config):
@@ -355,10 +366,11 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                           "-cp", self.sparqlify_jar,
                           "org.aksw.sparqlify.csv.CsvMapperCliMain",
                           "-f", self.get_csv_file_path(),
-                          "-c", self.get_sparqlify_configuration_path(configuration_name)]
+                          "-c", self.get_sparqlify_configuration_path(configuration_name),
+                          "-d", self.delimiter[configuration_name]]
         
         print str(' '.join(sparqlify_call))
-        
+    """
         rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         f = open(rdf_filename, 'w')
         pipe = subprocess.Popen(sparqlify_call, stdout=f, stderr=subprocess.PIPE)
@@ -367,7 +379,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         f.close()
         
         return sparqlify_message, pipe.returncode
-    
+    """
     #
     # Validation methods here
     #
@@ -638,8 +650,8 @@ class CKAN_Application(AuxilaryInterface, ConfigurationInterface):
 # 
             
 if __name__ == '__main__':
-    ckan = CKAN_Application()
-    ckan.get_sparqlified_list()
+    #ckan = CKAN_Application()
+    #ckan.get_sparqlified_list()
     #Test area				
     #getting package list
     #ckan = CkanInterface(base_location='http://publicdata.eu/api', api_key='e7a928be-a3e8-4a34-b25e-ef641045bbaf')
@@ -675,4 +687,7 @@ if __name__ == '__main__':
     #print len(csvResources)
     #CSV: 12224
     #Overall: 55846
+    
+    resource = Resource('2409b9b4-3261-4543-9653-ffd28222b745')
+    print resource.transform_to_rdf('default-tranformation-configuration')
     
