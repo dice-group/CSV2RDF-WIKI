@@ -370,16 +370,16 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                           "-d", self.delimiter[configuration_name]]
         
         print str(' '.join(sparqlify_call))
-    """
+    
         rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         f = open(rdf_filename, 'w')
-        pipe = subprocess.Popen(sparqlify_call, stdout=f, stderr=subprocess.PIPE)
+        pipe = subprocess.Popen(sparqlify_call, shell=True, stdout=f, stderr=subprocess.PIPE)
         sparqlify_message = pipe.stderr.read()
         pipe.stderr.close()
         f.close()
         
         return sparqlify_message, pipe.returncode
-    """
+    
     #
     # Validation methods here
     #
