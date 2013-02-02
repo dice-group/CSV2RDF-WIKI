@@ -482,12 +482,344 @@ class CkanInterface:
             print return_code
         file.close()
     
-
+    def count_resources(self):
+        import pickle
+        data_folder = 'data/'
+        file_list = os.listdir(data_folder)
+        counter = 0
+        for num, file in enumerate(file_list):
+            if(file == "package_list"):
+                continue
+            f = open(data_folder + file)
+            object = pickle.load(f)
+            f.close()
+            for resource in object['resources']:
+                counter = counter + 1
         
+        print counter    
+        
+    def read_data_folder(self):
+        import pickle
+        #get data folder list
+        data_folder = 'data/'
+        file_list = os.listdir(data_folder)
+        
+        stats = {
+            'maintainer': {},
+            'isopen': {},
+            'author': {},
+            'version': {},
+            'license_id': {},
+            'type': {},
+            'mimetype': {},
+            'format': {},
+            'resource_type': {},
+            'tags': {},
+            'groups': {},
+            'license': {},
+            'license_title': {},
+            'geographic_coverage': {},
+            'geographical_granularity': {},
+            'temporal_coverage-from': {},
+            'temporal_coverage-to': {},
+            'temporal_granularity': {},
+            'national_statistic': {},
+            'precision': {},
+            'series': {},
+            'date_released': {},
+            'categories': {}            
+        }
+        
+        import pprint
+        printer = pprint.PrettyPrinter(indent=4)
+        db = Database('stats/')    
+        
+        stats = db.loadDbase('stats14061')
+                
+        for num, file in enumerate(file_list):
+            print num
+            if(num < 14061 or file == "package_list"):
+                continue
+            f = open(data_folder + file)
+            object = pickle.load(f)
+            f.close()
+            self.add_to_stats(object['maintainer'], 'maintainer', stats)
+            self.add_to_stats(object['isopen'], 'isopen', stats)
+            self.add_to_stats(object['author'], 'author', stats)
+            self.add_to_stats(object['version'], 'version', stats)
+            self.add_to_stats(object['type'], 'type', stats)
+            for resource in object['resources']:
+                self.add_to_stats(resource['mimetype'], 'mimetype', stats)
+                self.add_to_stats(resource['format'], 'format', stats)
+                self.add_to_stats(resource['resource_type'], 'resource_type', stats)
+            
+            for tag in object['tags']:
+                self.add_to_stats(tag, 'tags', stats)
+            
+            for group in object['groups']:
+                self.add_to_stats(group, 'groups', stats)
+                
+            self.add_to_stats(object['license'], 'license', stats)
+            self.add_to_stats(object['license_title'], 'license_title', stats)
+            
+            try:
+                self.add_to_stats(object['extras']['geographic_coverage'], 'geographic_coverage', stats)
+                self.add_to_stats(object['extras']['geographical_granularity'], 'geographical_granularity', stats)
+                self.add_to_stats(object['extras']['temporal_coverage-from'], 'temporal_coverage-from', stats)
+                self.add_to_stats(object['extras']['temporal_coverage-to'], 'temporal_coverage-to', stats)
+                self.add_to_stats(object['extras']['temporal_granularity'], 'temporal_granularity', stats)
+                self.add_to_stats(object['extras']['series'], 'series', stats)
+                self.add_to_stats(object['extras']['precision'], 'precision', stats)
+                self.add_to_stats(object['extras']['national_statistic'], 'national_statistic', stats)
+                self.add_to_stats(object['extras']['date_released'], 'date_released', stats)
+                self.add_to_stats(object['extras']['categories'], 'categories', stats)
+            except BaseException as e:
+                pass
+                #print str(e)
+            
+            db.saveDbase('stats' + str(num), stats)    
+            
+        #output stats to file
+        print 'script executed!'
+    
+    def get_tag_count(self):
+        import pickle
+        #get data folder list
+        data_folder = 'data/'
+        file_list = os.listdir(data_folder)
+        
+        tag_usage = 0
+        for num, file in enumerate(file_list):
+            if(file == "package_list"):
+                continue
+            f = open(data_folder + file)
+            object = pickle.load(f)
+            if(not object['tags']):
+                print "no tags here!"
+            else:
+                tag_usage = tag_usage + 1
+                
+        print tag_usage
+    
+    def get_stats(self):
+        import pprint
+        printer = pprint.PrettyPrinter(indent=4)
+        db = Database('stats/')
+        stats = db.loadDbase('stats17028')
+        
+        #tag cloud
+        """
+        tag_cloud = []
+        for tag in stats['tags']:
+            if stats['tags'][tag] > 15: #5 is okay
+                for i in range(int(stats['tags'][tag] / 15)):
+                    tag_cloud.append(tag)
+            
+        import json
+        db.saveDbaseRaw('tag_cloud', json.dumps(tag_cloud))
+        """
+        
+        #tags overall
+        tag_usage = 0
+        tag_count = 0
+        for tag in stats['tags']:
+            tag_usage = tag_usage + stats['tags'][tag]
+            tag_count = tag_count + 1
+        
+        print tag_usage
+        print tag_count
+        
+        
+        #format statistics
+        """
+        import re
+        csv = 0
+        xml = 0
+        excel = 0
+        html = 0
+        rdf = 0
+        txt = 0
+        pdf = 0
+        doc = 0
+        image = 0
+        geo = 0
+        unverified = 0
+        zip = 0
+        all = 0
+        for format in stats['format']:
+            all = all + stats['format'][format]
+            
+            if(re.match(".*csv.*", format, re.I)):
+                csv = csv + stats['format'][format]
+            
+            if(re.match(".*xml.*", format, re.I) and
+               not re.match(".*spreadsheet.*", format, re.I)):
+                xml = xml + stats['format'][format]
+            
+            if(re.match(".*excel.*", format, re.I) or
+               re.match(".*xls.*", format, re.I) or #4052!!
+               re.match(".*spreadsheet.*", format, re.I) or
+               re.match(".*ODS.*", format, re.I) or
+               re.match(".*tsv.*", format, re.I)):
+                excel = excel + stats['format'][format]
+            
+            if(re.match(".*html.*", format, re.I) or
+               re.match(".*asp.*", format, re.I)):
+                if(not re.match(".*rdf.*", format, re.I)):
+                    html = html + stats['format'][format]
+            
+            if(re.match(".*rdf.*", format, re.I) or
+               re.match(".*text/turtle.*", format, re.I) or
+               re.match(".*bz2:nt.*", format, re.I)):
+                rdf = rdf + stats['format'][format]
+                
+            if(re.match(".*txt.*", format, re.I) or
+               re.match(".*text/plain.*", format, re.I) or
+               re.match(".*Texto.*", format, re.I)):
+                txt = txt + stats['format'][format]
+            
+            if(re.match(".*pdf.*", format, re.I)):
+                pdf = pdf + stats['format'][format]
+            
+            if(re.match(".*DOC.*", format, re.I)):
+                doc = doc + stats['format'][format]
+            
+            #graphical formats
+            if(re.match(".*DXF.*", format, re.I) or
+               re.match(".*GIF.*", format, re.I) or
+               re.match(".*Imagen.*", format, re.I) or
+               re.match(".*image.*", format, re.I) or
+               re.match(".*jpeg.*", format, re.I) or
+               re.match(".*shp.*", format, re.I) or
+               re.match(".*tif.*", format, re.I)):
+                image = image + stats['format'][format]
+            
+            #geographical
+            if(re.match(".*WFS.*", format, re.I) or
+               re.match(".*WMS.*", format, re.I) or
+               re.match(".*google-earth.*", format, re.I)  or
+               re.match(".*gpx.*", format, re.I) or
+               re.match(".*kmz.*", format, re.I)):
+                geo = geo + stats['format'][format]
+            
+            if(re.match(".*Unverified.*", format, re.I)):
+                unverified = unverified + stats['format'][format]
+            
+            if(re.match(".*zip.*", format, re.I)):
+                zip = zip + stats['format'][format]
+                
+            if(stats['format'][format] > 10):
+                pass
+                #print format
+        print "all: " + str(all)
+        print "csv: " + str(csv)
+        print "xml: " + str(xml)
+        print "excel: " + str(excel)
+        print "html: " +  str(html)
+        print "rdf: " + str(rdf)
+        print "txt: " + str(txt)
+        print "pdf: " + str(pdf)
+        print "doc: " + str(doc)
+        print "image: " + str(image)
+        print "geo: " + str(geo)
+        print "zip: " + str(zip)
+        print "unverified: " + str(unverified)
+        """
+                
+        
+        #printer.pprint(stats)
+    
+    def add_to_stats(self, new_value, key, stats):
+        #scan through the stats
+        not_new = False
+        
+        if new_value in stats[key]:
+            not_new = True
+        
+        #for stat in stats[key]:
+        #    if(stat == new_value):
+        #        not_new = True
+                
+        if(not_new):
+            stats[key][new_value] = stats[key][new_value] + 1
+        else:
+            stats[key][new_value] = 1
+    
+    def convert_blacklisted_files(self):
+        f = open('black_list')
+        black_list = f.read()
+        f.close()
+        
+        validate_list = [
+                #'b408c0ca-7ef8-45e0-8e06-8755b20112fd',
+                #'f4344e88-ec3e-4495-b774-0f989d1bc5c3',
+                #'c0659fb9-ef60-4b7e-91e8-ca1c87462df6', -deleted
+                #'b9a2e1a8-bb97-414b-b8f8-9f93b2a8e09f',
+                #'796dda60-c9f3-4bc7-93f3-9cf341aa7f9b'
+                #'ae26db03-51a9-43ee-8903-f6fe0ffe2fd7' deleted
+            ]
+        
+        for resource_id in validate_list:
+            #TODO: check for the loop!
+            #resource = ckaninterface.Resource(resource_id)
+            #print resource.get_ckan_url()
+            #print resource.validate()
+            pass
+        
+        for resource_id in black_list.split():
+            resource = ckaninterface.Resource(resource_id)
+            
+            #print resource.get_wiki_url()
+            return_code = resource.transform_to_rdf('default-tranformation-configuration')
+            print return_code
+            break
+        
+    def create_wanted_pages(self):
+        page_string = "{{Inward Links For Property | {{PAGENAME}}}}"
+        #get the list of wanted pages
+        
+        qpoffset = 0
+        wanted_pages = []
+        wanted_pages_chunk = self.get_wanted_page_list(qpoffset=qpoffset)
+        while('query-continue' in wanted_pages_chunk):
+            print "reading chunk with qpoffset = " + str(qpoffset)
+            qpoffset = wanted_pages_chunk['query-continue']['querypage']['qpoffset']
+            wanted_pages = wanted_pages + wanted_pages_chunk['query']['querypage']['results']
+            wanted_pages_chunk = self.get_wanted_page_list(qpoffset=qpoffset)
+        
+        wanted_pages = wanted_pages + wanted_pages_chunk['query']['querypage']['results']
+        
+        print "reading wanted pages complete!"
+        
+        import wikiconfig
+        import wikitools
+        site = wikitools.Wiki(wikiconfig.api_url)
+        site.login(wikiconfig.username, password=wikiconfig.password)
+        self.wiki_base_url = wikiconfig.wiki_base_url
+        
+        #get titles
+        for wanted_page in wanted_pages:
+            print "Creating a page " + str(wanted_page['title'])
+            page = wikitools.Page(site, title=wanted_page['title'])
+            result = page.edit(text=page_string, bot=True)
+        
+    def get_wanted_page_list(self, qpoffset=0, api_url = "http://wiki.publicdata.eu/api.php?"):
+        import requests
+        import json
+        query = str(api_url) + "format=json&" + "action=query&" + "list=querypage&" + "qppage=Wantedpages&" + "qplimit=500&" + "qpoffset=" + str(qpoffset)
+        r = requests.get(query, timeout=10)
+        result = json.loads(r.content)
+        return result
+    
     
 if __name__ == '__main__':
     ckan = CkanInterface()
-    print ckan._get_black_list()
+    ckan.create_wanted_pages()
+    #ckan.convert_blacklisted_files()
+    #ckan.get_tag_count()
+    #ckan.count_resources()
+    #ckan.get_stats()
+    #print ckan._get_black_list()
     #ckan.convert_again()
     #ckan.file_type_detect()
     #ckan.get_failed_resources_ckan_urls()
@@ -508,3 +840,14 @@ if __name__ == '__main__':
     #resource = ckaninterface.Resource('c15e1fff-f9d8-41c7-9434-5d302a08be61')
     #print resource.ckan_url
     #resource._download()
+    #
+    #for i in range(1, 300, 1):
+    #    string = """{{#if: {{{col"""+str(i)+"""|}}} | 
+#{{!}} col"""+str(i)+""" {{!}}{{!}} [[has property::{{{col"""+str(i)+"""}}}]] 
+#{{!}}- }}"""
+#        print string
+    
+    #string = "prijmeni/pov.obec;0;3100;3201;3202;3203;3204;3205;3206;3207;3208;3211;3212;3225;3226;3230;3235;3240;3245;3250;3251;3255;3260;3261;3265;3266;3270;3275;3276;3301;3302;3303;3304;3305;3306;3307;3308;3325;3326;3330;3335;3336;3340;3341;3345;3350;3355;3356;3360;3401;3402;3403;3404;3408;3409;3410;3425;3430;3431;3435;3440;3441;3445;3450;3451;3452;3453;3455;3456;3465;3470;3501;3502;3503;3504;3505;3506;3507;3508;3509;3510;3525;3530;3531;3535;3540;3541;3545;3550;3551;3555;3556;3560;3565;3601;3602;3603;3604;3605;3606;3607;3608;3609;3610;3611;3625;3626;3630;3635;3640;3641;3645;3646;3647;3650;3651;3655;3656;3660;3661;3665;3666;3667;3670;3671;3675;3676;3677;3678;3679;3701;3704;3705;3706;3707;3708;3709;3710;3711;3712;3713;3714;3725;3730;3735;3736;3737;3738;3739;3740;3741;3742;3745;3746;3747;3748;3750;3751;3755;3760;3761;3765;3770;3771;3775;3780;3781;3785;3790;3791;3792;3801;3802;3803;3804;3805;3806;3808;3809;3810;3811;3825;3826;3830;3831;3832;3835;3836;3837;3838;3840;3841;3842;3843;3845;3846;3847;3850;3851;3852;3855;3860;3861;3865;3866;3870;3871;3901;;SUMA"
+    #for num, item in enumerate(string.split(";")):
+    #    print "col" + str(num + 1) + " = " + str(item) + " |"
+    #    pass

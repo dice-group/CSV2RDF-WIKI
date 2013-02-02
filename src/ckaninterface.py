@@ -122,6 +122,9 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         return revision["packages"][0]
 
     def _download(self):
+        """
+            TODO: log errors!
+        """
         try:
             r = requests.get(self.url, timeout=self.timeout)
             file = Database(self.resource_dir)
@@ -352,7 +355,10 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                           "-cp", self.sparqlify_jar,
                           "org.aksw.sparqlify.csv.CsvMapperCliMain",
                           "-f", self.get_csv_file_path(),
-                          "-c", self.get_sparqlify_configuration_path(configuration_name)]        
+                          "-c", self.get_sparqlify_configuration_path(configuration_name)]
+        
+        print str(' '.join(sparqlify_call))
+        
         rdf_filename = self.rdf_files_path + self.id + '_' + configuration_name + '.rdf'
         f = open(rdf_filename, 'w')
         pipe = subprocess.Popen(sparqlify_call, stdout=f, stderr=subprocess.PIPE)
@@ -368,6 +374,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
     
     def validate(self):
         """ Destructive, be careful to use
+            TODO: include html, xml check (see scripts)
         """
         filename = self.resource_dir + self.filename
         mgc_encoding = magic.Magic(mime=False, magic_file=None, mime_encoding=True)
