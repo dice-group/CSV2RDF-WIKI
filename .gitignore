@@ -16,6 +16,7 @@ docs/
 /src/wikiconfig.py
 /src/ckanconfig.py
 /src/csv2rdfconfig.py
+/src/nohup.out
 *.komodoproject
 *.kpf
 *.pyc
