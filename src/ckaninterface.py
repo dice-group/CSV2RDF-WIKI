@@ -16,10 +16,7 @@ import urllib
 import magic
 
 #Configs
-import ckanconfig
-import csv2rdfconfig
-import wikiconfig
-import sparqlifyconfig
+import config
 
 #
 # Auxilary interfaces
@@ -47,26 +44,13 @@ class AuxilaryInterface():
         return str(output)
     
     def extract_filename_url(self, url):
-        return url.split('/')[-1].split('#')[0].split('?')[0]
-
-class ConfigurationInterface():
-    sparqlify_jar = sparqlifyconfig.sparqlify_jar
-    ckan_base_url = ckanconfig.ckan_base_url
-    api_url = ckanconfig.api_url #no trailing slash
-    timeout = 25 #timeout for requesting info from CKAN API
-    server_base_url = csv2rdfconfig.server_base_url
-    resource_dir = ckanconfig.resource_dir
-    
-    #Sparqlify related
-    rdf_files_exposed_path = sparqlifyconfig.rdf_files_exposed_path
-    rdf_files_path = sparqlifyconfig.rdf_files_path
-    sparqlify_mappings_path = sparqlifyconfig.sparqlify_mappings_path
+        return url.split('/')[-1].split('#')[0].split('?')[0]    
     
 #
 # CKAN interface - Actual API for the other pieces (server itself)
 #
 
-class Resource(AuxilaryInterface, ConfigurationInterface):
+class Resource(AuxilaryInterface):
     """ Reflects the CKAN resource.
         Properties:
             resource_group_id, cache_last_updated, revision_timestamp, 
@@ -86,51 +70,116 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
     """
     
     def __init__(self, resource_id):
-        #Resource specific config params
-        self.wiki_namespace = wikiconfig.wiki_namespace
-        #CSV related
-        self.csv_header_threshold = csv2rdfconfig.csv_header_threshold
-        #Wiki init
-        #TODO: exception: wikipedia not accessible
-        self.site = wikitools.Wiki(wikiconfig.api_url)
-        self.site.login(wikiconfig.username, password=wikiconfig.password)
-        self.text = ''
-        self.wiki_base_url = wikiconfig.wiki_base_url
-        #Resource init
         self.id = resource_id
-        self.initialize()
+        #Load resource from the CKAN
+        self.load_from_ckan()
         self.package_name = self.request_package_name()
-        #self.filename = self.extract_filename_url(self.url)
         self.filename = self.id
         self.ckan_url = self.get_ckan_url()
-        self.wiki_url = self.get_wiki_url()
-        #delimiter extraction
-        self.delimiter = {}
-        self._extract_csv_configurations()
-    
-    def initialize(self):
+        self.wiki_url = self.get_wiki_url()        
+        
+        #Wiki init
+        #TODO: exception: wikipedia not accessible
+        self.wiki_site = wikitools.Wiki(config.wiki_api_url)
+        self.wiki_site.login(config.wiki_username, password=config.wiki_password)
+        
+        #create mapping object
+        self.mappings = self.load_mapping()
+        
+                
+    def load_from_ckan(self):
+        """
+            Get the resource
+            specified by self.id
+            from config.ckan_api_url 
+        """
         data = json.dumps({'id': self.id})
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        url = self.api_url + '/action/resource_show'
-        r = requests.post(url, timeout=self.timeout, data=data, headers=headers)
+        url = config.ckan_api_url + '/action/resource_show'
+        r = requests.post(url, timeout=config.ckan_request_timeout, data=data, headers=headers)
         resource = json.loads(r.content)
         resource = resource["result"]
         for key in resource:
             setattr(self, key, resource[key])
     
     def request_package_name(self):
-        url = self.api_url + '/rest/revision/' + self.revision_id
-        r = requests.get(url, timeout=self.timeout)
+        """
+            Get the package (dataset)
+            for this resource
+            by using revision_id
+        """
+        url = config.ckan_api_url + '/rest/revision/' + self.revision_id
+        r = requests.get(url, timeout=config.ckan_request_timeout)
         revision = json.loads(r.content)
         return revision["packages"][0]
+        
+    def load_mapping(self):
+        wiki_page = self._request_wiki_page()
+        #extract configs to the
+        mappings = {}
+        for config in self._extract_csv_configurations(wiki_page):
+            mappings[config['name']] = config
+            
+        return mappings
+        
+    def _extract_csv_configurations(self, wiki_page):        
+        lines = wiki_page.split('\n')
+        configs = []
+        inside_config = False        
+        for num, line in enumerate(lines):
+            if(re.match('^{{RelCSV2RDF', line)):
+                inside_config = True
+                config = {}
+                config['type'] = line[2:] #'RelCSV2RDF|'
+                config['type'] = config['type'][:-1] # 'RelCSV2RDF'
+                continue
+            
+            if(inside_config and re.match('^}}', line)):
+                #push config to the configs
+                configs.append(config)
+                del config
+                inside_config = False
+                continue
+            
+            if(inside_config):
+                if(len(line.split('=')) < 2):
+                    continue
+                    #line = lines[num-1] + lines[num]
+                prop = line.split('=')[0]
+                value = str(line.split('=')[1])
+                prop = prop.strip()
+                #Encode value to URL
+                value = value[:-1]
+                value = value.strip()
+                if not prop == 'delimiter':
+                    value = urllib.quote(value)
+                config[prop] = value
+            
+        return configs
+
+    def _request_wiki_page(self):
+        """
+            Get a wiki page
+            From the Mapping Wiki
+            By self.id
+        """
+        title = config.wiki_csv2rdf_namespace + self.id
+        params = {'action':'query', 'prop':'revisions', 'rvprop':'content', 'titles':title}
+        request = wikitools.APIRequest(self.wiki_site, params)
+        result = request.query()
+        pages = result['query']['pages']
+        try:
+            for pageid in pages:
+                page = pages[pageid]
+                #get the last revision
+                return page['revisions'][0]["*"]
+        except:
+            return False
 
     def _download(self):
-        """
-            TODO: log errors!
-        """
         try:
-            r = requests.get(self.url, timeout=self.timeout)
-            file = Database(self.resource_dir)
+            r = requests.get(self.url, timeout=config.ckan_request_timeout)
+            file = Database(config.resources_path)
             file.saveDbaseRaw(self.filename, r.content)
             return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
         except BaseException as e:
@@ -138,7 +187,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
     
     def read_resource_file(self):
         try:
-            file = Database(self.resource_dir)
+            file = Database(config.resources_path)
             return file.loadDbaseRaw(self.filename)
         except IOError as e:
             # [Errno 2] No such file or directory
@@ -166,17 +215,16 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
                 return []
             #print csv.Sniffer().has_header(csvfile.read(1024))
             #csvfile.seek(0)
-            
         
     #
     # Wiki related methods (csv functions)
     #
     def create_wiki_page(self, text, captchaid=None, captchaword=None):
-        """ Replace the whole resource page with the text
-            DO NOT USE IN THE PRODUCTION!!!
         """
-        title = self.wiki_namespace + self.id
-        page = wikitools.Page(self.site, title=title)
+            Replace the whole resource page with the text
+        """
+        title = config.wiki_csv2rdf_namespace + self.id
+        page = wikitools.Page(self.wiki_site, title=title)
         result = ''
         try:
             if captchaid and captchaword:
@@ -240,63 +288,6 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         page = page.encode('utf-8')
                 
         return page
-    
-    def request_wiki_page(self):
-        title = self.wiki_namespace + self.id
-        params = {'action':'query', 'prop':'revisions', 'rvprop':'content', 'titles':title}
-        request = wikitools.APIRequest(self.site, params)
-        result = request.query()
-        pages = result['query']['pages']
-        try:
-            for pageid in pages:
-                page = pages[pageid]
-                #get the last revision
-                return page['revisions'][0]["*"]
-        except:
-            #Config does not exist
-            return False
-        
-    def _extract_csv_configurations(self):        
-        wiki_page = self.request_wiki_page()
-        lines = wiki_page.split('\n')
-        configs = []
-        inside_config = False        
-        for num, line in enumerate(lines):
-            if(re.match('^{{RelCSV2RDF', line)):
-                inside_config = True
-                config = {}
-                config['type'] = line[2:] #'RelCSV2RDF|'
-                config['type'] = config['type'][:-1] # 'RelCSV2RDF'
-                continue
-            
-            if(inside_config and re.match('^}}', line)):
-                #push config to the configs
-                configs.append(config)
-                del config
-                inside_config = False
-                continue
-            
-            if(inside_config):
-                if(len(line.split('=')) < 2):
-                    continue
-                    #line = lines[num-1] + lines[num]
-                prop = line.split('=')[0]
-                value = str(line.split('=')[1])
-                prop = prop.strip()
-                #Encode value to URL
-                value = value[:-1]
-                value = value.strip()
-                if not prop == 'delimiter':
-                    value = urllib.quote(value)
-                config[prop] = value
-        
-        for config in configs:
-            if('delimiter' in config):
-                self.delimiter[config['name']] = config['delimiter']
-            else:
-                self.delimiter[config['name']] = ','
-            
-        return configs
     
     def _convert_csv_config_to_sparqlifyml(self, config):
         csv2rdfconfig = ''
@@ -503,7 +494,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         return self.id
     
     def get_ckan_url(self):
-        return str(self.ckan_base_url) + '/dataset/' + str(self.package_name) + '/resource/' + str(self.id)
+        return str(config.ckan_base_url) + '/dataset/' + str(self.package_name) + '/resource/' + str(self.id)
     
     def get_csv_file_path(self):
         if(os.path.exists(self.resource_dir + self.filename)):
@@ -523,7 +514,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
         return self.server_base_url + self.get_sparqlify_configuration_path(configuration_name)
     
     def get_wiki_url(self):
-        return self.wiki_base_url + '/wiki/' + self.wiki_namespace + self.id
+        return config.wiki_base_url + '/wiki/' + config.wiki_csv2rdf_namespace + self.id
     
     def get_rdf_file_path(self, configuration_name):
         if(os.path.exists(self.rdf_files_path + self.id + '_' + configuration_name + '.rdf')):
@@ -535,7 +526,7 @@ class Resource(AuxilaryInterface, ConfigurationInterface):
     def get_rdf_file_url(self, configuration_name):
         return self.server_base_url + self.get_rdf_file_path(configuration_name)
         
-class Package(AuxilaryInterface, ConfigurationInterface):
+class Package(AuxilaryInterface):
     """ Reflects the CKAN package.
         CKAN package contains one or several CKAN resources
         Properties:
@@ -591,7 +582,7 @@ class Package(AuxilaryInterface, ConfigurationInterface):
         return str(self.ckan_base_url) + '/dataset/' + str(self.name)
         
         
-class CKAN_Application(AuxilaryInterface, ConfigurationInterface):
+class CKAN_Application(AuxilaryInterface):
     """ Reflects the CKAN application itself,
         interfaces for getting packages etc.
     """
@@ -689,5 +680,6 @@ if __name__ == '__main__':
     #Overall: 55846
     
     resource = Resource('2409b9b4-3261-4543-9653-ffd28222b745')
-    print resource.transform_to_rdf('default-tranformation-configuration')
+    
+    #print resource.transform_to_rdf('default-tranformation-configuration')
     

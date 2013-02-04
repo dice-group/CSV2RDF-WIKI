@@ -1,5 +1,0 @@
-username = ""
-password = ""
-wiki_namespace = "Csv2rdf:"
-wiki_base_url = "http://wiki.publicdata.eu"
-api_url = wiki_base_url + "/api.php"
