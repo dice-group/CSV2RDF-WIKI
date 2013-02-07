@@ -86,8 +86,7 @@ class Resource(AuxilaryInterface):
         self.wiki_site.login(config.wiki_username, password=config.wiki_password)
         
         #create mapping object
-        self.mappings = self.load_mapping()
-        
+        self.mappings = self.load_mappings()
                 
     def load_from_ckan(self):
         """
@@ -120,16 +119,16 @@ class Resource(AuxilaryInterface):
         revision = json.loads(r.content)
         return revision["packages"][0]
         
-    def load_mapping(self):
+    def load_mappings(self):
         wiki_page = self._request_wiki_page()
         #extract configs to the
         mappings = {}
-        for config in self._extract_csv_configurations(wiki_page):
+        for config in self._extract_csv_mappings(wiki_page):
             mappings[config['name']] = config
             
         return mappings
         
-    def _extract_csv_configurations(self, wiki_page):        
+    def _extract_csv_mappings(self, wiki_page):        
         lines = wiki_page.split('\n')
         configs = []
         inside_config = False        
@@ -350,7 +349,7 @@ class Resource(AuxilaryInterface):
     
     def save_csv_configurations(self):
         db = Database(self.sparqlify_mappings_path)
-        configs = self._extract_csv_configurations()
+        configs = self._extract_csv_mappings()
         for config in configs:
             sparqlifyml = self._convert_csv_config_to_sparqlifyml(config)
             filename = self.id + '_' + config['name'] + '.sparqlify'
