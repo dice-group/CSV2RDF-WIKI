@@ -71,8 +71,10 @@ class Resource(AuxilaryInterface):
     
     def __init__(self, resource_id):
         self.id = resource_id
+        
+    def load(self, resource_id):
         #Load resource from the CKAN
-        self.load_from_ckan()
+        self.unpack_object_to_self(self.load_from_ckan())        
         self.package_name = self.request_package_name()
         self.filename = self.id
         self.ckan_url = self.get_ckan_url()
@@ -90,18 +92,22 @@ class Resource(AuxilaryInterface):
     def load_from_ckan(self):
         """
             Get the resource
-            specified by self.id
+            specified by resource_id
             from config.ckan_api_url 
         """
         data = json.dumps({'id': self.id})
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
         url = config.ckan_api_url + '/action/resource_show'
         r = requests.post(url, timeout=config.ckan_request_timeout, data=data, headers=headers)
+        assert r.ok, r
         resource = json.loads(r.content)
         resource = resource["result"]
-        for key in resource:
-            setattr(self, key, resource[key])
+        return resource
     
+    def unpack_object_to_self(self, object):
+        for key in object:
+            setattr(self, key, object[key])
+        
     def request_package_name(self):
         """
             Get the package (dataset)
@@ -110,6 +116,7 @@ class Resource(AuxilaryInterface):
         """
         url = config.ckan_api_url + '/rest/revision/' + self.revision_id
         r = requests.get(url, timeout=config.ckan_request_timeout)
+        assert r.ok, r
         revision = json.loads(r.content)
         return revision["packages"][0]
         
@@ -179,6 +186,7 @@ class Resource(AuxilaryInterface):
     def _download(self):
         try:
             r = requests.get(self.url, timeout=config.ckan_request_timeout)
+            assert r.ok, r
             file = Database(config.resources_path)
             file.saveDbaseRaw(self.filename, r.content)
             return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"

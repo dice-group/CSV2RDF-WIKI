@@ -14,9 +14,7 @@ docs/
 /src/files_processed/
 /src/sparqlified_hashes/
 /src/stats/
-/src/wikiconfig.py
-/src/ckanconfig.py
-/src/csv2rdfconfig.py
+/src/config.py
 /src/nohup.out
 *.komodoproject
 *.kpf
