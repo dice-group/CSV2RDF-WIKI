@@ -1,0 +1,218 @@
+import config
+import wikitools
+import re
+import urllib
+from prefixcc import PrefixCC
+from database import Database
+from resource import Resource
+from package import Package
+
+class Mapping():
+    def __init__(self, resource_id = None):
+        self.resource_id = resource_id
+        self.wiki_site = wikitools.Wiki(config.wiki_api_url)
+        self.wiki_site.login(config.wiki_username, password=config.wiki_password)
+    
+    def request_wiki_page(self, resource_id = None):
+        """
+            Get a wiki page
+            From the Mapping Wiki
+        """
+        if(not resource_id):
+            resource_id = self.resource_id
+        
+        title = config.wiki_csv2rdf_namespace + resource_id
+        params = {'action':'query', 'prop':'revisions', 'rvprop':'content', 'titles':title}
+        request = wikitools.APIRequest(self.wiki_site, params)
+        result = request.query()
+        pages = result['query']['pages']
+        try:
+            for pageid in pages:
+                page = pages[pageid]
+                #get the last revision
+                return page['revisions'][0]["*"]
+        except:
+            return False
+    
+    def extract_mappings_from_wiki_page(self, wiki_page):        
+        lines = wiki_page.split('\n')
+        mappings = []
+        inside_mapping = False        
+        for num, line in enumerate(lines):
+            if(re.match('^{{RelCSV2RDF', line)):
+                inside_mapping = True
+                mapping = {}
+                mapping['type'] = line[2:] #'RelCSV2RDF|'
+                mapping['type'] = mapping['type'][:-1] # 'RelCSV2RDF'
+                continue
+            
+            if(inside_mapping and re.match('^}}', line)):
+                #push mapping to the mappings
+                mappings.append(mapping)
+                del mapping
+                inside_mapping = False
+                continue
+            
+            if(inside_mapping):
+                if(len(line.split('=')) < 2):
+                    continue
+                    #line = lines[num-1] + lines[num]
+                prop = line.split('=')[0]
+                value = str(line.split('=')[1])
+                prop = prop.strip()
+                #Encode value to URL
+                value = value[:-1]
+                value = value.strip()
+                if not prop == 'delimiter':
+                    value = urllib.quote(value)
+                mapping[prop] = value
+            
+        return mappings
+    
+    def convert_mapping_to_sparqlifyml(self, mapping, resource_id = None):
+        if(not resource_id):
+            resource_id = self.resource_id
+        
+        csv2rdf_mapping = ''
+        prefixcc = PrefixCC()
+        #scan all colX values and extract prefixes
+        prefixes = []
+        properties = {} #properties['col1'] = id >>>> ?obs myprefix:id ?col1
+        for key in mapping.keys():
+            if(re.match('^col', key)):
+                prefixes += prefixcc.extract_prefixes(mapping[key])
+                properties[key] = mapping[key]
+        #remove duplicates from prefixes
+        prefixes = dict.fromkeys(prefixes).keys()
+        #inject qb prefix
+        #prefixes += ['qb']
+        for prefix in prefixes:
+            csv2rdf_mapping += prefixcc.get_sparqlify_namespace(prefix) + "\n"
+        #Add custom prefix to non-prefixed values
+        csv2rdf_mapping += "Prefix publicdata:<http://wiki.publicdata.eu/ontology/>" + "\n"
+        #Add fn sparqlify prefix
+        csv2rdf_mapping += "Prefix fn:<http://aksw.org/sparqlify/>" + "\n"
+        
+        csv2rdf_mapping += "Create View Template DefaultView As" + "\n"
+        csv2rdf_mapping += "  CONSTRUCT {" + "\n"
+        #csv2rdfconfig += "      ?obs a qb:Observation ." + "\n"
+        
+        for prop in properties:
+            csv2rdf_mapping += "      ?obs "+ self._extract_property(properties[prop]) +" ?"+ prop + " .\n"
+        csv2rdf_mapping += "  }" + "\n"
+        csv2rdf_mapping += "  With" + "\n"
+        csv2rdf_mapping += "      ?obs = uri(concat('http://data.publicdata.eu/"+resource_id+"/', ?rowId))" + "\n"
+        for prop in properties:
+            csv2rdf_mapping += "      ?" + prop + " = " + self._extract_type(properties[prop], prop) + "\n"
+        
+        return csv2rdf_mapping
+    
+    def _extract_property(self, prop):
+        """
+            Auxilary method for tabular to spaqrlify-ml convertion
+        """
+        prop = prop.split('->')[0]
+        if(len(prop.split(':')) == 1):
+            return "<http://wiki.publicdata.eu/ontology/"+str(prop)+">"
+        else:
+            return prop
+    
+    def _extract_type(self, wikiString, column):
+        """
+            Auxilary method for tabular to spaqrlify-ml convertion
+        """
+        column_number = column[3:]
+        try:
+            t = wikiString.split('->')[1]
+            t = t.split('^^')[0]
+            return "typedLiteral(?"+column_number+", "+t+")"
+        except:
+            return "plainLiteral(?"+column_number+")"
+        
+    def save_csv_mappings(self, mappings, resource_id = None):
+        if(not resource_id):
+            resource_id = self.resource_id
+            
+        db = Database(config.sparqlify_mappings_path)
+        for mapping in mappings:
+            sparqlifyml = self.convert_mapping_to_sparqlifyml(mapping, resource_id=resource_id)
+            filename = resource_id + '_' + mapping['name'] + '.sparqlify'
+            db.saveDbaseRaw(filename, sparqlifyml)
+    
+    def create_wiki_page(self, text, resource_id = None):
+        """
+            Replace the whole resource page with the text
+            User should be acknowledged bot!
+        """
+        if(not resource_id):
+            resource_id = self.resource_id
+            
+        title = config.wiki_csv2rdf_namespace + resource_id
+        page = wikitools.Page(self.wiki_site, title=title)
+        result = page.edit(text=text, bot=True)
+        return result
+    
+    def generate_default_wiki_page(self, resource_id = None):
+        """
+            Check this method! Does not work yet!!!
+        """
+        if(not resource_id):
+            resource_id = self.resource_id
+        
+        resource = Resource(resource_id)
+        resource.init()
+        package = Package(resource.package_name)
+        tabular_file = TabularFile(resource_id)
+        
+        page = '{{CSV2RDFHeader}} \n'
+        page += '\n'
+        
+        #link to the publicdata.eu dataset
+        page += '{{CSV2RDFResourceLink | \n'
+        page += 'packageId = '+package.name+' | \n'
+        page += 'packageName = "'+package.title+'" | \n'
+        page += 'resourceId = '+resource.id+' | \n'
+        page += 'resourceName = "'+resource.description+'" | \n'
+        page += '}} \n'
+        page += '\n'
+        
+        #get the header from the csv file
+        
+        header_position = tabular_file.get_header_position()
+        header = self.extract_header(header_position)
+        
+        #CSV2RDF Template
+        page += '{{RelCSV2RDF|\n'
+        page += 'name = default-tranformation-configuration |\n'
+        page += 'header = '+str(header_position)+' |\n'
+        page += 'omitRows = -1 |\n'
+        page += 'omitCols = -1 |\n'
+        
+        #Split header and create column definition
+        for num, item in enumerate(header):
+            item = unidecode(item)
+            page += 'col'+str(num)+' = '+item.rstrip()+' |\n'
+        
+        #Close template
+        page += '}}\n'
+        page += '\n'
+        
+        page = page.encode('utf-8')
+                
+        return page
+        
+    def get_mapping_path(self, configuration_name):
+        #self.save_csv_configurations()
+        return self.sparqlify_mappings_path + self.id + '_' + configuration_name + '.sparqlify'
+    
+    def get_mapping_url(self, configuration_name):
+        return self.server_base_url + self.get_sparqlify_configuration_path(configuration_name)
+    
+if __name__ == '__main__':
+    mapping = Mapping()
+    wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    mappings = mapping.extract_mappings_from_wiki_page(wiki_page)
+    sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #mapping.create_wiki_page('Testing the test page!', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    

@@ -21,7 +21,7 @@ class PrefixCC:
         string = string.split('->')
         for substr in string:
             substr = substr.split(':')
-            print len(substr)
+            #print len(substr)
             if(len(substr) > 1):
                 prefixes.append(substr[0])
         return prefixes
