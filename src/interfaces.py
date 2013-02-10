@@ -19,5 +19,9 @@ class AuxilaryInterface():
             output[attr] = value
         return str(output)
     
+    def unpack_object_to_self(self, object):
+        for key in object:
+            setattr(self, key, object[key])
+    
     def extract_filename_url(self, url):
         return url.split('/')[-1].split('#')[0].split('?')[0]    

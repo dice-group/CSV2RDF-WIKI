@@ -3,6 +3,17 @@ class TabularFile():
         self.id = resource_id
         self.filename = self.id
     
+    def download_all_resources(self):
+        db = Database(self.resource_dir)
+        for resource in self.resources:
+            url = resource['url']
+            filename = self.extract_filename_url(url)
+            try:
+                r = requests.get(url, timeout=self.timeout)
+                db.saveDbaseRaw(filename, r.content)
+            except BaseException as e:
+                print "Could not get the resource " + str(resource['id']) + " ! " + str(e)
+    
     def validate(self):
         """ Destructive, be careful to use
             TODO: include html, xml check (see scripts)

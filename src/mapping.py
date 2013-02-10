@@ -6,6 +6,7 @@ from prefixcc import PrefixCC
 from database import Database
 from resource import Resource
 from package import Package
+from tabularfile import TabularFile
 
 class Mapping():
     def __init__(self, resource_id = None):
@@ -215,4 +216,4 @@ if __name__ == '__main__':
     sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mapping.create_wiki_page('Testing the test page!', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    
+    print mapping.generate_default_wiki_page(resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')

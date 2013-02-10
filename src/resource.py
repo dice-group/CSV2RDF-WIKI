@@ -1,8 +1,10 @@
 import json
 import requests
 import config
+from interfaces import AuxilaryInterface
+import re
 
-class Resource():
+class Resource(AuxilaryInterface):
     """ Reflects the CKAN resource.
         Properties:
             resource_group_id, cache_last_updated, revision_timestamp, 
@@ -46,10 +48,6 @@ class Resource():
         resource = json.loads(r.content)
         resource = resource["result"]
         return resource
-    
-    def unpack_object_to_self(self, object):
-        for key in object:
-            setattr(self, key, object[key])
         
     def request_package_name(self):
         """
@@ -62,6 +60,12 @@ class Resource():
         assert r.ok, r
         revision = json.loads(r.content)
         return revision["packages"][0]
+    
+    def is_csv(self):
+        if(re.search( r'csv', self.format, re.M|re.I)):
+            return True
+        else:
+            return False
     
     #
     # Interface methods - getters
@@ -77,5 +81,5 @@ class Resource():
 if __name__ == '__main__':
     res = Resource('1aa9c015-3c65-4385-8d34-60ca0a875728')
     res.init()
-    print res
+    print res.is_csv()
     pass
