@@ -7,12 +7,19 @@ from database import Database
 from resource import Resource
 from package import Package
 from tabularfile import TabularFile
+from unidecode import unidecode
+import os
 
 class Mapping():
     def __init__(self, resource_id = None):
         self.resource_id = resource_id
         self.wiki_site = wikitools.Wiki(config.wiki_api_url)
         self.wiki_site.login(config.wiki_username, password=config.wiki_password)
+    
+    def init(self):
+        self.wiki_page = self.request_wiki_page()
+        self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
+        self.save_csv_mappings(self.mappings)
     
     def request_wiki_page(self, resource_id = None):
         """
@@ -180,7 +187,7 @@ class Mapping():
         #get the header from the csv file
         
         header_position = tabular_file.get_header_position()
-        header = self.extract_header(header_position)
+        header = tabular_file.extract_header(header_position)
         
         #CSV2RDF Template
         page += '{{RelCSV2RDF|\n'
@@ -202,18 +209,46 @@ class Mapping():
                 
         return page
         
-    def get_mapping_path(self, configuration_name):
-        #self.save_csv_configurations()
-        return self.sparqlify_mappings_path + self.id + '_' + configuration_name + '.sparqlify'
+    def get_mapping_path(self, configuration_name, resource_id=None):
+        if(not resource_id):
+            resource_id = self.resource_id
+        file_path = os.path.join(config.sparqlify_mappings_path, str(resource_id) + '_' + str(configuration_name) + '.sparqlify')
+        if(os.path.exists(file_path)):
+            return file_path
+        else:
+            return False
     
-    def get_mapping_url(self, configuration_name):
-        return self.server_base_url + self.get_sparqlify_configuration_path(configuration_name)
+    def get_mapping_url(self, configuration_name, resource_id = None):
+        if(not resource_id):
+            resource_id = self.resource_id
+        file_path = self.get_mapping_path(configuration_name, resource_id=resource_id)
+        if(file_path):
+            return os.path.join(config.server_base_url, self.get_mapping_path(configuration_name, resource_id=resource_id))
+        else:
+            return False
+        
+    def get_mapping_names(self):
+        names = []
+        for mapping in self.mappings:
+            names.append(mapping['name'])
+        return names
+    
+    def get_mapping_by_name(self, mapping_name):
+        for mapping in self.mappings:
+            if(mapping['name'] == mapping_name):
+                return mapping
+        #Nothing was found
+        return False
     
 if __name__ == '__main__':
-    mapping = Mapping()
-    wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    mappings = mapping.extract_mappings_from_wiki_page(wiki_page)
-    sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    mapping.init()
+    print mapping.get_mapping_names()
+    #wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #mappings = mapping.extract_mappings_from_wiki_page(wiki_page)
+    #sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mapping.create_wiki_page('Testing the test page!', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    print mapping.generate_default_wiki_page(resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #print mapping.generate_default_wiki_page(resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #print mapping.get_mapping_path('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #print mapping.get_mapping_url('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')

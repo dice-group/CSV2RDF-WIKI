@@ -1,6 +1,8 @@
 import config
 from ckanclient import CkanClient
 from interfaces import AuxilaryInterface
+import requests
+from database import Database
 
 class Package(AuxilaryInterface):
     """ Reflects the CKAN package.
@@ -32,6 +34,20 @@ class Package(AuxilaryInterface):
         entity = self.ckan.package_entity_get(self.name)
         self.unpack_object_to_self(entity)
         
+    def download_all_resources(self):
+        """
+            Overwrites existing files!
+        """
+        db = Database(config.resource_dir)
+        for resource in self.resources:
+            url = resource['url']
+            filename = self.extract_filename_url(url)
+            try:
+                r = requests.get(url, timeout=self.timeout)
+                db.saveDbaseRaw(filename, r.content)
+            except BaseException as e:
+                print "Could not get the resource " + str(resource['id']) + " ! " + str(e)
+        
     #
     # Interface - getters
     #
@@ -41,4 +57,4 @@ class Package(AuxilaryInterface):
         
 if __name__ == '__main__':
     package = Package('financial-transactions-data-ago-cps')
-    print package
+    print package.resources

@@ -1,35 +1,106 @@
+from resource import Resource
+import requests
+import config
+from database import Database
+import csv
+from magic import Magic
+import os
+
 class TabularFile():
     def __init__(self, resource_id):
         self.id = resource_id
         self.filename = self.id
     
-    def download_all_resources(self):
-        db = Database(self.resource_dir)
-        for resource in self.resources:
-            url = resource['url']
-            filename = self.extract_filename_url(url)
+    def download(self):
+        resource = Resource(self.id)
+        resource.init()
+        try:
+            r = requests.get(resource.url, timeout=config.ckan_request_timeout)
+            assert r.ok, r
+            file = Database(config.resources_path)
+            file.saveDbaseRaw(self.filename, r.content)
+            return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
+        except BaseException as e:
+            return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
+    
+    def delete(self):
+        db = Database(config.resources_path)
+        db.delete(self.filename)
+        return True
+        
+    def get_csv_file_path(self):
+        db = Database(config.resources_path)
+        if(db.is_exists(self.filename)):
+            return db.get_path_to_file(self.filename)
+        else:
+            return False
+        
+    def get_csv_file_url(self):
+        file_path = self.get_csv_file_path()
+        if(file_path):
+            return os.path.join(config.server_base_url, file_path)
+        else:
+            return False
+    
+    def read_resource_file(self):
+        try:
+            file = Database(config.resources_path)
+            return file.loadDbaseRaw(self.filename)
+        except BaseException as e:
+            print "Could not read the resource! " + str(e)
+            return False
+    
+    def get_header_position(self):
+        """
+            Stub for the header recognition problem!
+        """
+        return 1
+    
+    def extract_header(self, position):
+        """
+            This function take the first line of the csv file
+            as a header. Should work in 60% of all cases.
+        """
+        db = Database(config.resources_path)
+        with open(db.get_path_to_file(self.filename), 'rU') as csvfile:
+            reader = csv.reader(csvfile)
             try:
-                r = requests.get(url, timeout=self.timeout)
-                db.saveDbaseRaw(filename, r.content)
+                for num, row in enumerate(reader, 1):
+                    if(num == position):
+                        return row
             except BaseException as e:
-                print "Could not get the resource " + str(resource['id']) + " ! " + str(e)
+                print str(e)
+                return []
     
     def validate(self):
         """ Destructive, be careful to use
             TODO: include html, xml check (see scripts)
         """
-        filename = config.resources_path + self.filename
-        mgc_encoding = magic.Magic(mime=False, magic_file=None, mime_encoding=True)
-        mgc_string = magic.Magic(mime=False, magic_file=None, mime_encoding=False)
-        encoding = mgc_encoding.from_file(filename)
-        info = mgc_string.from_file(filename)
+        (encoding, info) = self.get_info_about()
+        
+        #TODO: run information collection on the all files!
+        #print encoding, info
+        """
         if(encoding == "utf-16le"):
             self._process_utf16(filename)
         elif(re.match("^binary", encoding) or
              re.match("^application/.*", encoding)):
             self._process_based_on(info, filename)
         else:
-            return True
+            return True"""
+    
+    def get_info_about(self):
+        """
+            return (encoding, info) tuple
+            info is a plain string and has to be parsed 
+        """
+        db = Database(config.resources_path)
+        filename = db.get_path_to_file(self.filename)
+        mgc_encoding = Magic(mime=False, mime_encoding=True)
+        mgc_string = Magic(mime=False, mime_encoding=False)
+        encoding = mgc_encoding.from_file(filename)
+        info = mgc_string.from_file(filename)
+        return (encoding, info)
             
     def _process_based_on(self, info, filename):
         """
@@ -118,58 +189,13 @@ class TabularFile():
                 break
             yield data
             
-    def _delete(self, filename):
-        rm_call = ["rm", filename]
-        pipe = subprocess.Popen(rm_call, stdout=subprocess.PIPE)
-        pipe_message = pipe.stdout.read()
-        
-    def get_csv_file_path(self):
-        if(os.path.exists(config.resources_path + self.filename)):
-            return config.resources_path + self.filename
-        else:
-            self._download()
-            return config.resources_path + self.filename
-        
-    def _download(self):
-        try:
-            r = requests.get(self.url, timeout=config.ckan_request_timeout)
-            assert r.ok, r
-            file = Database(config.resources_path)
-            file.saveDbaseRaw(self.filename, r.content)
-            return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
-        except BaseException as e:
-            return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
-            
-    def get_csv_file_url(self):
-        return str(self.server_base_url) + str(self.resource_dir) + str(self.filename)
-        
-    def _extract_csv_header_and_position_first_line(self):
-        """
-            This function take the first line of the csv file
-            as a header. Should work in 60% of all cases.
-        """
-        with open(self.resource_dir + self.filename, 'rU') as csvfile:
-            #dialect does not work good!
-            #dialect = csv.Sniffer().sniff(csvfile.read(1024))
-            #csvfile.seek(0)
-            reader = csv.reader(csvfile)
-            try:
-                for row in reader:
-                    return row
-            except BaseException as e:
-                print str(e)
-                return []
-            #print csv.Sniffer().has_header(csvfile.read(1024))
-            #csvfile.seek(0)
-            
-    def read_resource_file(self):
-        try:
-            file = Database(config.resources_path)
-            return file.loadDbaseRaw(self.filename)
-        except IOError as e:
-            # [Errno 2] No such file or directory
-            if(e.errno == 2):
-                self._download()
-                self.read_resource_file()
-        except BaseException as e:
-            print "Could not read the resource! " + str(e)
+if __name__ == '__main__':
+    tabular_file = TabularFile('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    print tabular_file.get_csv_file_url()
+    #print tabular_file.download()
+    #print tabular_file.delete()
+    #print tabular_file.get_csv_file_path()
+    #print tabular_file.read_resource_file()
+    #header_position = tabular_file.get_header_position()
+    #print tabular_file.extract_header(header_position)
+    #print tabular_file.validate()

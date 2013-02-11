@@ -7,37 +7,50 @@ class Database:
         if not os.path.exists(self.path):
             os.makedirs(self.path)
     
+    def get_path_to_file(self, filename):
+        return os.path.join(self.path, filename)
+    
+    def is_exists(self, filename):
+        if(os.path.exists(self.get_path_to_file(filename))):
+            return True
+        else:
+            return False
+    
     def saveDbase(self, filename, object):
         "save object to file"
-        file = open(self.path + filename, 'wb')
+        file = open(self.get_path_to_file(filename), 'wb')
         pickle.dump(object, file, protocol=pickle.HIGHEST_PROTOCOL)
         file.close()
     
     def loadDbase(self, filename):
         "load object from file"
-        file = open(self.path + filename, 'rb')
+        file = open(self.get_path_to_file(filename), 'rb')
         object = pickle.load(file)
         file.close()
         return object
     
     def saveDbaseRaw(self, filename, string):
         "save string to file"
-        file = open(self.path + filename, 'wb')
+        file = open(self.get_path_to_file(filename), 'wb')
         file.write(string)
         file.close()
         
     def loadDbaseRaw(self, filename):
         "load string from file"
-        file = open(self.path + filename, 'rb')
+        file = open(self.get_path_to_file(filename), 'rb')
         return file.read()
         
     def addDbaseRaw(self, filename, string):
-        if not os.path.exists(self.path + filename) :
-            open(self.path + filename, 'w').close()
-        file = open(self.path + filename, 'a+')
+        if not os.path.exists(self.get_path_to_file(filename)) :
+            open(self.get_path_to_file(filename), 'w').close()
+        file = open(self.get_path_to_file(filename), 'a+')
         file.write(string)
         file.close()
     
+    def delete(self, filename):
+        if os.path.exists(self.get_path_to_file(filename)):
+            os.unlink(self.get_path_to_file(filename))
+            
     #
     # CKAN specific functions
     #
