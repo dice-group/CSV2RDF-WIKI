@@ -16,7 +16,5 @@ docs/
 /src/stats/
 /src/config.py
 /src/nohup.out
-*.komodoproject
-*.kpf
 *.pyc
 *.log
