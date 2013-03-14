@@ -21,6 +21,13 @@ class CKANApplication():
     def get_package_list(self):
         return self.ckan.package_list()
 
+    def dump_all_resources(self):
+        package_list = self.get_package_list()
+        for package_name in package_list:
+            pkg = Package(package_name)
+            print pkg
+            break
+
     def update_csv_resource_list(self):
         output = []
         package_list = self.get_package_list()
@@ -58,6 +65,7 @@ class CKANApplication():
             
 if __name__ == '__main__':
     ckan_app = CKANApplication()
+    print ckan_app.dump_all_resources()
     #print ckan_app.get_package_list()
     #print ckan_app.get_csv_resource_list()
     #print ckan_app.update_csv_resource_list()

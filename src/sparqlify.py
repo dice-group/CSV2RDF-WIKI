@@ -12,10 +12,13 @@ class Sparqlify():
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
             resource_id = self.resource_id
-        
+                
         tabular_file = TabularFile(resource_id)
-        file_path = tabular_file.get_csv_file_path()
-        
+        if(tabular_file.get_csv_file_path()):
+            file_path = tabular_file.get_csv_file_path()
+        else:
+            file_path = tabular_file.download()
+
         mapping = Mapping(resource_id)
         mapping.init()
         mapping_path = mapping.get_mapping_path(mapping_name)
@@ -33,7 +36,7 @@ class Sparqlify():
                           "-c", mapping_path,
                           "-d", delimiter]
         
-        print str(' '.join(sparqlify_call))
+        #print str(' '.join(sparqlify_call))
         
         rdf_file = os.path.join(config.rdf_files_path, str(self.resource_id) + '_' + str(mapping_name) + '.rdf')
         f = open(rdf_file, 'w')

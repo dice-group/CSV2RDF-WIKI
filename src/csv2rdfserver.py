@@ -3,7 +3,9 @@
 #
 import cherrypy
 import json
-import ckaninterface
+from resource import Resource
+from tabularfile import TabularFile
+from sparqlify import Sparqlify
 import pystache
 import pystachetempl
 
@@ -15,19 +17,21 @@ class CSV2RDFApp(object):
     def index(self):
         index = pystachetempl.Index()
         return self.renderer.render(index)
-    
+        
     @cherrypy.expose(alias='csv2rdf.html')
     def csv2rdf(self):
         #read several resource, give navigation link to wiki and CKAN
         #let transform each of them
-        res1 = ckaninterface.Resource('676e2f9b-c05f-4fd5-844a-25497c3c2c9e')
-        res2 = ckaninterface.Resource('6023100d-1c76-4bee-9429-105caa061b9f')
-        resources = [res1, res2]
+        res1 = Resource('676e2f9b-c05f-4fd5-844a-25497c3c2c9e')
+        res2 = Resource('6023100d-1c76-4bee-9429-105caa061b9f')
+        res3 = Resource('1aa9c015-3c65-4385-8d34-60ca0a875728')
+        resources = [res1, res2, res3]
+        map(lambda x: x.init(), resources)
         csv2rdf = pystachetempl.Csv2rdf(resources)
         return self.renderer.render(csv2rdf)
 
     @cherrypy.expose(alias="rdf_edit.html")
-    def rdf_edit(self, resource_id, configuration_name='default-tranformation-configuration'):
+    def rdf_edit(self, resource_id, mapping_name='default-tranformation-configuration'):
         
         #black_list
         black_list = self._get_black_list()
@@ -35,8 +39,13 @@ class CSV2RDFApp(object):
             index = pystachetempl.Index()
             return self.renderer.render(index)
         
-        resource = ckaninterface.Resource(resource_id)
-        rdf_file_url = resource.get_rdf_file_url(configuration_name)
+        resource = Resource(resource_id)
+        resource.init()
+        sparqlify = Sparqlify(resource_id)
+        
+        (sparqlify_message, returncode) = sparqlify.transform_resource_to_rdf(mapping_name)
+        
+        rdf_file_url = sparqlify.get_rdf_file_url(mapping_name)
         rdf_edit = pystachetempl.RdfEdit(resource, rdf_file_url)
         return self.renderer.render(rdf_edit)
         #TODO: make page with the editor!
@@ -62,12 +71,12 @@ class CSV2RDFApp(object):
         return json.dumps(ckan.get_sparqlified_list())
         
     def _get_black_list(self):
-        f = open('black_list', 'rU')
+        f = open('files_over_50MB', 'rU')
         black_list = f.read()
         f.close()
         return black_list.split('\n')
         
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
-    cherrypy.quickstart(publicdataeu, '/', 'csv2rdf.cherrypy.config')
+    cherrypy.quickstart(publicdataeu, '/', 'cherrypy.config')
     cherrypy.config.update('cherrypy.config')

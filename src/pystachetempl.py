@@ -1,5 +1,6 @@
 import pystache
 import json
+import config
 
 class Index(object):
     def __init__(self):
@@ -19,7 +20,7 @@ class Csv2rdf(object):
             items.append({'ckan_url': resource.ckan_url,
                           'description': resource.description,
                           'wiki_url': resource.wiki_url,
-                          'server_base_url': resource.server_base_url,
+                          'server_base_url': config.server_base_url,
                           'id': resource.id})
         return items
         
@@ -33,7 +34,7 @@ class RdfEdit(object):
         items.append({'ckan_url': self.resource.ckan_url,
                       'description': self.resource.description,
                       'wiki_url': self.resource.wiki_url,
-                      'server_base_url': self.resource.server_base_url,
+                      'server_base_url': config.server_base_url,
                       'id': self.resource.id,
                       'rdf_file_url': self.rdf_file_url})
         return items

@@ -19,9 +19,11 @@ class TabularFile():
             assert r.ok, r
             file = Database(config.resources_path)
             file.saveDbaseRaw(self.filename, r.content)
-            return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
+            return self.get_csv_file_path()
+            #return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
         except BaseException as e:
-            return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
+            #return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
+            return False
     
     def delete(self):
         db = Database(config.resources_path)
