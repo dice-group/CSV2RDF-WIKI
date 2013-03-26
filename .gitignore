@@ -16,5 +16,6 @@ docs/
 /src/stats/
 /src/config.py
 /src/nohup.out
+/src/.ropeproject/
 *.pyc
 *.log
