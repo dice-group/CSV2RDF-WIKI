@@ -6,16 +6,7 @@ util/
 docs/
 ./
 /src/files/
-/src/files_old/
-/src/sparqlify_mappings/
-/src/sparqlified/
-/src/sparqlified_exposed/
-/src/script_logs/
-/src/files_processed/
-/src/sparqlified_hashes/
-/src/stats/
 /src/config.py
-/src/nohup.out
 /src/.ropeproject/
 *.pyc
 *.log

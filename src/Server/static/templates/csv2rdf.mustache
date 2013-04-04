@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+{{> header}}
+
+{{> globaljs}}
+<!-- page specific scripts -->
+<script src="static/javascript/csv2rdf.js"></script>
+
+<body>
+    {{> navigation}}
+    <div class="container">
+        <div class="row">
+            <h2>Choose the CKAN resource to convert</h2>
+            <ul>
+                {{#item}}
+                <li>
+                    <a href="{{ckan_url}}">{{description}}</a>
+                    <a href="{{wiki_url}}"><i class="icon-cog"></i></a>
+                    <a href="{{server_base_url}}rdf_edit.html?resource_id={{id}}"><i class="icon-play"></i></a>
+                </li>
+                {{/item}}
+            </ul>
+            
+        </div>
+    </div>
+</body>
+{{> footer}}
+
+</html>

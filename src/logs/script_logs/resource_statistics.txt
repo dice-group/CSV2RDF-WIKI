@@ -1,0 +1,6 @@
+overall csv resources: 12223
+status code 200: 9977
+other status code: 2028
+could not download: 218
+
+

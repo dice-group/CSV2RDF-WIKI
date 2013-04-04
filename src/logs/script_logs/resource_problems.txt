@@ -1,0 +1,111 @@
+=== Assumptions ===
+
+The reference point, stating canonical format for csv file, is the RFC 4180 [1].
+The canonical csv is defined as follows:
+1. Each record is located on a separate line, delimited by a line break (CRLF).
+2. The last record in the file may or may not have an ending line break.
+3. There maybe an optional header line appearing as the first line of the file with the same format as normal record lines.
+    This header will contain names corresponding to the fields in the file and should contain the same number of fields as the records in the rest of the file
+    (the presence or absence of the header lineshould be indicated via the optional "header" parameter of this MIME type).
+4. Within the header and each record, there may be one or more fields, separated by commas.
+    Each line should contain the same number of fields throughout the file.
+    Spaces are considered part of a field and should not be ignored.
+    The last field in the record must not be followed by a comma.
+5. Each field may or may not be enclosed in double quotes
+    (however some programs, such as Microsoft Excel, do not use double quotes at all).
+    If fields are not enclosed with double quotes, then double quotes may not appear inside the fields.
+6. Fields containing line breaks (CRLF), double quotes, and commas should be enclosed in double-quotes.
+7. If double-quotes are used to enclose fields, then a double-quote appearing inside a field must be escaped by preceding it with another double quote.
+
+[1] http://www.ietf.org/rfc/rfc4180.txt
+
+=== Problems ===
+resource id | problem
+00e5b714-84a0-410a-9833-6983bd65cc96 |
+1b3a086e-c877-49af-b3c8-9ce038961d3f |
+1d790d31-34fc-48e2-9d18-0c14e39a0515 | Some fields are enclosed in ""
+1f5a4241-338b-436f-9bb8-0d4a0507aea5 | in header "_" used, not " "
+2a4df61a-b7ad-4bd1-a67c-96349486097e |
+
+2bf8f760-5f21-4602-86e3-1c1edfbfefa4 | trailing comma in the header and all records, 2 record entries start with space
+Department of Health,"Heywood,Middleton & Rochdale PCT",14/07/2010, Rm3 Salford Royal Ft H/Care,Acute Collab Commissioned,Salford Royal NHSF Trust,15897,"48,310.00",0,
+Department of Health,"Heywood,Middleton & Rochdale PCT",14/07/2010, Rm3 Salford Royal Ft H/Care,Acute Core Contracts Slam Abc,Salford Royal NHSF Trust,15896,"198,758.00",0,
+
+4b27f8ae-a3de-4f2e-86e9-2ca82395a4f7 | Some fields are enclosed in ""
+04ebf07e-c888-47fa-87b5-7c5f315c3934 | trailing comma in the header
+5b4d2c66-f2ac-44de-928a-6a48aac26c10 | header is not on the first line, blank lines, notes and additional information are embedded into file
+5d04b916-9bcb-4ad8-b3da-55487e5633a3 |
+6c81548f-14ca-4226-b7e9-ac9515126425 | separator ";", all entries are in enclosed in ""
+8abc2838-9fd8-406b-90b0-0bfa79ae20fc |
+09e76b2e-4336-4445-a2b5-4262e3833da8 | header is not on the first line, additional information on the first line, blank lines
+9ecc5282-0885-49ae-b086-fb556a2d51e8 | separator ";"
+9fec01d8-6a24-4451-a7dc-31a7adf15a5a | several csv files in one (with same number of records per line), additional information - not a candidate for transformation (have to take a closer look)
+16ad006e-1a01-45c7-beff-fb815d6f438c | some entries are enclosed in quotes
+22dff3fe-087e-4f49-bd4c-baeb922bd5a2 |
+52d99692-21cd-44d2-b801-0d43ca062a76 |
+59a42d0c-a5a1-4990-8966-b2ece234391e | some entries are enclosed in quotes
+59fbe831-09b5-4f96-b390-4a7f11d88a9f |
+65c88620-a632-4b97-88f6-bbcbca415c53 | header is not on the first line, additional information on the first line! 56 trailing commas (?), 4 empty rows at the bottom
+69d6bd4e-5297-44c5-9171-bd87fc00d5f1 | some entries are enclosed in quotes, first 4 rows are additional information, header is not on the first line
+81d9d191-0c19-4d21-a6bb-3b2ab8f74c43 |
+91ab388f-0ffe-4cb5-9d66-4388e34a0440 | header is not on the first line, first 4 lines are additional info, some entries are enclosed in quotes
+91e66038-8594-462d-8cf6-68fa7c3bac49 | header is not on the first line, additional info before header, empty rows, some entries starts with " "
+92e1d376-ae2a-4544-b75a-2ce0ab970453 | header is on two lines (proper "" CRLF), empty rows
+94efc0a6-522e-48a0-a1c3-0796ada67a20 | header is not on the first line, additional info before header
+95bab559-b9c6-43eb-9ae6-a41adad3fd80 | empty rows, additional info: notes under records
+96a396e1-54e4-4e3e-b174-070640c7e72a | some entries are enclosed in quotes
+146ac5ad-d095-4da4-87b4-9a2cee4b365e | some entries are enclosed in quotes
+376ea67e-2664-402b-838f-a76fb5565b2c | some entries are enclosed in quotes
+414ff589-f674-466b-80f3-b7cf2145ee8e |
+520b5f60-0078-4205-84f7-cd379978e371 | some entries are enclosed in quotes
+712b5b36-4cd7-4eee-84a8-181caa4b3568 | some entries are enclosed in quotes
+793f8d00-9580-4055-8c94-d4b50fb0c5fb |
+808af076-9b28-400f-8bb9-6d4743d55efe | separator ";", not all rows got all of the entries (; missing), header is not on the first line
+0834ce81-2f5c-4703-bb3d-def85b752d01 | some entries are enclosed in quotes
+850c4785-46ff-490c-93c1-53fa74beefec | some entries are enclosed in quotes
+933db257-2543-4619-ac7c-a79e0e007742 | some entries are enclosed in quotes, empty rows
+1284b128-db53-4c5b-ba18-65adf431d22e | several tables in one file, header is scattered over rows
+3939f259-60ad-4c55-9ebe-57eb8c1bed9b | all entries are enclosed in quotes
+4333cac2-c429-45e4-a94d-e59fda76a06c |
+6131a4d4-68c4-4e14-8001-33a6df222b9e | some entries are enclosed in quotes, empty rows, last sum row
+6400e88f-3e36-443e-80b8-b950b7626a07 | some entries are enclosed in quotes
+60966bbe-4584-477a-9bbc-d4cc0390c86d | additional info at the bottom
+374559e6-98f1-4856-869a-e6d05b51dc79 |
+490233bd-26ce-4ac3-a8ec-a6f5218ec7e1 | separator ";"
+
+704534f9-0566-45dc-af98-87c248b25909 | header split in two rows, data does not repeat same name!
+Helen Ghosh,Permanent Secretary,3.5.11,Royal College of Physicians,Dinner,,,,,
+,,22.6.11,Royal Academy of Arts,Drinks,,,,,
+,,23.6.11,Tablet Trust,AGM Dinner,,,,,
+
+726120e3-1188-4473-9f77-27e011ab1438 | encoding problem, can view by less, everything is fine
+45453604-f816-4755-9fd1-483f0a312d64 | some entries are enclosed in quotes, sum at the end of the table, empty rows
+a8cf57ae-de0b-4135-aaa6-db68e3d7dc5f | some entries are enclosed in quotes
+afd27629-e380-4db3-8988-24278fc8de9e | several tables in one file (needs a closer look)
+b05f5b3b-aaaa-46f2-9113-a37f9e6d0376 | some entries are enclosed in quotes
+b6cb5d73-79e8-4c51-bcb0-31f52839251d | some entries are enclosed in quotes
+b324e9b4-397e-407f-a2d8-a0fc45c21cfc | sum at the bottom, additional info at the bottom
+b600e5f6-e96a-4023-821a-5fb15e9967e3 | some entries are enclosed in quotes
+b2286a63-0206-4d04-89ff-62577a69108f | some entries are enclosed in quotes, empty rows
+ba2f23f2-cf35-45dc-9560-345586572aaf | header is not on the first line, additional info before header
+bbe38083-4c77-45a1-be41-cfdb6822811f | additional info before and after table, header is not on the first line
+bd517294-e8d6-4dd3-af5d-80b57fdff829 |
+beb43ea0-033f-41fc-8018-444a5a9542af | not a csv (some DOS formated table) - needs a closer look
+c6aabd7a-d8fd-4277-8ff5-6e3e417e6aa6 | header is not on the first line, additional info before and after table, sum after table
+c588c51f-263e-4c5c-887a-1558896cd19a | some entries are enclosed in quotes
+c8421ebb-ff9e-4818-9370-43f2189ac8b2 | take a closer look!
+c46923d2-63c7-4c86-a849-bd48643ceae5 |
+caf788cf-05d7-4658-a1d7-24fc2eb5150b | "_" instead of " " in the header
+cafa383e-4b81-49ca-a8b2-e98915a9af7f |
+cdea853f-adeb-48ff-a3be-08c0167cea64 | trailing commas in the header and rows
+d9e2d748-7a87-4f76-9b11-3c34ac515a57 | header is not on the first line, additional info before table
+d40d4710-6f9b-4425-af30-70c52530949e | trailing commas in the header and rows
+d45d3500-1dd4-4246-891b-54f190590b79 | all entries are enclosed in quotes
+d647e886-cd4a-41b5-b2eb-0b2765fa3b1e |
+da921992-174e-4c9d-ba60-dd55d84e531a |
+deec9c7c-9631-469b-9b0a-b0fc154e7dd5 | sum at the bottom
+e581fa6a-1fd8-4367-bbc4-4cc487695fa7 |
+ec445e4b-fedc-40a9-b39e-8feb9e8adfdd |
+f30e9269-f1d7-4b01-bfdc-7d41cda76354 | some entries are enclosed in quotes
+f99beed9-fd3c-4222-a6d7-15e16e09098f | some entries are enclosed in quotes
+

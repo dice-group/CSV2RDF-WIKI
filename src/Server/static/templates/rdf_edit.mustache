@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+{{> header}}
+
+{{> navigation}}
+
+{{> codemirror}}
+
+{{> globaljs}}
+<!-- page specific script -->
+<script type="text/javascript">
+    var CKANEntryId = "{{entityName}}";
+    var CKANResourceId = "{{resourceId}}";
+</script>
+
+<script src="static/javascript/rdfedit.js"></script>
+
+<body>
+    <div class="container">
+        <div class="row">
+        {{#item}}
+            <h4>
+                Transformation complete! <a href="{{rdf_file_url}}">Download RDF!</a>
+            </h4>
+            
+            
+            You have just transformed <a href="{{ckan_url}}">{{description}}</a> CKAN resource to RDF. <br/>
+            You can review transformation config on <a href="{{wiki_url}}">publicdata.eu wiki</a>. <br/>
+            To run the transformation one more time, just reload the page. <br/>
+        {{/item}}    
+        </div>
+    </div>
+</body>
+
+{{> footer}}
+</html>

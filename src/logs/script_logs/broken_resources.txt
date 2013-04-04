@@ -1,0 +1,19 @@
+Could not download the resource 6d49b623-72e0-48b6-b023-3ad214578e79 ! HTTPSConnectionPool(host='basil.smhft.nhs.uk', port=443): Request timed out. (timeout=10)
+Could not download the resource 0da3e952-3426-4293-b2d7-6817728b7fe8 ! Invalid URL u'\u2022\thttp://www.transparency.culture.gov.uk/iwm/files/2011/11/IWM-staff-and-salary-data-juinor-data-Sept-2011.csv': No schema supplied
+Could not download the resource 181c7a41-b6aa-4ae3-8c39-048b1e68ad88 ! HTTPSConnectionPool(host='b
+Could not download the resource 7dd74a6e-0293-4e66-ad99-fad51fcf13e9 ! Invalid URL u'NHS%20Redcar%20&%20Cleveland%20Transparency%20Report%20August.csv': No schema supplied asil.smhft.nhs.uk', port=443): Request timed out. (timeout=10)
+0d304b50-bef9-49df-9f66-d0efb6630108 Page not found
+5a101359-5037-48fd-a4d4-856aaa7548ea Page not found
+f466dc1c-12db-41cf-ae92-ac417dd138e6 Page not found
+f72ad9b1-adca-4656-b7e6-f3bbc730ed68 Page not found
+c48c8805-9f55-4f85-a102-d5c7b7196b73 Page not found
+726120e3-1188-4473-9f77-27e011ab1438 encoding?
+2796f22e-678e-4fd7-976e-3d2f2bfb284b Page not found
+1848ab68-b8e6-4272-97ff-d014bd155e44 Page not found
+0883cb9e-2e61-4ca2-a9df-00f14b4a5591 not a csv
+770adcf6-1926-42bb-bc97-8124565c39ef Error establishing database connection
+455b46a8-c65a-4da4-adda-e21224678106 Empty
+119cbfa3-1ceb-4f66-a295-4a03605d7798 Empty
+89df38b2-7f39-4d2c-a498-b766d7e02dcb not a csv
+59f6569b-0428-4a6c-a6d2-e853dd1b89dc not a csv
+56c456ba-fbb8-433c-b1c2-2229cd2981c6 page not found
