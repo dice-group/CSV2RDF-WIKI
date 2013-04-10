@@ -6,7 +6,7 @@ util/
 docs/
 ./
 /src/files/
-/src/config.py
+/src/Config/config.py
 /src/.ropeproject/
 *.pyc
 *.log
