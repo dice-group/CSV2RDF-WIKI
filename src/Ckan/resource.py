@@ -1,11 +1,10 @@
 import re
 
 import json
-import pdb
 import requests
 
-import config
-from interfaces import AuxilaryInterface
+from Config import config
+from Interfaces import AuxilaryInterface
 
 
 class Resource(AuxilaryInterface):
@@ -84,7 +83,6 @@ class Resource(AuxilaryInterface):
 
 if __name__ == '__main__':
     res = Resource('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    pdb.set_trace() ############################## Breakpoint ##############################
     res.init()
     print res.is_csv()
     pass

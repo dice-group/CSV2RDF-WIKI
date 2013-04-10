@@ -5,7 +5,7 @@ import ckaninterface
 import magic
 import subprocess
 
-from database import Database
+from Database import files
 
 
 #

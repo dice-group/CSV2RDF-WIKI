@@ -1,9 +1,9 @@
 import requests
 from ckanclient import CkanClient
 
-import config
-from database import Database
-from interfaces import AuxilaryInterface
+from Config import config
+from Database import files
+from Interfaces import AuxilaryInterface
 
 
 class Package(AuxilaryInterface):

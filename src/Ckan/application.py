@@ -2,13 +2,14 @@ import os
 
 from ckanclient import CkanClient
 
-import config
-from database import Database
+from Config import config
+from Database import files
+
+#relative imports
 from package import Package
 from resource import Resource
 
-
-class CKANApplication():
+class CkanApplication():
     """ Reflects the CKAN application itself,
         interfaces for getting packages etc.
     """
@@ -67,7 +68,7 @@ class CKANApplication():
             print pipe_message
             
 if __name__ == '__main__':
-    ckan_app = CKANApplication()
+    ckan_app = CkanApplication()
     print ckan_app.dump_all_resources()
     #print ckan_app.get_package_list()
     #print ckan_app.get_csv_resource_list()
