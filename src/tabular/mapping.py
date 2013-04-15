@@ -5,12 +5,12 @@ import urllib
 import wikitools
 from unidecode import unidecode
 
-import config
-from database import Database
-from package import Package
-from prefixcc import PrefixCC
-from resource import Resource
-from tabularfile import TabularFile
+from config import config
+from database import DatabasePlainFiles
+from ckan.package import Package
+import prefixcc
+from ckan.resource import Resource
+from tabular.tabularfile import TabularFile
 
 
 class Mapping():
@@ -144,7 +144,7 @@ class Mapping():
         if(not resource_id):
             resource_id = self.resource_id
             
-        db = Database(config.sparqlify_mappings_path)
+        db = DatabasePlainFiles(config.sparqlify_mappings_path)
         for mapping in mappings:
             sparqlifyml = self.convert_mapping_to_sparqlifyml(mapping, resource_id=resource_id)
             filename = resource_id + '_' + mapping['name'] + '.sparqlify'

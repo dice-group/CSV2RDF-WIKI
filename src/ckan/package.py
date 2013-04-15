@@ -1,9 +1,9 @@
 import requests
 from ckanclient import CkanClient
 
-from Config import config
-from Database import files
-from Interfaces import AuxilaryInterface
+from config import config
+from database import DatabasePlainFiles
+from interfaces import AuxilaryInterface
 
 
 class Package(AuxilaryInterface):
@@ -40,7 +40,7 @@ class Package(AuxilaryInterface):
         """
             Overwrites existing files!
         """
-        db = Database(config.resource_dir)
+        db = DatabasePlainFiles(config.resource_dir)
         for resource in self.resources:
             url = resource['url']
             filename = self.extract_filename_url(url)

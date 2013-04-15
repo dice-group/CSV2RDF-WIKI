@@ -4,9 +4,9 @@ import csv
 import requests
 from magic import Magic
 
-import config
-from database import Database
-from resource import Resource
+from config import config
+from database import DatabasePlainFiles
+from ckan.resource import Resource
 
 
 class TabularFile():
@@ -20,7 +20,7 @@ class TabularFile():
         try:
             r = requests.get(resource.url, timeout=config.ckan_request_timeout)
             assert r.ok, r
-            file = Database(config.resources_path)
+            file = DatabasePlainFiles(config.resources_path)
             file.saveDbaseRaw(self.filename, r.content)
             return self.get_csv_file_path()
             #return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
@@ -29,12 +29,12 @@ class TabularFile():
             return False
     
     def delete(self):
-        db = Database(config.resources_path)
+        db = DatabasePlainFiles(config.resources_path)
         db.delete(self.filename)
         return True
         
     def get_csv_file_path(self):
-        db = Database(config.resources_path)
+        db = DatabasePlainFiles(config.resources_path)
         if(db.is_exists(self.filename)):
             return db.get_path_to_file(self.filename)
         else:
@@ -49,7 +49,7 @@ class TabularFile():
     
     def read_resource_file(self):
         try:
-            file = Database(config.resources_path)
+            file = DatabasePlainFiles(config.resources_path)
             return file.loadDbaseRaw(self.filename)
         except BaseException as e:
             print "Could not read the resource! " + str(e)
@@ -66,7 +66,7 @@ class TabularFile():
             This function take the first line of the csv file
             as a header. Should work in 60% of all cases.
         """
-        db = Database(config.resources_path)
+        db = DatabasePlainFiles(config.resources_path)
         with open(db.get_path_to_file(self.filename), 'rU') as csvfile:
             reader = csv.reader(csvfile)
             try:
@@ -99,7 +99,7 @@ class TabularFile():
             return (encoding, info) tuple
             info is a plain string and has to be parsed 
         """
-        db = Database(config.resources_path)
+        db = DatabasePlainFiles(config.resources_path)
         filename = db.get_path_to_file(self.filename)
         mgc_encoding = Magic(mime=False, mime_encoding=True)
         mgc_string = Magic(mime=False, mime_encoding=False)

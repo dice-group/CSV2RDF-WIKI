@@ -5,14 +5,14 @@ import cherrypy
 import json
 import pystache
 
-import pystachetempl
-from resource import Resource
-from sparqlify import Sparqlify
+from server import pystachetempl
+from ckan.resource import Resource
+from tabular.sparqlify import Sparqlify
 
 
 class CSV2RDFApp(object):
     def __init__(self):
-        self.renderer = pystache.Renderer(search_dirs="static/templates/")
+        self.renderer = pystache.Renderer(search_dirs="server/static/templates/")
         
     @cherrypy.expose(alias='index.html')
     def index(self):
@@ -79,5 +79,5 @@ class CSV2RDFApp(object):
         
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
-    cherrypy.quickstart(publicdataeu, '/', 'cherrypy.config')
-    cherrypy.config.update('cherrypy.config')
+    cherrypy.quickstart(publicdataeu, '/', 'server/config')
+    cherrypy.config.update('server/config')

@@ -3,7 +3,7 @@ import os
 import pickle
 
 
-class Database:
+class DatabasePlainFiles:
     def __init__(self, path = './'):
         self.path = path
         if not os.path.exists(self.path):
@@ -80,6 +80,3 @@ class Database:
             lines.append(file.readline())
         return lines
     
-if __name__ == '__main__':
-    #reimport all objects as strings
-    pass

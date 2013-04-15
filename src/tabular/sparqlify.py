@@ -2,10 +2,10 @@ import os
 
 import subprocess
 
-import config
-from database import Database
-from mapping import Mapping
-from tabularfile import TabularFile
+from config import config
+from database import DatabasePlainFiles
+from tabular.mapping import Mapping
+from tabular.tabularfile import TabularFile
 
 
 class Sparqlify():
@@ -55,7 +55,7 @@ class Sparqlify():
             resource_id = self.resource_id
         
         filename = resource_id + '_' + mapping_name + '.rdf'
-        db = Database(config.rdf_files_path)
+        db = DatabasePlainFiles(config.rdf_files_path)
         if(db.is_exists(filename)):
             return db.get_path_to_file(filename)
         else:

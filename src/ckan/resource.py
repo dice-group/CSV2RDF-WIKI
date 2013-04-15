@@ -3,8 +3,8 @@ import re
 import json
 import requests
 
-from Config import config
-from Interfaces import AuxilaryInterface
+from config import config
+from interfaces import AuxilaryInterface
 
 
 class Resource(AuxilaryInterface):

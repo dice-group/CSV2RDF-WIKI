@@ -2,8 +2,8 @@ import os
 
 from ckanclient import CkanClient
 
-from Config import config
-from Database import files
+from config import config
+from database import DatabasePlainFiles
 
 #relative imports
 from package import Package
@@ -19,7 +19,7 @@ class CkanApplication():
         self.csv_resource_list_filename = 'csv_resource_list'
         
     def get_csv_resource_list(self):
-        db = Database()
+        db = DatabasePlainFiles()
         return db.loadDbase(self.csv_resource_list_filename)
 
     def get_package_list(self):
@@ -44,7 +44,7 @@ class CkanApplication():
                 if(r.is_csv()):
                     output.append(r.id)
         
-        db = Database()
+        db = DatabasePlainFiles()
         db.saveDbase(self.csv_resource_list_filename, output)
         
     def get_sparqlified_list(self):

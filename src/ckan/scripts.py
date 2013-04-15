@@ -5,7 +5,7 @@ import ckaninterface
 import magic
 import subprocess
 
-from Database import files
+from database import DatabasePlainFiles
 
 
 #
@@ -39,7 +39,7 @@ class CkanInterface:
                 os.remove('files/'+resource)
     
     def download_n_random_csv(self, n):
-        db = Database(self.log_folder)
+        db = DatabasePlainFiles(self.log_folder)
         random_csv_filename = "random_csv.txt"
         import random
         ckan = ckaninterface.CKAN_Application()
@@ -61,7 +61,7 @@ class CkanInterface:
                 - check mimetype of the file
                 - if not csv - report
         """
-        db = Database(self.log_folder)
+        db = DatabasePlainFiles(self.log_folder)
         download_all_log = "download_all_log.txt"
         ckan = ckaninterface.CKAN_Application()
         csv_resource_list = ckan.get_csv_resource_list()
@@ -71,7 +71,7 @@ class CkanInterface:
             db.addDbaseRaw(download_all_log, resource._download())
             
     def process_download_all_log(self):
-        db_logs = Database(self.log_folder)
+        db_logs = DatabasePlainFiles(self.log_folder)
         
         download_all_log = db_logs.loadDbaseRaw('download_all_log.txt')
         download_all_log = download_all_log.split('\n')
@@ -100,7 +100,7 @@ class CkanInterface:
         pp.pprint(resources_check)
     
     def delete_bad_response(self):
-        db_logs = Database(self.log_folder)
+        db_logs = DatabasePlainFiles(self.log_folder)
         
         download_all_log = db_logs.loadDbaseRaw('download_all_log.txt')
         download_all_log = download_all_log.split('\n')
@@ -128,7 +128,7 @@ class CkanInterface:
         print 'resources clean-up complete!'
         
     def check_good_response(self):
-        db_logs = Database(self.log_folder)
+        db_logs = DatabasePlainFiles(self.log_folder)
         
         download_all_log = db_logs.loadDbaseRaw('download_all_log.txt')
         download_all_log = download_all_log.split('\n')
@@ -169,7 +169,7 @@ class CkanInterface:
                 print str(resource) + ' ok!'
                 
     def delete_html_pages(self):
-        db_logs = Database(self.log_folder)
+        db_logs = DatabasePlainFiles(self.log_folder)
         html_pages = db_logs.loadDbaseRaw('html_pages.txt')
         html_pages = html_pages.split('\n')
         for resource in html_pages:
@@ -180,7 +180,7 @@ class CkanInterface:
         
         
     def get_failed_resources_ckan_urls(self):
-        db_logs = Database(self.log_folder)
+        db_logs = DatabasePlainFiles(self.log_folder)
         resources_fail = db_logs.loadDbaseRaw('resources_fail.csv')
         resources_fail = resources_fail.split('\n')
         for line in resources_fail:
@@ -189,7 +189,7 @@ class CkanInterface:
             print resource_id + ' ' + resource.ckan_url
             
     def choose_n_random(self, n=10):
-        db = Database('files/.analyzed/')
+        db = DatabasePlainFiles('files/.analyzed/')
         analyzed_ids = db.loadDbaseRaw('100_analyze_ids')
         analyzed_ids = analyzed_ids.split('\n')
         all_ids=self.get_files()
@@ -233,8 +233,8 @@ class CkanInterface:
         return file_list
         
     def convert_all_to_rdf(self, start_from = 0):        
-        conversion_log = Database(self.conversion_log_folder)
-        process_log = Database(self.log_folder)
+        conversion_log = DatabasePlainFiles(self.conversion_log_folder)
+        process_log = DatabasePlainFiles(self.log_folder)
         process_log_filename = "rdf_conversion.log"
         all_ids = self.get_files()
         overall = len(all_ids)
@@ -534,7 +534,7 @@ class CkanInterface:
         
         import pprint
         printer = pprint.PrettyPrinter(indent=4)
-        db = Database('stats/')    
+        db = DatabasePlainFiles('stats/')    
         
         stats = db.loadDbase('stats14061')
                 
@@ -606,7 +606,7 @@ class CkanInterface:
     def get_stats(self):
         import pprint
         printer = pprint.PrettyPrinter(indent=4)
-        db = Database('stats/')
+        db = DatabasePlainFiles('stats/')
         stats = db.loadDbase('stats17028')
         
         #tag cloud

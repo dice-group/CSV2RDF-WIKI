@@ -1,6 +1,6 @@
 import pystache
 
-import config
+from config import config
 
 
 class Index(object):
