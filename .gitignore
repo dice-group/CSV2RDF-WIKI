@@ -6,6 +6,8 @@ util/
 docs/
 ./
 /src/files/
+/src/sparqlified/
+/src/sparqlified_exposed/
 /src/Config/config.py
 /src/.ropeproject/
 *.pyc
