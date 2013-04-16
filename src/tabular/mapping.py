@@ -8,7 +8,7 @@ from unidecode import unidecode
 from config import config
 from database import DatabasePlainFiles
 from ckan.package import Package
-import prefixcc
+from prefixcc import PrefixCC
 from ckan.resource import Resource
 from tabular.tabularfile import TabularFile
 

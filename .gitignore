@@ -12,3 +12,4 @@ docs/
 /src/.ropeproject/
 *.pyc
 *.log
+*.swp

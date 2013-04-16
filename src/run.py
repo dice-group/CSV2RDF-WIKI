@@ -32,13 +32,9 @@ class CSV2RDFApp(object):
         return self.renderer.render(csv2rdf)
 
     @cherrypy.expose(alias="rdf_edit.html")
-    def rdf_edit(self, resource_id, mapping_name='default-tranformation-configuration'):
-        
-        #black_list
-        black_list = self._get_black_list()
-        if(resource_id in black_list):
-            index = pystachetempl.Index()
-            return self.renderer.render(index)
+    def rdf_edit(self, resource_id, configuration_name='default-tranformation-configuration'):
+        mapping_name = configuration_name 
+        resource_id = resource_id.lower()
         
         resource = Resource(resource_id)
         resource.init()

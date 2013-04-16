@@ -39,7 +39,8 @@ class Sparqlify():
                           "-c", mapping_path,
                           "-d", delimiter]
         
-        #print str(' '.join(sparqlify_call))
+        print sparqlify_call
+        print str(' '.join(sparqlify_call))
         
         rdf_file = os.path.join(config.rdf_files_path, str(self.resource_id) + '_' + str(mapping_name) + '.rdf')
         f = open(rdf_file, 'w')
