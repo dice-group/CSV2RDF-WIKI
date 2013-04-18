@@ -8,6 +8,7 @@ import pystache
 from server import pystachetempl
 from ckan.resource import Resource
 from tabular.sparqlify import Sparqlify
+from ckan.application import CkanApplication
 
 
 class CSV2RDFApp(object):
@@ -41,6 +42,8 @@ class CSV2RDFApp(object):
         sparqlify = Sparqlify(resource_id)
         
         (sparqlify_message, returncode) = sparqlify.transform_resource_to_rdf(mapping_name)
+
+        print sparqlify_message
         
         rdf_file_url = sparqlify.get_rdf_file_url(mapping_name)
         rdf_edit = pystachetempl.RdfEdit(resource, rdf_file_url)
@@ -64,7 +67,7 @@ class CSV2RDFApp(object):
     
     @cherrypy.expose        
     def get_exposed_rdf_list(self):
-        ckan = ckaninterface.CKAN_Application()
+        ckan = CkanApplication()
         return json.dumps(ckan.get_sparqlified_list())
         
     def _get_black_list(self):

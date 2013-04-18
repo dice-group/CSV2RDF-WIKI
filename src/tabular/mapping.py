@@ -93,6 +93,7 @@ class Mapping():
             if(re.match('^col', key)):
                 prefixes += prefixcc.extract_prefixes(mapping[key])
                 properties[key] = mapping[key]
+        #print properties
         #remove duplicates from prefixes
         prefixes = dict.fromkeys(prefixes).keys()
         #inject qb prefix
@@ -123,10 +124,10 @@ class Mapping():
             Auxilary method for tabular to spaqrlify-ml convertion
         """
         prop = prop.split('->')[0]
-        if(len(prop.split(':')) == 1):
+        if(len(prop.split('%3A')) == 1): # %3A = :
             return "<http://wiki.publicdata.eu/ontology/"+str(prop)+">"
         else:
-            return prop
+            return ':'.join(prop.split('%3A'))
     
     def _extract_type(self, wikiString, column):
         """
