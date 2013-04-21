@@ -2,7 +2,6 @@ bin/
 include/
 lib/
 local/
-util/
 docs/
 ./
 /src/files/
