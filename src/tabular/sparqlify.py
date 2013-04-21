@@ -70,7 +70,7 @@ class Sparqlify():
             while not stdout_queue.empty():
                 stdout_size += 1
                 line = stdout_queue.get()
-                print >>f, repr(line)
+                f.write(line)
                 if(stdout_size % 1000 == 0):
                     print "Processed %d lines" % stdout_size
 

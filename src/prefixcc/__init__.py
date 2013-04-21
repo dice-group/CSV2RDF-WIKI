@@ -18,6 +18,8 @@ class PrefixCC:
     
     def extract_prefixes(self, string):
         #format here: foaf:birthday->xsd:date
+        if(string.startswith('http')):
+            return ''
         prefixes = []
         string = string.split('->')
         for substr in string:

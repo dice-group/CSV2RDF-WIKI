@@ -127,7 +127,7 @@ class Mapping():
         if(len(prop.split('%3A')) == 1): # %3A = :
             return "<http://wiki.publicdata.eu/ontology/"+str(prop)+">"
         else:
-            return ':'.join(prop.split('%3A'))
+            return "<" + ':'.join(prop.split('%3A')) + ">"
     
     def _extract_type(self, wikiString, column):
         """
