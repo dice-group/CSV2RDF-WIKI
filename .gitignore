@@ -7,7 +7,7 @@ docs/
 /src/files/
 /src/sparqlified/
 /src/sparqlified_exposed/
-/src/Config/config.py
+/src/config/config.py
 /src/.ropeproject/
 *.pyc
 *.log
