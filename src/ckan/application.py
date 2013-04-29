@@ -16,11 +16,10 @@ class CkanApplication():
     def __init__(self):
         self.ckan = CkanClient(base_location=config.ckan_api_url,
                                api_key=config.ckan_api_key)
-        self.csv_resource_list_filename = 'csv_resource_list'
         
     def get_csv_resource_list(self):
         db = DatabasePlainFiles()
-        return db.loadDbase(self.csv_resource_list_filename)
+        return db.loadDbase(config.data_csv_list)
 
     def get_package_list(self):
         return self.ckan.package_list()
@@ -45,7 +44,7 @@ class CkanApplication():
                     output.append(r.id)
         
         db = DatabasePlainFiles()
-        db.saveDbase(self.csv_resource_list_filename, output)
+        db.saveDbase(config.data_csv_list, output)
         
     def get_sparqlified_list(self):
         return os.listdir(config.rdf_files_exposed_path)
@@ -69,7 +68,7 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    print ckan_app.dump_all_resources()
+    #print ckan_app.dump_all_resources()
     #print ckan_app.get_package_list()
     #print ckan_app.get_csv_resource_list()
     #print ckan_app.update_csv_resource_list()

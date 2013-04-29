@@ -40,7 +40,8 @@ class Sparqlify():
                           "org.aksw.sparqlify.csv.CsvMapperCliMain",
                           "-f", file_path,
                           "-c", mapping_path,
-                          "-s", delimiter]
+                          "-s", delimiter,
+                          "-h"]
         # -h - header omit
         # -d - delimiter ("")
         # -s - separator (@,;)

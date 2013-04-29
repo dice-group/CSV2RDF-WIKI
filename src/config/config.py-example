@@ -24,3 +24,6 @@ resources_path = "files/" #contains downloaded and cleaned csv files
 rdf_files_path = "sparqlified/" #contains converted to RDF files
 rdf_files_exposed_path = "sparqlified_exposed/" #contains soft links to each (only one) resource
 sparqlify_mappings_path = "sparqlify_mappings/" #contains mappings for every config in the mappings wiki
+
+#data files
+data_csv_list = root_path + "data/csv_list"
