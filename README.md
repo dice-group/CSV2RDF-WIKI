@@ -4,6 +4,11 @@ To use this project you have to:
 
 2. pip install -r src/stable-req.txt
 
-Access to wiki.publicdata.eu:
+for wikitools:
+add 'captchaid' and 'captchaword' to valid args for page.edit function
 
-http://wiki.publicdata.eu/api.php?format=xml&action=query&titles=Main%20Page&prop=revisions&rvprop=content
+Requirements:
+gnumeric
+
+TODOs:
+
