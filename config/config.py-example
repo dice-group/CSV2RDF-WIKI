@@ -17,7 +17,7 @@ wiki_api_url = "http://wiki.publicdata.eu/api.php"
 wiki_csv2rdf_namespace = "Csv2rdf:"
 
 #Root
-root_path = "/home/ivan/.virtualenvs/csv2rdf/"
+root_path = "/home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/"
 
 #pathes to libraries
 sparqlify_jar_path = root_path + "libs/sparqlify.jar"

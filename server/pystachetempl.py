@@ -2,7 +2,6 @@ import pystache
 
 from config import config
 
-
 class Index(object):
     def __init__(self):
         pass
@@ -26,9 +25,9 @@ class Csv2rdf(object):
         return items
         
 class RdfEdit(object):
-    def __init__(self, resource, rdf_file_url):
+    def __init__(self, resource, mapping_name):
         self.resource = resource
-        self.rdf_file_url = rdf_file_url
+        self.rdf_file_url = config.server_base_url + 'sparqlified/' + resource.id + "_" + mapping_name + ".rdf"
     
     def item(self):
         items = []

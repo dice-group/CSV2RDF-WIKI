@@ -45,8 +45,7 @@ class CSV2RDFApp(object):
 
         print sparqlify_message
         
-        rdf_file_url = sparqlify.get_rdf_file_url(mapping_name)
-        rdf_edit = pystachetempl.RdfEdit(resource, rdf_file_url)
+        rdf_edit = pystachetempl.RdfEdit(resource, configuration_name)
         return self.renderer.render(rdf_edit)
         #TODO: make page with the editor!
         
