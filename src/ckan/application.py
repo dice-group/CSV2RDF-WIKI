@@ -8,6 +8,8 @@ from database import DatabasePlainFiles
 #relative imports
 from package import Package
 from resource import Resource
+from tabular.mapping import Mapping
+from tabular.tabularfile import TabularFile
 
 class CkanApplication():
     """ Reflects the CKAN application itself,
@@ -17,34 +19,101 @@ class CkanApplication():
         self.ckan = CkanClient(base_location=config.ckan_api_url,
                                api_key=config.ckan_api_key)
         
-    def get_csv_resource_list(self):
-        db = DatabasePlainFiles()
-        return db.loadDbase(config.data_csv_list)
+    def get_csv_resource_list_actual(self):
+        csv_list = os.listdir(config.data_csv_resources_path)
+        return csv_list
+
+    def get_csv_resource_list_current(self):
+        csv_list = os.listdir(config.resources_path)
+        return csv_list
 
     def get_package_list(self):
         return self.ckan.package_list()
 
-    def dump_all_resources(self):
-        package_list = self.get_package_list()
-        for package_name in package_list:
-            pkg = Package(package_name)
-            print pkg
-            break
+    def get_all_csv2rdf_page_ids(self):
+        db = DatabasePlainFiles(config.data_path)
+        pages = db.loadDbase('data_all_csv2rdf_pages_file')
+        titles = []
+        for page in pages['query']['allpages']:
+            titles.append( page['title'][8:].lower() )
+        return titles
+
+    def delete_outdated_items(self):
+        """
+            Delete outdated wikipages and csv files
+        """
+        (resources_outdated, resources_new) = self.csv_resources_list_diff()
+        (pages_outdated, pages_new) = self.wiki_pages_diff()
+        outdated_list = pages_outdated + resources_outdated
+        print len(outdated_list)
+        for resource_id in outdated_list:
+            mapping = Mapping(resource_id)
+            try:
+                print mapping.delete_wiki_page()
+                print os.remove( os.path.join(config.resources_path, resource_id) )
+            except BaseException as e:
+                print str(e)
+
+    def download_new_resources(self):
+        (outdated_list, new_list) = self.csv_resources_list_diff()
+        for resource_id in new_list:
+            print resource_id
+            tabularfile = TabularFile(resource_id)
+            if(tabularfile.download()): #if 200 response code
+                tabularfile.validate()
+
+    def create_new_wiki_pages(self):
+        (pages_outdated, pages_new) = self.wiki_pages_diff()
+
+        for num, page_id in enumerate(pages_new):
+            mapping = Mapping(page_id)
+            default_page = mapping.generate_default_wiki_page()
+            mapping.create_wiki_page(default_page)
+
+    def csv_resources_list_diff(self):
+        actual_list = self.get_csv_resource_list_actual()
+        current_list = self.get_csv_resource_list_current()
+        resources_outdated = []
+        resources_new = []
+
+        for resource in current_list:
+            if(not resource in actual_list):
+                resources_outdated.append(resource)
+
+        for resource in actual_list:
+            if(not resource in current_list and
+               not resource in resources_outdated):
+                resources_new.append(resource)
+
+        return (resources_outdated, resources_new)
+
+    def wiki_pages_diff(self):
+        resources_list = self.get_csv_resource_list_current()
+        page_ids_list = self.get_all_csv2rdf_page_ids()
+        pages_outdated = []
+        pages_new = [] 
+
+        for page_id in page_ids_list:
+            if(not page_id in resources_list):
+                pages_outdated.append(page_id) 
+
+        for resource_id in resources_list:
+            if(not resource_id in page_ids_list):
+                pages_new.append(resource_id)
+
+        return (pages_outdated, pages_new)
 
     def update_csv_resource_list(self):
-        output = []
         package_list = self.get_package_list()
-        
+        db = DatabasePlainFiles(config.data_csv_resources_path)
+
         for package_id in package_list:
             package = Package(package_id)
             for resource in package.resources:
                 r = Resource(resource['id'])
                 r.format = resource['format']
                 if(r.is_csv()):
-                    output.append(r.id)
-        
-        db = DatabasePlainFiles()
-        db.saveDbase(config.data_csv_list, output)
+                    db.saveDbase(resource['id'], resource)
         
     def get_sparqlified_list(self):
         return os.listdir(config.rdf_files_exposed_path)
@@ -68,9 +137,16 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
+    ckan_app.create_new_wiki_pages()
+    #ckan_app.wiki_pages_diff()
+    #ckan_app.get_csv2rdf_pages()
+    #ckan_app.download_new_resources()
+    #ckan_app.delete_outdated_items()
+    #ckan_app.delete_outdated_wiki_pages()
+    #print ckan_app.csv_resources_list_diff()
     #print ckan_app.dump_all_resources()
     #print ckan_app.get_package_list()
-    #print ckan_app.get_csv_resource_list()
+    #print len(ckan_app.get_csv_resource_list())
     #print ckan_app.update_csv_resource_list()
     #print ckan_app.get_sparqlified_list()
     

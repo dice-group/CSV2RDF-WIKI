@@ -82,7 +82,7 @@ class Resource(AuxilaryInterface):
         return config.wiki_base_url + '/wiki/' + config.wiki_csv2rdf_namespace + self.id
 
 if __name__ == '__main__':
-    res = Resource('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    res = Resource('2625cb04-6a73-4154-9e22-bde490d5b61e')
     res.init()
-    print res.is_csv()
+    print res
     pass

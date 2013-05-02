@@ -3,6 +3,7 @@ import re
 
 import urllib
 import wikitools
+from mwapi import MWApi
 from unidecode import unidecode
 
 from config import config
@@ -18,11 +19,25 @@ class Mapping():
         self.resource_id = resource_id
         self.wiki_site = wikitools.Wiki(config.wiki_api_url)
         self.wiki_site.login(config.wiki_username, password=config.wiki_password)
+        self.mwapi = MWApi(config.mwapi_host, config.mwapi_apipath)
+        self.mwapi.login(config.wiki_username, config.wiki_password)
     
     def init(self):
         self.wiki_page = self.request_wiki_page()
         self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
         self.save_csv_mappings(self.mappings)
+
+    def update_csv2rdf_wiki_page_list(self):
+        params = {
+                  'action':'query', 
+                  'list':'allpages', 
+                  'apnamespace':'505' #505 - csv2rdf namespace
+                 }
+        #result = self.mwapi.post(kwparams=params)
+        request = wikitools.APIRequest(self.wiki_site, params)
+        result = request.query()
+        db = DatabasePlainFiles(config.data_path)
+        db.saveDbase('data_all_csv2rdf_pages_file', result)
     
     def request_wiki_page(self, resource_id = None):
         """
@@ -165,6 +180,15 @@ class Mapping():
         page = wikitools.Page(self.wiki_site, title=title)
         result = page.edit(text=text, bot=True)
         return result
+
+    def delete_wiki_page(self, resource_id = None):
+        if(not resource_id):
+            resource_id = self.resource_id
+
+        title = config.wiki_csv2rdf_namespace + resource_id
+        page = wikitools.Page(self.wiki_site, title=title)
+        result = page.delete()
+        return result
     
     def generate_default_wiki_page(self, resource_id = None):
         """
@@ -205,7 +229,9 @@ class Mapping():
         #Split header and create column definition
         for num, item in enumerate(header):
             item = unidecode(item)
-            page += 'col'+str(num)+' = '+item.rstrip()+' |\n'
+            page += 'col'+str(num+1)+' = '+item.rstrip()+' |\n'
+            if(num > 500): # too many columns in this csv OR bad format
+                break
         
         #Close template
         page += '}}\n'
@@ -248,8 +274,9 @@ class Mapping():
     
 if __name__ == '__main__':
     mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    mapping.init()
-    print mapping.get_mapping_names()
+    #mapping.init()
+    print mapping.update_csv2rdf_wiki_page_list()
+    #print mapping.get_mapping_names()
     #wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mappings = mapping.extract_mappings_from_wiki_page(wiki_page)
     #sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')

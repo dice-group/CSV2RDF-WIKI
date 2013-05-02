@@ -1,4 +1,6 @@
 import os
+import re
+import subprocess
 
 import csv
 import requests
@@ -78,21 +80,26 @@ class TabularFile():
                 return []
     
     def validate(self):
-        """ Destructive, be careful to use
-            TODO: include html, xml check (see scripts)
-        """
+        filename = self.filename
         (encoding, info) = self.get_info_about()
-        
-        #TODO: run information collection on the all files!
-        #print encoding, info
-        """
+        print encoding
+        print info
+
+        if(re.match('.*HTML.*', info) or
+           re.match('.*[Tt]orrent.*',info) or
+           self.isXML() or
+           self.isHTML()):
+            print info
+            self.delete()
+            return True
+
         if(encoding == "utf-16le"):
             self._process_utf16(filename)
         elif(re.match("^binary", encoding) or
              re.match("^application/.*", encoding)):
             self._process_based_on(info, filename)
         else:
-            return True"""
+            return True
     
     def get_info_about(self):
         """
@@ -106,7 +113,28 @@ class TabularFile():
         encoding = mgc_encoding.from_file(filename)
         info = mgc_string.from_file(filename)
         return (encoding, info)
-            
+    
+    def isHTML(self):
+        db = DatabasePlainFiles(config.resources_path)
+        file_chunk = db.loadDbaseChunk(self.filename)
+        check_1 = ".*\<\!DOCTYPE html PUBLIC.*"
+        result = False
+        for line in file_chunk:
+            if(re.match(check_1, line)):
+                result = True
+        return result
+
+    def isXML(self):
+        db = DatabasePlainFiles(config.resources_path)
+        file_chunk = db.loadDbaseChunk(self.filename)
+        check = ".*\<\?xml version=\"1.0\""
+        result = False
+        for line in file_chunk:
+            if(re.match(check, line)):
+                    print line
+                    result = True
+        return result
+
     def _process_based_on(self, info, filename):
         """
             The order is significant here
@@ -119,7 +147,10 @@ class TabularFile():
             self._process_xls(filename)
         elif(re.match(".*Composite Document File V2 Document.*Word.*", info)):
             #Word document
-            self._delete(filename)
+            self.delete()
+            return False
+        else:
+            self.delete()
             return False
             
     def _process_xls(self, resource_id):
@@ -127,10 +158,12 @@ class TabularFile():
         ssconvert_call = ["ssconvert", #from gnumeric package
                           "-T",
                           "Gnumeric_stf:stf_csv",
-                          resource_id,
-                          resource_id]
+                          config.resources_path + resource_id,
+                          config.resources_path + resource_id]
+        print ' '.join(ssconvert_call)
         pipe = subprocess.Popen(ssconvert_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
+        print pipe_message
         self.validate()
     
     def _process_archive(self, filename):
@@ -138,7 +171,7 @@ class TabularFile():
         #check number of files
         sevenza_call = ["7za", 
                           "l",
-                          filename]
+                          config.resources_path + filename]
         pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
         pattern = "(\d+) files"
@@ -152,18 +185,18 @@ class TabularFile():
             #extract
             sevenza_call = ["7za", 
                             "e",
-                            filename]
+                            config.resources_path + filename]
             pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
             pipe_message = pipe.stdout.read()
             #move to original
             mv_call = ["mv",
-                       original_filename,
-                       filename]
+                       config.resources_path + original_filename,
+                       config.resources_path + filename]
             pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
             pipe_message = pipe.stdout.read()
         else:
             #more than 1 file in the archive
-            self._delete(filename)
+            self.delete()
             return False
     
     def _process_utf16(self, filename):

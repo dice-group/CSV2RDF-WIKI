@@ -16,6 +16,10 @@ wiki_base_url = "http://wiki.publicdata.eu"
 wiki_api_url = "http://wiki.publicdata.eu/api.php"
 wiki_csv2rdf_namespace = "Csv2rdf:"
 
+#MWApi config
+mwapi_host = wiki_base_url
+mwapi_apipath = "/api.php"
+
 #pathes to libraries
 sparqlify_jar_path = "../lib/sparqlify/sparqlify.jar"
 
@@ -26,4 +30,5 @@ rdf_files_exposed_path = "sparqlified_exposed/" #contains soft links to each (on
 sparqlify_mappings_path = "sparqlify_mappings/" #contains mappings for every config in the mappings wiki
 
 #data files
-data_csv_list = root_path + "data/csv_list"
+data_csv_resources_path = root_path + "data/csv_resources/"
+data_path = root_path + "data/"

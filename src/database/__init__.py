@@ -41,6 +41,10 @@ class DatabasePlainFiles:
         "load string from file"
         file = open(self.get_path_to_file(filename), 'rb')
         return file.read()
+
+    def loadDbaseChunk(self, filename):
+        file = open(self.get_path_to_file(filename), 'rb')
+        return self._readnlines(file, 10)
         
     def addDbaseRaw(self, filename, string):
         if not os.path.exists(self.get_path_to_file(filename)) :

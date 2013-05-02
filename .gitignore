@@ -5,6 +5,7 @@ local/
 docs/
 ./
 /src/files/
+/src/data/
 /src/sparqlified/
 /src/sparqlified_exposed/
 /src/config/config.py
