@@ -3,7 +3,6 @@ import re
 
 import urllib
 import wikitools
-from mwapi import MWApi
 from unidecode import unidecode
 
 from config import config
@@ -19,8 +18,6 @@ class Mapping():
         self.resource_id = resource_id
         self.wiki_site = wikitools.Wiki(config.wiki_api_url)
         self.wiki_site.login(config.wiki_username, password=config.wiki_password)
-        self.mwapi = MWApi(config.mwapi_host, config.mwapi_apipath)
-        self.mwapi.login(config.wiki_username, config.wiki_password)
     
     def init(self):
         self.wiki_page = self.request_wiki_page()
@@ -33,7 +30,6 @@ class Mapping():
                   'list':'allpages', 
                   'apnamespace':'505' #505 - csv2rdf namespace
                  }
-        #result = self.mwapi.post(kwparams=params)
         request = wikitools.APIRequest(self.wiki_site, params)
         result = request.query()
         db = DatabasePlainFiles(config.data_path)

@@ -1,8 +1,8 @@
 #This server URI
-server_base_url = 'http://localhost:8090/'
+server_base_url = 'http://csv2rdf.vhost.tld/'
 
 #Login information
-ckan_api_key='00000000000000'
+ckan_api_key='APIKEY'
 wiki_username = "username"
 wiki_password = "password"
 
@@ -16,19 +16,19 @@ wiki_base_url = "http://wiki.publicdata.eu"
 wiki_api_url = "http://wiki.publicdata.eu/api.php"
 wiki_csv2rdf_namespace = "Csv2rdf:"
 
-#MWApi config
-mwapi_host = wiki_base_url
-mwapi_apipath = "/api.php"
+#Root
+root_path = "/home/ivan/.virtualenvs/csv2rdf/"
 
 #pathes to libraries
-sparqlify_jar_path = "../lib/sparqlify/sparqlify.jar"
+sparqlify_jar_path = root_path + "libs/sparqlify.jar"
 
 #pathes to local folders
-resources_path = "files/" #contains downloaded and cleaned csv files
-rdf_files_path = "sparqlified/" #contains converted to RDF files
-rdf_files_exposed_path = "sparqlified_exposed/" #contains soft links to each (only one) resource
-sparqlify_mappings_path = "sparqlify_mappings/" #contains mappings for every config in the mappings wiki
+resources_path = root_path + "files/csv/" #contains downloaded and cleaned csv files
+sparqlify_mappings_path = root_path + "files/sparqlify_mappings/" #contains mappings for every config in the mappings wiki
+rdf_files_path = root_path + "sparqlified/" #contains converted to RDF files
+rdf_files_exposed_path = root_path + "sparqlified_exposed/" #contains soft links to each (only one) resource
 
 #data files
 data_csv_resources_path = root_path + "data/csv_resources/"
 data_path = root_path + "data/"
+data_all_csv2rdf_pages_file = "csv2rdf_pages"
