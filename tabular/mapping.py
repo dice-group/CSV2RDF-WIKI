@@ -4,6 +4,7 @@ import re
 import urllib
 import wikitools
 from unidecode import unidecode
+import tempfile
 
 from config import config
 from database import DatabasePlainFiles
@@ -22,7 +23,15 @@ class Mapping():
     def init(self):
         self.wiki_page = self.request_wiki_page()
         self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
+        self.mappings = self.process_mappings(self.mappings)
         self.save_csv_mappings(self.mappings)
+
+    def process_mappings(self, mappings):
+        for mapping in mappings:
+            mapping['omitRows'] = self.process_omitRows(mapping['omitRows']) if mapping['omitRows'] != '-1' else [-1]
+            mapping['omitCols'] = self.process_omitCols(mapping['omitCols']) if mapping['omitCols'] != '-1' else [-1]
+            mapping['delimiter'] = mapping['delimiter'] if ('delimiter' in mapping) else ','
+        return mappings
 
     def update_csv2rdf_wiki_page_list(self):
         params = {
@@ -104,7 +113,10 @@ class Mapping():
             if(re.match('^col', key)):
                 prefixes += prefixcc.extract_prefixes(mapping[key])
                 properties[key] = mapping[key]
-        #print properties
+        #delete omitCols from the properties array and rearrange it
+        for key in properties.keys():
+            if(int(key[3:]) in mapping['omitCols']):
+                del properties[key]
         #remove duplicates from prefixes
         prefixes = dict.fromkeys(prefixes).keys()
         #inject qb prefix
@@ -127,7 +139,7 @@ class Mapping():
         csv2rdf_mapping += "      ?obs = uri(concat('http://data.publicdata.eu/"+resource_id+"/', ?rowId))" + "\n"
         for prop in properties:
             csv2rdf_mapping += "      ?" + prop + " = " + self._extract_type(properties[prop], prop) + "\n"
-        
+
         return csv2rdf_mapping
     
     def _extract_property(self, prop):
@@ -237,6 +249,39 @@ class Mapping():
                 
         return page
         
+    def process_omitRows(self, string):
+        output = []
+        ranges = string.split('%2C')
+        for r in ranges:
+            if(len(r.split('-')) < 2):
+                output.append(int(r))
+            else:
+                start = int(r.split('-')[0])
+                end = int(r.split('-')[1])
+                list = range(start, end + 1)
+                output = output + list
+        return output
+
+    def process_omitCols(self, string):
+        return self.process_omitRows(string)
+
+    def process_file(self, original_file_path, mapping_current):
+        omitRows = mapping_current['omitRows']
+
+        try:
+            processed_file = tempfile.NamedTemporaryFile(delete=False)
+            original_file = open(original_file_path, 'rU')
+            for line_num, line in enumerate(original_file.readlines()):
+                #line_num = 0 is a header, we do not process it
+                if(not line_num in omitRows):
+                    processed_file.write(line)
+        except BaseException as e:
+            print str(e)
+        finally:
+            original_file.close()
+
+        return processed_file
+
     def get_mapping_path(self, configuration_name, resource_id=None):
         if(not resource_id):
             resource_id = self.resource_id
@@ -270,8 +315,9 @@ class Mapping():
     
 if __name__ == '__main__':
     mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #mapping.init()
-    print mapping.update_csv2rdf_wiki_page_list()
+    mapping.init()
+    print mapping.mappings
+    #print mapping.update_csv2rdf_wiki_page_list()
     #print mapping.get_mapping_names()
     #wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mappings = mapping.extract_mappings_from_wiki_page(wiki_page)

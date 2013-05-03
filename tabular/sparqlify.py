@@ -14,6 +14,7 @@ from tabular.tabularfile import TabularFile
 class Sparqlify():
     def __init__(self, resource_id):
         self.resource_id = resource_id
+
     
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
@@ -29,11 +30,11 @@ class Sparqlify():
         mapping.init()
         mapping_path = mapping.get_mapping_path(mapping_name)
         mapping_current = mapping.get_mapping_by_name(mapping_name)
-        
-        if('delimiter' in mapping_current):
-            delimiter = mapping_current['delimiter']
-        else:
-            delimiter = ','
+
+        #process file based on the mapping_current options
+        processed_file = mapping.process_file(file_path, mapping_current)
+        file_path = processed_file.name
+        delimiter = mapping_current['delimiter']
         
         sparqlify_call = ["java",
                           "-cp", config.sparqlify_jar_path,
@@ -56,6 +57,7 @@ class Sparqlify():
         process = subprocess.Popen(sparqlify_call, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #sparqlify_message = process.stderr.read()
         sparqlify_message = ""
+        print rdf_file
 
         stdout_queue = Queue.Queue()
         stdout_reader = AsynchronousFileReader(process.stdout, stdout_queue)
@@ -140,6 +142,6 @@ class AsynchronousFileReader(threading.Thread):
 
 if __name__ == '__main__':
     sparqlify = Sparqlify('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #print sparqlify.transform_resource_to_rdf('default-tranformation-configuration')
-    print sparqlify.get_rdf_file_path('default-tranformation-configuration')
-    print sparqlify.get_rdf_file_url('default-tranformation-configuration')
+    print sparqlify.transform_resource_to_rdf('default-tranformation-configuration')
+    #print sparqlify.get_rdf_file_path('default-tranformation-configuration')
+    #print sparqlify.get_rdf_file_url('default-tranformation-configuration')
