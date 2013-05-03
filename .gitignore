@@ -4,6 +4,7 @@ sparqlified/
 sparqlified_exposed/
 config/config.py
 .ropeproject/
+get_exposed_rdf_list
 *.pyc
 *.log
 *.swp
