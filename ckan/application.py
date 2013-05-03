@@ -1,4 +1,5 @@
 import os
+import glob
 
 from ckanclient import CkanClient
 
@@ -53,6 +54,22 @@ class CkanApplication():
                 print os.remove( os.path.join(config.resources_path, resource_id) )
             except BaseException as e:
                 print str(e)
+    
+    def clean_sparqlified(self):
+        resources_list = self.get_csv_resource_list_current()
+        sparqlified_list = os.listdir(config.rdf_files_path)
+        resources_ids_sparqlified = []
+        for item in sparqlified_list:
+            resources_ids_sparqlified.append(item.split("_")[0])
+
+        outdated_sparqlified = []
+        for item in resources_ids_sparqlified:
+            if(not item in resources_list):
+                outdated_sparqlified.append(item)
+        
+        for resource_id in outdated_sparqlified:
+            for filename in glob.glob( os.path.join(config.rdf_files_path, resource_id+"*")):
+                os.remove(filename)
 
     def download_new_resources(self):
         (outdated_list, new_list) = self.csv_resources_list_diff()
@@ -137,7 +154,8 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.create_new_wiki_pages()
+    ckan_app.clean_sparqlified()
+    #ckan_app.create_new_wiki_pages()
     #ckan_app.wiki_pages_diff()
     #ckan_app.get_csv2rdf_pages()
     #ckan_app.download_new_resources()
