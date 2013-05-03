@@ -1,6 +1,7 @@
 import os
 import glob
 import subprocess
+import json
 
 from ckanclient import CkanClient
 
@@ -135,6 +136,10 @@ class CkanApplication():
         
     def get_sparqlified_list(self):
         return os.listdir(config.rdf_files_exposed_path)
+
+    def update_exposed_rdf_list(self):
+        db = DatabasePlainFiles(config.root_path)
+        db.saveDbaseRaw('get_exposed_rdf_list', json.dumps(self.get_sparqlified_list()))
         
     def update_sparqlified_list(self):
         #delete all items
@@ -153,11 +158,12 @@ class CkanApplication():
                               link_to,
                               link]
             pipe = subprocess.Popen(make_soft_link, stdout=subprocess.PIPE)
-            pipe_message = pipe.stdout.read()
+            #pipe_message = pipe.stdout.read()
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.update_sparqlified_list()
+    ckan_app.update_exposed_rdf_list()
+    #ckan_app.update_sparqlified_list()
     #ckan_app.clean_sparqlified()
     #ckan_app.create_new_wiki_pages()
     #ckan_app.wiki_pages_diff()
