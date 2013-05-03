@@ -1,5 +1,6 @@
 import os
 import glob
+import subprocess
 
 from ckanclient import CkanClient
 
@@ -136,13 +137,16 @@ class CkanApplication():
         return os.listdir(config.rdf_files_exposed_path)
         
     def update_sparqlified_list(self):
+        #delete all items
+        for file in glob.glob(os.path.join(config.rdf_files_exposed_path + "*")):
+            os.remove(file)
         #update list - make soft links to the files
         rdf_files = os.listdir(config.rdf_files_path)
         for rdf_file in rdf_files:
             #make a soft link
             link_to = os.path.abspath(config.rdf_files_path + rdf_file)
             resource_id = rdf_file[:36] #take resource_id part only
-            link = self.rdf_files_exposed_path + resource_id
+            link = config.rdf_files_exposed_path + resource_id
             make_soft_link = ["ln",
                               "-f",
                               "-s",
@@ -150,11 +154,11 @@ class CkanApplication():
                               link]
             pipe = subprocess.Popen(make_soft_link, stdout=subprocess.PIPE)
             pipe_message = pipe.stdout.read()
-            print pipe_message
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.clean_sparqlified()
+    ckan_app.update_sparqlified_list()
+    #ckan_app.clean_sparqlified()
     #ckan_app.create_new_wiki_pages()
     #ckan_app.wiki_pages_diff()
     #ckan_app.get_csv2rdf_pages()
