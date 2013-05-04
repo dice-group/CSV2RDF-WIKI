@@ -279,6 +279,7 @@ class Mapping():
             print str(e)
         finally:
             original_file.close()
+            processed_file.close()
 
         return processed_file
 

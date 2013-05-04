@@ -33,7 +33,7 @@ class Sparqlify():
 
         #process file based on the mapping_current options
         processed_file = mapping.process_file(file_path, mapping_current)
-        file_path = processed_file.name
+        file_path = str(processed_file.name)
         delimiter = mapping_current['delimiter']
         
         sparqlify_call = ["java",
