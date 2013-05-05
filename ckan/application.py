@@ -159,10 +159,21 @@ class CkanApplication():
                               link]
             pipe = subprocess.Popen(make_soft_link, stdout=subprocess.PIPE)
             #pipe_message = pipe.stdout.read()
+
+    def update_metadata_for_all_resources(self):
+        resources_list = self.get_csv_resource_list_current()
+        for resource_id in resources_list[2:]:
+            try:
+                mapping = Mapping(resource_id)
+                mapping.init()
+                mapping.update_metadata()
+            except BaseException as e:
+                print str(e)
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.update_exposed_rdf_list()
+    ckan_app.update_metadata_for_all_resources()
+    #ckan_app.update_exposed_rdf_list()
     #ckan_app.update_sparqlified_list()
     #ckan_app.clean_sparqlified()
     #ckan_app.create_new_wiki_pages()
