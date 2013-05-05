@@ -14,7 +14,6 @@ from tabular.tabularfile import TabularFile
 class Sparqlify():
     def __init__(self, resource_id):
         self.resource_id = resource_id
-
     
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
@@ -93,6 +92,9 @@ class Sparqlify():
         process.stdout.close()
         process.stderr.close()
         f.close()
+        
+        #update metadata
+        mapping.update_metadata()
         
         return sparqlify_message, process.returncode
     

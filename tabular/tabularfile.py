@@ -29,7 +29,15 @@ class TabularFile():
         except BaseException as e:
             #return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
             return False
-    
+
+    def get_csv_filesize(self):
+        filepath = self.get_csv_file_path()
+        return os.path.getsize(filepath)
+
+    def get_csv_number_of_lines(self):
+        db = DatabasePlainFiles(config.resources_path)
+        return db.count_line_number(self.filename)
+
     def delete(self):
         db = DatabasePlainFiles(config.resources_path)
         db.delete(self.filename)

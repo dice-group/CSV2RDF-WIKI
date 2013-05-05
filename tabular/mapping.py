@@ -22,7 +22,9 @@ class Mapping():
     
     def init(self):
         self.wiki_page = self.request_wiki_page()
+        self.metadata = self.extract_metadata_from_wiki_page(self.wiki_page)
         self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
+        self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
         self.mappings = self.process_mappings(self.mappings)
         self.save_csv_mappings(self.mappings)
 
@@ -65,26 +67,43 @@ class Mapping():
         except:
             return False
     
+    def extract_metadata_from_wiki_page(self, wiki_page):
+        (templates, template_start, template_end) = self.parse_template(wiki_page, 'CSV2RDFMetadata')
+        self.delete_template_from_wiki_page(template_start, template_end)
+        if(len(templates) != 0):
+            return templates[0]
+        else:
+            return {}
+
     def extract_mappings_from_wiki_page(self, wiki_page):        
+        (templates, template_start, template_end) = self.parse_template(wiki_page, 'RelCSV2RDF')
+        #self.delete_template_from_wiki_page(template_start, template_end)
+        return templates
+
+    def parse_template(self, wiki_page, template_name):
         lines = wiki_page.split('\n')
-        mappings = []
-        inside_mapping = False        
+        templates = []
+        inside_template = False        
+        template_start = []
+        template_end = []
         for num, line in enumerate(lines):
-            if(re.match('^{{RelCSV2RDF', line)):
-                inside_mapping = True
-                mapping = {}
-                mapping['type'] = line[2:] #'RelCSV2RDF|'
-                mapping['type'] = mapping['type'][:-1] # 'RelCSV2RDF'
+            if(re.match('^{{'+template_name, line)):
+                inside_template = True
+                template_start.append(num)
+                template = {}
+                template['type'] = line[2:] #'RelCSV2RDF|'
+                template['type'] = template['type'][:-1] # 'RelCSV2RDF'
                 continue
             
-            if(inside_mapping and re.match('^}}', line)):
+            if(inside_template and re.match('^}}', line)):
                 #push mapping to the mappings
-                mappings.append(mapping)
-                del mapping
-                inside_mapping = False
+                templates.append(template)
+                del template
+                inside_template = False
+                template_end.append(num)
                 continue
             
-            if(inside_mapping):
+            if(inside_template):
                 if(len(line.split('=')) < 2):
                     continue
                     #line = lines[num-1] + lines[num]
@@ -96,10 +115,26 @@ class Mapping():
                 value = value.strip()
                 if not prop == 'delimiter':
                     value = urllib.quote(value)
-                mapping[prop] = value
-            
-        return mappings
+                template[prop] = value
+
+        return (templates, template_start, template_end)
+
+    def delete_template_from_wiki_page(self, template_start, template_end):
+        lines = self.wiki_page.split('\n')
+        for i in range(0, len(template_start)):
+            for j in range(template_start[i], template_end[i] + 1):
+                lines[j] = ''
+
+        self.wiki_page = '\n'.join(lines)
     
+    def remove_blank_lines_from_wiki_page(self, wiki_page):
+        lines = wiki_page.split('\n')
+        output = []
+        for num, line in enumerate(lines):
+            if(not line == ''):
+                output.append(line)
+        return '\n'.join(output)
+
     def convert_mapping_to_sparqlifyml(self, mapping, resource_id = None):
         if(not resource_id):
             resource_id = self.resource_id
@@ -248,6 +283,56 @@ class Mapping():
         page = page.encode('utf-8')
                 
         return page
+
+    def update_metadata(self):
+        self.update_metadata_csv_filesize()
+        self.update_metadata_csv_number_of_lines()
+        self.update_metadata_csv_number_of_columns()
+        self.update_metadata_rdf_number_of_triples()
+        self.update_metadata_rdf_last_sparqlified()
+        self.add_metadata_to_wiki_page()
+        self.create_wiki_page(self.wiki_page)
+        
+    def update_metadata_csv_filesize(self):
+        tabular_file = TabularFile(self.resource_id) 
+        csv_filesize = tabular_file.get_csv_filesize()
+        self.metadata['filesize'] = str(csv_filesize)
+
+    def update_metadata_csv_number_of_lines(self):
+        tabular_file = TabularFile(self.resource_id)
+        csv_number_of_lines = tabular_file.get_csv_number_of_lines()
+        self.metadata['csv_number_of_lines'] = str(csv_number_of_lines)
+
+    def update_metadata_csv_number_of_columns(self):
+        cols = 0
+        for key in self.mappings[0].keys():
+            if(re.match("^col.*", key)):
+                cols += 1
+        self.metadata['csv_number_of_columns'] = str(cols)
+
+    def update_metadata_rdf_number_of_triples(self):
+        """
+            using the default mapping here (mapping 0)
+        """
+        rdf_filename = self.resource_id + "_" + self.mappings[0]['name'] + ".rdf"
+        db = DatabasePlainFiles(config.rdf_files_path)
+        rdf_number_of_triples = db.count_line_number(rdf_filename)
+        self.metadata['rdf_number_of_triples'] = str(rdf_number_of_triples)
+
+    def update_metadata_rdf_last_sparqlified(self):
+        rdf_filename = self.resource_id + "_" + self.mappings[0]['name'] + ".rdf"
+        db = DatabasePlainFiles(config.rdf_files_path)
+        rdf_last_sparqlified = db.get_last_access_time(rdf_filename)
+        self.metadata['rdf_last_sparqlified'] = str(rdf_last_sparqlified)
+
+    def add_metadata_to_wiki_page(self):
+        metadata = self.metadata
+        lines = self.wiki_page.split('\n')
+        lines.append("{{CSV2RDFMetadata|")
+        for key in metadata.keys():
+            lines.append(key +"="+metadata[key]+" |")
+        lines.append("}}")
+        self.wiki_page = '\n'.join(lines)
         
     def process_omitRows(self, string):
         output = []
@@ -315,9 +400,13 @@ class Mapping():
         return False
     
 if __name__ == '__main__':
-    mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
+    mapping = Mapping('00e0737c-6920-479a-9916-ff83b9de692c')
     mapping.init()
-    print mapping.mappings
+    mapping.update_metadata()
+    #print mapping.wiki_page
+    #print mapping.metadata
+    #print mapping.mappings
     #print mapping.update_csv2rdf_wiki_page_list()
     #print mapping.get_mapping_names()
     #wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
