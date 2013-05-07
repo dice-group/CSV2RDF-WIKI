@@ -134,6 +134,23 @@ class CkanApplication():
                 if(r.is_csv()):
                     db.saveDbase(resource['id'], resource)
         
+    def update_full_resource_list(self):
+        package_list = self.get_package_list()
+        db = DatabasePlainFiles(config.data_path)
+        all_resources = []
+        number_of_datasets = len(package_list)
+        print "Number of datasets in the "+str(config.ckan_base_url)+" : "+str(number_of_datasets)
+        for num, package_id in enumerate(package_list):
+            try:
+                print "Processing package " + str(num) + " out of " + str(number_of_datasets)
+                package = Package(package_id)
+                for resource in package.resources:
+                   all_resources.append(resource) 
+                del package
+            except BaseException as e:
+                print str(e)
+        db.saveDbase(config.data_all_resources, all_resources)
+
     def get_sparqlified_list(self):
         return os.listdir(config.rdf_files_exposed_path)
 
@@ -172,7 +189,8 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.update_metadata_for_all_resources()
+    ckan_app.update_full_resource_list()
+    #ckan_app.update_metadata_for_all_resources()
     #ckan_app.update_exposed_rdf_list()
     #ckan_app.update_sparqlified_list()
     #ckan_app.clean_sparqlified()
