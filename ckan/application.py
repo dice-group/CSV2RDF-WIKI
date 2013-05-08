@@ -282,10 +282,10 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.get_rdf_and_sparql_list()
+    #ckan_app.get_rdf_and_sparql_list()
     #ckan_app.update_all_rdf_resources()
     #ckan_app.update_full_resource_list()
-    #ckan_app.update_metadata_for_all_resources()
+    ckan_app.update_metadata_for_all_resources()
     #ckan_app.update_exposed_rdf_list()
     #ckan_app.update_sparqlified_list()
     #ckan_app.clean_sparqlified()
