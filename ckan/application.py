@@ -6,6 +6,7 @@ import json
 from ckanclient import CkanClient
 
 from config import config
+from config import rdf_formats
 from database import DatabasePlainFiles
 
 #relative imports
@@ -133,7 +134,116 @@ class CkanApplication():
                 r.format = resource['format']
                 if(r.is_csv()):
                     db.saveDbase(resource['id'], resource)
+
+    def get_full_resource_list(self):
+        db = DatabasePlainFiles(config.data_path)
+        return db.loadDbase(config.data_all_resources)
+
+    def get_all_available_formats(self):
+        resource_list = self.get_full_resource_list()
+        formats = []
+        for resource in resource_list:
+            if(not resource['format'] in formats):
+                formats.append(resource['format'])
+        return sorted(formats)
+
+    def get_rdf_resources(self):
+        return self.get_resources("rdf")
+
+    def get_rdf_compressed_resources(self):
+        return self.get_resources("rdf_compressed")
+
+    def get_rdf_html_resources(self):
+        return self.get_resources("rdf_html")
+
+    def get_rdf_endpoints_resources(self):
+        return self.get_resources("endpoints")
+
+    def get_resources(self, type):
+        types = ["rdf","rdf_compressed","endpoints","rdf_html"]
+        if(not type in types):
+            return False
+        db = DatabasePlainFiles(config.data_path)
+        return db.loadDbase(eval("config.data_"+str(type)))
+
+    def get_rdf_and_sparql_list(self):
+        rdf = self.get_rdf_resources()
+        rdf_compressed = self.get_rdf_compressed_resources()
+        rdf_html = self.get_rdf_html_resources()
+        endpoints = self.get_rdf_endpoints_resources()
+        process_list = rdf + rdf_compressed + rdf_html
+
+        #Jens request: download link to rdf file, sparql end-point (if exist)
+        #rdf_id, package_id, sparql_id, rdf_link, sparql_link
+        #output_item = {'rdf_id': '',       # id
+                       #'package_name': '', # package_name
+                       #'rdf_url': '',     # url
+                       #'sparql_id': '',    # (optional) also id, but in the endpoints list
+                       #'sparql_url': '' } # (optional) also url, but in the endpoints list
+        # order of the fields in csv output file
+        fieldnames = ('rdf_id', 'sparql_id', 'package_name', 'rdf_url', 'sparql_url')
+        output = []
+
+        for resource in process_list:
+            output_item = {}
+            output_item['rdf_id'] = resource.id
+            output_item['package_name'] = resource.package_name
+            output_item['rdf_url'] = (resource.url).encode('utf-8')
+            for endpoint in endpoints:
+                if(resource.package_name == endpoint.package_name):
+                    output_item['sparql_id'] = endpoint.id
+                    output_item['sparql_url'] = endpoint.url
+            output.append(output_item)
+       
+        db = DatabasePlainFiles(config.data_path)
+        db.saveListToCSV(config.data_rdf_and_sparql_csv, output, fieldnames) 
+
+    def update_all_rdf_resources(self):
+        resource_list = self.get_full_resource_list()
+        rdf = []
+        rdf_compressed = []
+        endpoints = []
+        rdf_html = []
+        for resource in resource_list:
+            if(resource['format'] in rdf_formats.rdf_formats):
+                res = Resource(resource['id'])
+                res.init()
+                rdf.append(res)
+            if(resource['format'] in rdf_formats.compressed_formats):
+                res = Resource(resource['id'])
+                res.init()
+                rdf_compressed.append(res)
+            if(resource['format'] in rdf_formats.endpoints):
+                res = Resource(resource['id'])
+                res.init()
+                endpoints.append(res)
+            if(resource['format'] in rdf_formats.html_formats):
+                res = Resource(resource['id'])
+                res.init()
+                rdf_html.append(res)
+        db = DatabasePlainFiles(config.data_path)
+        db.saveDbase(config.data_rdf, rdf)
+        db.saveDbase(config.data_rdf_compressed, rdf_compressed)
+        db.saveDbase(config.data_endpoints, endpoints)
+        db.saveDbase(config.data_rdf_html, rdf_html)
         
+    def update_full_resource_list(self):
+        package_list = self.get_package_list()
+        db = DatabasePlainFiles(config.data_path)
+        all_resources = []
+        number_of_datasets = len(package_list)
+        print "Number of datasets in the "+str(config.ckan_base_url)+" : "+str(number_of_datasets)
+        for num, package_id in enumerate(package_list):
+            try:
+                print "Processing package " + str(num) + " out of " + str(number_of_datasets)
+                package = Package(package_id)
+                for resource in package.resources:
+                   all_resources.append(resource) 
+                del package
+            except BaseException as e:
+                print str(e)
+        db.saveDbase(config.data_all_resources, all_resources)
+
     def get_sparqlified_list(self):
         return os.listdir(config.rdf_files_exposed_path)
 
@@ -172,7 +282,10 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.update_metadata_for_all_resources()
+    ckan_app.get_rdf_and_sparql_list()
+    #ckan_app.update_all_rdf_resources()
+    #ckan_app.update_full_resource_list()
+    #ckan_app.update_metadata_for_all_resources()
     #ckan_app.update_exposed_rdf_list()
     #ckan_app.update_sparqlified_list()
     #ckan_app.clean_sparqlified()

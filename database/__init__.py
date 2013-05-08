@@ -3,6 +3,7 @@ import os
 import pickle
 import mmap
 import datetime
+import csv
 
 
 class DatabasePlainFiles:
@@ -43,6 +44,13 @@ class DatabasePlainFiles:
         "load string from file"
         file = open(self.get_path_to_file(filename), 'rb')
         return file.read()
+
+    def saveListToCSV(self, filename, list, fieldnames):
+        file = open(self.get_path_to_file(filename), 'wb')
+        csv_writer = csv.DictWriter(file, fieldnames)
+        headers = dict( (n,n) for n in fieldnames )
+        csv_writer.writerow(headers)
+        csv_writer.writerows(list)
 
     def loadDbaseChunk(self, filename):
         file = open(self.get_path_to_file(filename), 'rb')
