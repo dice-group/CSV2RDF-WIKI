@@ -219,6 +219,7 @@ class Mapping():
         if(not resource_id):
             resource_id = self.resource_id
             
+        text = text.encode('utf-8')
         title = config.wiki_csv2rdf_namespace + resource_id
         page = wikitools.Page(self.wiki_site, title=title)
         result = page.edit(text=text, bot=True)
