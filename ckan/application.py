@@ -124,6 +124,9 @@ class CkanApplication():
         return (pages_outdated, pages_new)
 
     def update_csv_resource_list(self):
+        """
+            TODO: rewrite to use update_full_resource_list() function output
+        """
         package_list = self.get_package_list()
         db = DatabasePlainFiles(config.data_csv_resources_path)
 
@@ -138,6 +141,10 @@ class CkanApplication():
     def get_full_resource_list(self):
         db = DatabasePlainFiles(config.data_path)
         return db.loadDbase(config.data_all_resources)
+
+    def get_full_package_list(self):
+        db = DatabasePlainFiles(config.data_path)
+        return db.loadDbase(config.data_all_packages)
 
     def get_all_available_formats(self):
         resource_list = self.get_full_resource_list()
@@ -226,8 +233,26 @@ class CkanApplication():
         db.saveDbase(config.data_rdf_compressed, rdf_compressed)
         db.saveDbase(config.data_endpoints, endpoints)
         db.saveDbase(config.data_rdf_html, rdf_html)
+
         
+    def update_full_package_list(self):
+        package_list = self.get_package_list()
+        db = DatabasePlainFiles(config.data_path)
+        all_packages = []
+        number_of_packages = len(package_list)
+        for num, package_id in enumerate(package_list):
+            print "processing %d out of %d package" % (num + 1, number_of_packages)
+            package = Package(package_id)
+            # ckan object can not be pickled
+            del package.ckan 
+            all_packages.append(package)
+
+        db.saveDbase(config.data_all_packages, all_packages)
+
     def update_full_resource_list(self):
+        """
+            TODO: use update_full_dataset_list output here
+        """
         package_list = self.get_package_list()
         db = DatabasePlainFiles(config.data_path)
         all_resources = []
@@ -282,10 +307,11 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
+    ckan_app.get_resource_data()
     #ckan_app.get_rdf_and_sparql_list()
     #ckan_app.update_all_rdf_resources()
     #ckan_app.update_full_resource_list()
-    ckan_app.update_metadata_for_all_resources()
+    #ckan_app.update_metadata_for_all_resources()
     #ckan_app.update_exposed_rdf_list()
     #ckan_app.update_sparqlified_list()
     #ckan_app.clean_sparqlified()
