@@ -69,12 +69,15 @@ class DatabasePlainFiles:
 
     def count_line_number(self, filename):
         f = open(self.get_path_to_file(filename), 'r+')
-        buf = mmap.mmap(f.fileno(), 0)
-        lines = 0
-        readline = buf.readline
-        while readline():
-            lines += 1
-        return lines 
+        try:
+            buf = mmap.mmap(f.fileno(), 0)
+            lines = 0
+            readline = buf.readline
+            while readline():
+                lines += 1
+            return lines 
+        except BaseException as e:
+            return 0
 
     def get_last_access_time(self, filename):
         os.stat_float_times(False)
