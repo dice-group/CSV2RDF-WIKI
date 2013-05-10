@@ -21,7 +21,7 @@ class PrefixCC:
         if(string.startswith('http')):
             return ''
         prefixes = []
-        string = string.split('-%3E')
+        string = string.split('%5E%5E') # ^^
         for substr in string:
             substr = substr.split('%3A') # %3A = :
             if(len(substr) > 1):

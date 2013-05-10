@@ -181,7 +181,8 @@ class Mapping():
         """
             Auxilary method for tabular to spaqrlify-ml convertion
         """
-        prop = prop.split('->')[0]
+        print prop
+        prop = prop.split('%5E%5E')[0]
         
         if(len(prop.split('%3A')) == 1): # %3A = :
             return "<http://wiki.publicdata.eu/ontology/"+str(prop)+">"
@@ -194,7 +195,7 @@ class Mapping():
         """
         column_number = column[3:]
         try:
-            t = wikiString.split('-%3E')[1]
+            t = wikiString.split('%5E%5E')[1]
             #t = t.split('^^')[0]
             t = ':'.join(t.split('%3A')) 
             return "typedLiteral(?"+column_number+", "+t+")"
