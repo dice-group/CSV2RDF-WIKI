@@ -208,20 +208,24 @@ class CkanApplication():
     def get_rdf_for_lodstats(self):
         rdf = self.get_rdf_resources()
         rdf_compressed = self.get_rdf_compressed_resources()
-        rdf_html = self.get_rdf_html_resources()
         endpoints = self.get_rdf_endpoints_resources()
         process_list = rdf + rdf_compressed + endpoints
 
-        fieldnames = ('resource_id', 'package_name', 'rdf_url', 'format')
+        fieldnames = ('resource_id', 'package_name', 'uri', 'format')
         output = []
+        package_names = []
+        import md5
 
         for resource in process_list:
             output_item = {}
             output_item['resource_id'] = resource.id
-            output_item['package_name'] = resource.package_name
-            output_item['rdf_url'] = (resource.url).encode('utf-8')
+            if(not resource.package_name in package_names):
+                output_item['package_name'] = resource.package_name
+                package_names.append(resource.package_name)
+            else:
+                output_item['package_name'] = resource.package_name + "_" + str(md5.new(resource.url.encode('utf-8')).hexdigest())
+            output_item['uri'] = (resource.url).encode('utf-8')
             #routine from the LODStats
-            print resource.format.lower()
             if resource.format.lower() in ["application/x-ntriples", "nt", "gzip:ntriples", "n-triples", "ntriples", "nt:meta", "nt:transparency-international-corruption-perceptions-index", "rdf, nt", "text/ntriples", "compressed tarfile containing n-triples", "bz2:nt", "gz:nt"]:
                 output_item['format'] = "nt"
             elif resource.format.lower() in ["application/x-nquads", "nquads", "gzip::nquads", "gz:nq"]:
@@ -235,7 +239,7 @@ class CkanApplication():
             elif resource.format.lower() in [ 'RDF endpoint', 'RDF, SPARQL+XML', 'SPARQ/JSON', 'SPARQL', 'SPARQL/JSON', 'SPARQL/XML', 'api/linked-data', 'api/sparql', 'api/sparql ', 'api/dcat', 'rdf, sparql', 'html, rdf, dcif', 'rdf, csv, xml', 'RDF/XML, HTML, JSON', 'RDF, SPARQL+XML', 'sparql' ]:
                 output_item['format'] = "sparql"
             else:
-                break
+                continue
             output.append(output_item)
        
         db = DatabasePlainFiles(config.data_path)
