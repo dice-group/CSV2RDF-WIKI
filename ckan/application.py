@@ -205,6 +205,42 @@ class CkanApplication():
         db = DatabasePlainFiles(config.data_path)
         db.saveListToCSV(config.data_rdf_and_sparql_csv, output, fieldnames) 
 
+    def get_rdf_for_lodstats(self):
+        rdf = self.get_rdf_resources()
+        rdf_compressed = self.get_rdf_compressed_resources()
+        rdf_html = self.get_rdf_html_resources()
+        endpoints = self.get_rdf_endpoints_resources()
+        process_list = rdf + rdf_compressed + endpoints
+
+        fieldnames = ('resource_id', 'package_name', 'rdf_url', 'format')
+        output = []
+
+        for resource in process_list:
+            output_item = {}
+            output_item['resource_id'] = resource.id
+            output_item['package_name'] = resource.package_name
+            output_item['rdf_url'] = (resource.url).encode('utf-8')
+            #routine from the LODStats
+            print resource.format.lower()
+            if resource.format.lower() in ["application/x-ntriples", "nt", "gzip:ntriples", "n-triples", "ntriples", "nt:meta", "nt:transparency-international-corruption-perceptions-index", "rdf, nt", "text/ntriples", "compressed tarfile containing n-triples", "bz2:nt", "gz:nt"]:
+                output_item['format'] = "nt"
+            elif resource.format.lower() in ["application/x-nquads", "nquads", "gzip::nquads", "gz:nq"]:
+                output_item['format'] = "nq"
+            elif resource.format.lower() in ["text/turtle", "rdf/turtle", "ttl", "turtle", "application/turtle", "example/turtle", "example/x-turtle", "meta/turtle", "meta/urtle", "rdf/turtle", "text/ttl", "text/turtle", "ttl:e1:csv", "7z:ttl", "gz:ttl", "gz:ttl:owl", "ttl.bzip2"]:
+                output_item['format'] = "ttl"
+            elif resource.format.lower() in ["text/n3", "n3", "rdf/n3", "application/n3", "example/n3", "example/n3 ", "example/rdf+n3", "text/rdf+n3"]:
+                output_item['format'] = "n3"
+            elif resource.format.lower() in ["application/rdf+xml", "rdf", "rdf/xml", "owl", "application/rdf xml", "application/rdf+xml ", "application/rdfs", "example/owl", "example/rdf", "example/rdf xml", "example/rdf+xml", "meta/rdf+schema", "meta/rdf+xml", "meta/rdf-schema", "meta/rdf-schema ", "rdf+xml", "rdf+xml ", "rdf, owl", "rdf (gzipped)", "gzip:rdf/xml", ]:
+                output_item['format'] = "rdf"
+            elif resource.format.lower() in [ 'RDF endpoint', 'RDF, SPARQL+XML', 'SPARQ/JSON', 'SPARQL', 'SPARQL/JSON', 'SPARQL/XML', 'api/linked-data', 'api/sparql', 'api/sparql ', 'api/dcat', 'rdf, sparql', 'html, rdf, dcif', 'rdf, csv, xml', 'RDF/XML, HTML, JSON', 'RDF, SPARQL+XML', 'sparql' ]:
+                output_item['format'] = "sparql"
+            else:
+                break
+            output.append(output_item)
+       
+        db = DatabasePlainFiles(config.data_path)
+        db.saveListToCSV(config.data_for_lodstats, output, fieldnames) 
+
     def update_all_rdf_resources(self):
         resource_list = self.get_full_resource_list()
         rdf = []
@@ -307,7 +343,8 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    ckan_app.get_resource_data()
+    print ckan_app.get_rdf_for_lodstats()
+    #ckan_app.get_resource_data()
     #ckan_app.get_rdf_and_sparql_list()
     #ckan_app.update_all_rdf_resources()
     #ckan_app.update_full_resource_list()
