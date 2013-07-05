@@ -4,8 +4,7 @@ Unidecode==0.04.9
 argparse==1.2.1
 ckanclient==0.10
 distribute==0.6.24
-matplotlib==1.2.0
-numpy==1.6.2
+numpy==1.7.1
 py==1.4.13
 pystache==0.5.2
 pytest==2.3.4
@@ -13,5 +12,6 @@ python-magic==0.4.3
 requests==0.14.1
 rope==0.9.4
 ropemode==0.2
+uWSGI==1.9.13
 wikitools==1.1.1
 wsgiref==0.1.2
