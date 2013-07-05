@@ -79,3 +79,7 @@ if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
     cherrypy.quickstart(publicdataeu, '/', 'server/config')
     cherrypy.config.update('server/config')
+
+def application(environ, start_response): 
+    cherrypy.tree.mount(CSV2RDFApp(), '/', 'server/config')
+    return cherrypy.tree(environ, start_response)
