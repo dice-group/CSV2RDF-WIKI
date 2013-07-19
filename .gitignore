@@ -9,5 +9,5 @@ get_exposed_rdf_list
 *.log
 *.swp
 csv2rdf-nginx.conf
-csv2rdf-supervisor.confonf
+csv2rdf-supervisor.conf
 csv2rdf-uwsgi.ini
