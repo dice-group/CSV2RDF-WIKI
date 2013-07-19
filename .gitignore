@@ -8,3 +8,6 @@ get_exposed_rdf_list
 *.pyc
 *.log
 *.swp
+csv2rdf-nginx.conf
+csv2rdf-supervisor.confonf
+csv2rdf-uwsgi.ini

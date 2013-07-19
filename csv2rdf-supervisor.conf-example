@@ -13,8 +13,8 @@
 ;serverurl=unix:///home/akswadmin/www/csv2rdf-server/supervisor_uwsgi.sock
 
 [program:csv2rdf]
-command = /home/akswadmin/www/csv2rdf-server/bin/uwsgi --ini /home/akswadmin/www/csv2rdf-server/src/CSV2RDF-WIKI/csv2rdf-uwsgi.ini
+command = /home/ivan/.virtualenvs/csv2rdf/bin/uwsgi --ini /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/csv2rdf-uwsgi.ini
 
-[eventlistener:crashmail]
-command=/usr/local/bin/crashmail -a -m iermilov@informatik.uni-leipzig.de
-events=PROCESS_STATE
+;[eventlistener:crashmail]
+;command=/usr/local/bin/crashmail -a -m iermilov@informatik.uni-leipzig.de
+;events=PROCESS_STATE

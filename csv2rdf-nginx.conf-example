@@ -1,0 +1,47 @@
+# mysite_nginx.conf
+
+# the upstream component nginx needs to connect to
+upstream cherrypy {
+    server unix:///home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/csv2rdf.sock; # for a file socket
+    }
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      80;
+    # the domain name it will serve for
+    server_name csv2rdf.vhost.tld; # substitute your machine's IP address or FQDN
+    charset     utf-8;
+
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    # Django media
+    location /server/static  {
+        alias /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/server/static;
+    }
+
+    location /sparqlified_exposed {
+        alias /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/sparqlified_exposed;
+    }
+
+    location /sparqlified {
+        alias /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/sparqlified;
+    }
+
+    location /get_exposed_rdf_list {
+        alias /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/get_exposed_rdf_list;
+    }
+
+    location /legal {
+        alias /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/legal;
+    }
+
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        uwsgi_pass  cherrypy;
+        include     /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/uwsgi_params; # the uwsgi_params file you installed
+        }
+    access_log /var/log/nginx/csv2rdf.access.log;
+    error_log /var/log/nginx/csv2rdf.error.log;
+}
