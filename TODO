@@ -1,0 +1,17 @@
+Describe backup procedure
+Make scripts for (cronjobs):
+1. Renew the resources list
+    a. Delete outdated items.
+        delete resource
+        delete wiki page
+    b. Download new items
+        download resource
+        create wiki page
+    c. Convert everything to RDF
+        renew the list of available RDFized csv
+2. Make a module for data fetching via CKAN API (RDF files etc. - see what it can do)
+    See datacatalogs.py
+    move all methods for data extraction there
+    check out API v3 methods
+3. 
+
