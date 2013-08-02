@@ -4,6 +4,7 @@ import subprocess
 import threading
 import Queue
 import time
+import json
 
 from config import config
 from database import DatabasePlainFiles
@@ -117,7 +118,13 @@ class Sparqlify():
             return os.path.join(config.server_base_url, self.get_rdf_file_path(configuration_name))
         else:
             return False
-        
+
+    def get_sparqlified_list(self):
+        return os.listdir(config.rdf_files_exposed_path)
+
+    def update_exposed_rdf_list(self):
+        db = DatabasePlainFiles(config.root_path)
+        db.saveDbaseRaw('get_exposed_rdf_list', json.dumps(self.get_sparqlified_list()))
 
 class AsynchronousFileReader(threading.Thread):
     '''

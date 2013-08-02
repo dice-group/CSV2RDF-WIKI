@@ -1,6 +1,7 @@
 import os
 import re
 import subprocess
+import logging
 
 import csv
 import requests
@@ -24,10 +25,11 @@ class TabularFile():
             assert r.ok, r
             file = DatabasePlainFiles(config.resources_path)
             file.saveDbaseRaw(self.filename, r.content)
+            logging.info("File %s downloaded and saved successfully" % self.id)
             return self.get_csv_file_path()
-            #return "resource " + str(self.id) + " status_code " + str(r.status_code) + "\n"
         except BaseException as e:
-            #return "Could not download the resource "+str(self.id)+" ! "+str(e)+"\n"
+            logging.warning("Could not download the resource %s " % str(self.id))
+            logging.warning("Exception occured: %s" % str(e))
             return False
 
     def get_csv_filesize(self):
@@ -90,18 +92,20 @@ class TabularFile():
     def validate(self):
         filename = self.filename
         (encoding, info) = self.get_info_about()
-        print encoding
-        print info
+        logging.debug("File encoding: %s" % encoding)
+        logging.debug("File info: %s" % info)
 
         if(re.match('.*HTML.*', info) or
            re.match('.*[Tt]orrent.*',info) or
            self.isXML() or
            self.isHTML()):
-            print info
+            logging.debug("File is html, torrent or xml file ... Deleting")
             self.delete()
             return True
 
         if(encoding == "utf-16le"):
+            #TODO: work with utf-8
+            logging.debug("File is in UTF-16 encoding ... recoding to ASCII.")
             self._process_utf16(filename)
         elif(re.match("^binary", encoding) or
              re.match("^application/.*", encoding)):
@@ -152,12 +156,14 @@ class TabularFile():
         elif(re.match(".*Composite Document File V2 Document.*Excel.*", info) or
            re.match(".*Microsoft Excel 2007+.*", info) or
            not re.match(".*Composite Document File V2 Document.*Word.*", info)):
+            logging.debug("Converting excel sheet to CSV")
             self._process_xls(filename)
         elif(re.match(".*Composite Document File V2 Document.*Word.*", info)):
-            #Word document
+            logging.debug("File is a word document ... Deleting.")
             self.delete()
             return False
         else:
+            logging.debug("Could not determine format ... Deleting.")
             self.delete()
             return False
             
@@ -234,6 +240,13 @@ class TabularFile():
             if not data:
                 break
             yield data
+
+    def get_csv_resource_list_local(self):
+        """
+            Returns the list of downloaded csv CKAN resources (csv files)
+        """
+        csv_list = os.listdir(config.resources_path)
+        return csv_list
             
 if __name__ == '__main__':
     tabular_file = TabularFile('1aa9c015-3c65-4385-8d34-60ca0a875728')

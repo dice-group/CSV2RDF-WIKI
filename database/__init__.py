@@ -111,4 +111,3 @@ class DatabasePlainFiles:
         for x in range(0, n):
             lines.append(file.readline())
         return lines
-    

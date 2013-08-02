@@ -30,6 +30,9 @@ class Resource(AuxilaryInterface):
         self.id = resource_id
         self.filename = self.id
 
+    def init_from_dump(self, dump):
+        self.unpack_object_to_self(dump)
+
     def init(self):
         #Load resource from the CKAN
         self.unpack_object_to_self(self.load_from_ckan())

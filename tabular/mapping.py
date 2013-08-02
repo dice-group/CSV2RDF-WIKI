@@ -1,5 +1,6 @@
 import os
 import re
+import logging
 
 import urllib
 import wikitools
@@ -12,7 +13,7 @@ from ckan.package import Package
 from prefixcc import PrefixCC
 from ckan.resource import Resource
 from tabular.tabularfile import TabularFile
-
+from ckan.ckanio import CkanIO
 
 class Mapping():
     def __init__(self, resource_id = None):
@@ -44,8 +45,22 @@ class Mapping():
         request = wikitools.APIRequest(self.wiki_site, params)
         result = request.query()
         db = DatabasePlainFiles(config.data_path)
-        db.saveDbase('data_all_csv2rdf_pages_file', result)
-    
+        db.saveDbase(config.data_all_csv2rdf_pages, result)
+
+    def get_csv2rdf_wiki_page_list(self):
+        db = DatabasePlainFiles(config.data_path)
+        return db.loadDbase(config.data_all_csv2rdf_pages)
+
+    def get_all_csv2rdf_page_ids(self):
+        """
+            Returns the list of all wiki page ids
+        """
+        page_list = self.get_csv2rdf_wiki_page_list()
+        titles = []
+        for page in page_list['query']['allpages']:
+            titles.append( page['title'][8:].lower() )
+        return titles
+
     def request_wiki_page(self, resource_id = None):
         """
             Get a wiki page
@@ -231,9 +246,12 @@ class Mapping():
             resource_id = self.resource_id
 
         title = config.wiki_csv2rdf_namespace + resource_id
-        page = wikitools.Page(self.wiki_site, title=title)
-        result = page.delete()
-        return result
+        try:
+            page = wikitools.Page(self.wiki_site, title=title)
+            result = page.delete()
+            return result
+        except BaseException as e:
+            logging.info("An exception occured, while deleting wiki page %s" % str(e))
     
     def generate_default_wiki_page(self, resource_id = None):
         """
@@ -400,6 +418,26 @@ class Mapping():
                 return mapping
         #Nothing was found
         return False
+
+    def get_outdated_and_new_wiki_pages(self):
+        logging.info("Looking for outdated and new wiki pages ... Started.")
+        tf = TabularFile('')
+        resources_ids = tf.get_csv_resource_list_local()
+
+        page_ids_list = self.get_all_csv2rdf_page_ids()
+        pages_outdated = []
+        pages_new = [] 
+
+        for page_id in page_ids_list:
+            if(not page_id in resources_ids):
+                pages_outdated.append(page_id) 
+
+        for resource_id in resources_ids:
+            if(not resource_id in page_ids_list):
+                pages_new.append(resource_id)
+
+        logging.info("Looking for outdated and new wiki pages ... Complete.")
+        return (pages_outdated, pages_new)
     
 if __name__ == '__main__':
     #mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')

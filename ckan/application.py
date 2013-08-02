@@ -1,65 +1,88 @@
 import os
 import glob
 import subprocess
-import json
+import logging
 
 from ckanclient import CkanClient
 
 from config import config
-from config import rdf_formats
-from database import DatabasePlainFiles
 
-#relative imports
-from package import Package
-from resource import Resource
 from tabular.mapping import Mapping
 from tabular.tabularfile import TabularFile
+from ckan.ckanio import CkanIO
+from ckan.ckanio.queries import Queries
 
 class CkanApplication():
-    """ Reflects the CKAN application itself,
-        interfaces for getting packages etc.
+    """ 
+        Contains service functions (batch deleting, creating etc.)
     """
     def __init__(self):
         self.ckan = CkanClient(base_location=config.ckan_api_url,
                                api_key=config.ckan_api_key)
-        
-    def get_csv_resource_list_actual(self):
-        csv_list = os.listdir(config.data_csv_resources_path)
-        return csv_list
 
-    def get_csv_resource_list_current(self):
-        csv_list = os.listdir(config.resources_path)
-        return csv_list
+    def update(self):
+        """
+            Dump the CKAN instance in the files
+            see log in the config.log
+        """
+        logging.info("Dumping data from the CKAN ... Started.")
+        io = CkanIO()
+        io.update_full_package_list()
+        io.update_full_resource_list()
+        io.update_csv_resource_list()
+        io.update_rdf_resources_list()
+        logging.info("Dumping data from the CKAN ... Complete.")
 
-    def get_package_list(self):
-        return self.ckan.package_list()
+        logging.info("Updating the list of wiki pages ... Started.")
+        mapping = Mapping('')
+        mapping.update_csv2rdf_wiki_page_list()
+        logging.info("Updating the list of wiki pages ... Complete.")
 
-    def get_all_csv2rdf_page_ids(self):
-        db = DatabasePlainFiles(config.data_path)
-        pages = db.loadDbase('data_all_csv2rdf_pages_file')
-        titles = []
-        for page in pages['query']['allpages']:
-            titles.append( page['title'][8:].lower() )
-        return titles
+    def synchronize(self):
+        """
+            Delete outdated resources and wiki pages
+            Download new resources, clean them up and
+            Create wiki pages for them
+            Refresh sparqlified list
+        """
+        q = Queries()
+        (outdated_csv, new_csv) = q.get_outdated_and_new_csv_resources()
 
-    def delete_outdated_items(self):
+        mapping = Mapping('')
+        (outdated_wiki_pages, new_wiki_pages) = mapping.get_outdated_and_new_wiki_pages()
+
+        #Delete outdated resources
+        self.delete_outdated_items(outdated_csv, outdated_wiki_pages)
+        self.remove_outdated_rdf()
+
+        self.download_and_validate_new_resources(new_csv)
+        (outdated_wiki_pages, new_wiki_pages) = mapping.get_outdated_and_new_wiki_pages()
+        self.create_new_wiki_pages(new_wiki_pages)
+        self.update_sparqlified_list()
+
+    def delete_outdated_items(self, outdated_csv, outdated_wiki_pages):
         """
             Delete outdated wikipages and csv files
         """
-        (resources_outdated, resources_new) = self.csv_resources_list_diff()
-        (pages_outdated, pages_new) = self.wiki_pages_diff()
-        outdated_list = pages_outdated + resources_outdated
-        print len(outdated_list)
+        logging.info("Deleting outdated resources ... Started.")
+        outdated_list = outdated_csv + outdated_wiki_pages
+        logging.info("Number of outdated resources and pages to delete: %d" % len(outdated_list))
         for resource_id in outdated_list:
+            logging.info("Processing resource %s" % resource_id)
             mapping = Mapping(resource_id)
             try:
-                print mapping.delete_wiki_page()
-                print os.remove( os.path.join(config.resources_path, resource_id) )
+                delete_result = mapping.delete_wiki_page()
+                logging.info("Removing the wiki page ... %s" % delete_result)
+                os.remove( os.path.join(config.resources_path, resource_id) )
+                logging.info("File removed successfully.")
             except BaseException as e:
-                print str(e)
+                logging.info("An exception occurred, while deleting item: %s" % str(e))
+        logging.info("Deleting outdated resources ... Complete.")
     
-    def clean_sparqlified(self):
-        resources_list = self.get_csv_resource_list_current()
+    def remove_outdated_rdf(self):
+        logging.info("Removing outdated RDF files ... Started.")
+        tf = TabularFile('')
+        resources_list = tf.get_csv_resource_list_local()
         sparqlified_list = os.listdir(config.rdf_files_path)
         resources_ids_sparqlified = []
         for item in sparqlified_list:
@@ -69,253 +92,37 @@ class CkanApplication():
         for item in resources_ids_sparqlified:
             if(not item in resources_list):
                 outdated_sparqlified.append(item)
+
+        logging.info("Outdated RDF files found: %d" % len(outdated_sparqlified))
         
         for resource_id in outdated_sparqlified:
             for filename in glob.glob( os.path.join(config.rdf_files_path, resource_id+"*")):
+                logging.info("Removing %s" % filename)
                 os.remove(filename)
 
-    def download_new_resources(self):
-        (outdated_list, new_list) = self.csv_resources_list_diff()
-        for resource_id in new_list:
-            print resource_id
+        logging.info("Removing outdated RDF files ... Complete.")
+
+    def download_and_validate_new_resources(self, new_resources):
+        logging.info("Downloading new resources ... Started.")
+        logging.info("Resources to process %d" % len(new_resources))
+        for num, resource_id in enumerate(new_resources):
+            logging.info("Processing resource: %s" % resource_id)
+            logging.info("%d left to process." % (len(new_resources) - num + 1))
             tabularfile = TabularFile(resource_id)
             if(tabularfile.download()): #if 200 response code
                 tabularfile.validate()
+        logging.info("Downloading new resources ... Complete.")
 
-    def create_new_wiki_pages(self):
-        (pages_outdated, pages_new) = self.wiki_pages_diff()
-
-        for num, page_id in enumerate(pages_new):
+    def create_new_wiki_pages(self, new_wiki_page_ids):
+        logging.info("Creating new wiki mappings for CSV resources ... Started.")
+        for num, page_id in enumerate(new_wiki_page_ids):
+            logging.info("Creating page for %s" % page_id)
             mapping = Mapping(page_id)
             default_page = mapping.generate_default_wiki_page()
             mapping.create_wiki_page(default_page)
+            break
+        logging.info("Creating new wiki mappings for CSV resources ... Complete.")
 
-    def csv_resources_list_diff(self):
-        actual_list = self.get_csv_resource_list_actual()
-        current_list = self.get_csv_resource_list_current()
-        resources_outdated = []
-        resources_new = []
-
-        for resource in current_list:
-            if(not resource in actual_list):
-                resources_outdated.append(resource)
-
-        for resource in actual_list:
-            if(not resource in current_list and
-               not resource in resources_outdated):
-                resources_new.append(resource)
-
-        return (resources_outdated, resources_new)
-
-    def wiki_pages_diff(self):
-        resources_list = self.get_csv_resource_list_current()
-        page_ids_list = self.get_all_csv2rdf_page_ids()
-        pages_outdated = []
-        pages_new = [] 
-
-        for page_id in page_ids_list:
-            if(not page_id in resources_list):
-                pages_outdated.append(page_id) 
-
-        for resource_id in resources_list:
-            if(not resource_id in page_ids_list):
-                pages_new.append(resource_id)
-
-        return (pages_outdated, pages_new)
-
-    def update_csv_resource_list(self):
-        """
-            TODO: rewrite to use update_full_resource_list() function output
-        """
-        package_list = self.get_package_list()
-        db = DatabasePlainFiles(config.data_csv_resources_path)
-
-        for package_id in package_list:
-            package = Package(package_id)
-            for resource in package.resources:
-                r = Resource(resource['id'])
-                r.format = resource['format']
-                if(r.is_csv()):
-                    db.saveDbase(resource['id'], resource)
-
-    def get_full_resource_list(self):
-        db = DatabasePlainFiles(config.data_path)
-        return db.loadDbase(config.data_all_resources)
-
-    def get_full_package_list(self):
-        db = DatabasePlainFiles(config.data_path)
-        return db.loadDbase(config.data_all_packages)
-
-    def get_all_available_formats(self):
-        resource_list = self.get_full_resource_list()
-        formats = []
-        for resource in resource_list:
-            if(not resource['format'] in formats):
-                formats.append(resource['format'])
-        return sorted(formats)
-
-    def get_rdf_resources(self):
-        return self.get_resources("rdf")
-
-    def get_rdf_compressed_resources(self):
-        return self.get_resources("rdf_compressed")
-
-    def get_rdf_html_resources(self):
-        return self.get_resources("rdf_html")
-
-    def get_rdf_endpoints_resources(self):
-        return self.get_resources("endpoints")
-
-    def get_resources(self, type):
-        types = ["rdf","rdf_compressed","endpoints","rdf_html"]
-        if(not type in types):
-            return False
-        db = DatabasePlainFiles(config.data_path)
-        return db.loadDbase(eval("config.data_"+str(type)))
-
-    def get_rdf_and_sparql_list(self):
-        rdf = self.get_rdf_resources()
-        rdf_compressed = self.get_rdf_compressed_resources()
-        rdf_html = self.get_rdf_html_resources()
-        endpoints = self.get_rdf_endpoints_resources()
-        process_list = rdf + rdf_compressed + rdf_html
-
-        #Jens request: download link to rdf file, sparql end-point (if exist)
-        #rdf_id, package_id, sparql_id, rdf_link, sparql_link
-        #output_item = {'rdf_id': '',       # id
-                       #'package_name': '', # package_name
-                       #'rdf_url': '',     # url
-                       #'sparql_id': '',    # (optional) also id, but in the endpoints list
-                       #'sparql_url': '' } # (optional) also url, but in the endpoints list
-        # order of the fields in csv output file
-        fieldnames = ('rdf_id', 'sparql_id', 'package_name', 'rdf_url', 'sparql_url')
-        output = []
-
-        for resource in process_list:
-            output_item = {}
-            output_item['rdf_id'] = resource.id
-            output_item['package_name'] = resource.package_name
-            output_item['rdf_url'] = (resource.url).encode('utf-8')
-            for endpoint in endpoints:
-                if(resource.package_name == endpoint.package_name):
-                    output_item['sparql_id'] = endpoint.id
-                    output_item['sparql_url'] = endpoint.url
-            output.append(output_item)
-       
-        db = DatabasePlainFiles(config.data_path)
-        db.saveListToCSV(config.data_rdf_and_sparql_csv, output, fieldnames) 
-
-    def get_rdf_for_lodstats(self):
-        rdf = self.get_rdf_resources()
-        rdf_compressed = self.get_rdf_compressed_resources()
-        endpoints = self.get_rdf_endpoints_resources()
-        process_list = rdf + rdf_compressed + endpoints
-
-        fieldnames = ('resource_id', 'package_name', 'uri', 'format')
-        output = []
-        package_names = []
-        import md5
-
-        for resource in process_list:
-            output_item = {}
-            output_item['resource_id'] = resource.id
-            if(not resource.package_name in package_names):
-                output_item['package_name'] = resource.package_name
-                package_names.append(resource.package_name)
-            else:
-                output_item['package_name'] = resource.package_name + "_" + str(md5.new(resource.url.encode('utf-8')).hexdigest())
-            output_item['uri'] = (resource.url).encode('utf-8')
-            #routine from the LODStats
-            if resource.format.lower() in ["application/x-ntriples", "nt", "gzip:ntriples", "n-triples", "ntriples", "nt:meta", "nt:transparency-international-corruption-perceptions-index", "rdf, nt", "text/ntriples", "compressed tarfile containing n-triples", "bz2:nt", "gz:nt"]:
-                output_item['format'] = "nt"
-            elif resource.format.lower() in ["application/x-nquads", "nquads", "gzip::nquads", "gz:nq"]:
-                output_item['format'] = "nq"
-            elif resource.format.lower() in ["text/turtle", "rdf/turtle", "ttl", "turtle", "application/turtle", "example/turtle", "example/x-turtle", "meta/turtle", "meta/urtle", "rdf/turtle", "text/ttl", "text/turtle", "ttl:e1:csv", "7z:ttl", "gz:ttl", "gz:ttl:owl", "ttl.bzip2"]:
-                output_item['format'] = "ttl"
-            elif resource.format.lower() in ["text/n3", "n3", "rdf/n3", "application/n3", "example/n3", "example/n3 ", "example/rdf+n3", "text/rdf+n3"]:
-                output_item['format'] = "n3"
-            elif resource.format.lower() in ["application/rdf+xml", "rdf", "rdf/xml", "owl", "application/rdf xml", "application/rdf+xml ", "application/rdfs", "example/owl", "example/rdf", "example/rdf xml", "example/rdf+xml", "meta/rdf+schema", "meta/rdf+xml", "meta/rdf-schema", "meta/rdf-schema ", "rdf+xml", "rdf+xml ", "rdf, owl", "rdf (gzipped)", "gzip:rdf/xml", ]:
-                output_item['format'] = "rdf"
-            elif resource.format.lower() in [ 'RDF endpoint', 'RDF, SPARQL+XML', 'SPARQ/JSON', 'SPARQL', 'SPARQL/JSON', 'SPARQL/XML', 'api/linked-data', 'api/sparql', 'api/sparql ', 'api/dcat', 'rdf, sparql', 'html, rdf, dcif', 'rdf, csv, xml', 'RDF/XML, HTML, JSON', 'RDF, SPARQL+XML', 'sparql' ]:
-                output_item['format'] = "sparql"
-            else:
-                continue
-            output.append(output_item)
-       
-        db = DatabasePlainFiles(config.data_path)
-        db.saveListToCSV(config.data_for_lodstats, output, fieldnames) 
-
-    def update_all_rdf_resources(self):
-        resource_list = self.get_full_resource_list()
-        rdf = []
-        rdf_compressed = []
-        endpoints = []
-        rdf_html = []
-        for resource in resource_list:
-            if(resource['format'] in rdf_formats.rdf_formats):
-                res = Resource(resource['id'])
-                res.init()
-                rdf.append(res)
-            if(resource['format'] in rdf_formats.compressed_formats):
-                res = Resource(resource['id'])
-                res.init()
-                rdf_compressed.append(res)
-            if(resource['format'] in rdf_formats.endpoints):
-                res = Resource(resource['id'])
-                res.init()
-                endpoints.append(res)
-            if(resource['format'] in rdf_formats.html_formats):
-                res = Resource(resource['id'])
-                res.init()
-                rdf_html.append(res)
-        db = DatabasePlainFiles(config.data_path)
-        db.saveDbase(config.data_rdf, rdf)
-        db.saveDbase(config.data_rdf_compressed, rdf_compressed)
-        db.saveDbase(config.data_endpoints, endpoints)
-        db.saveDbase(config.data_rdf_html, rdf_html)
-
-        
-    def update_full_package_list(self):
-        package_list = self.get_package_list()
-        db = DatabasePlainFiles(config.data_path)
-        all_packages = []
-        number_of_packages = len(package_list)
-        for num, package_id in enumerate(package_list):
-            print "processing %d out of %d package" % (num + 1, number_of_packages)
-            package = Package(package_id)
-            # ckan object can not be pickled
-            del package.ckan 
-            all_packages.append(package)
-
-        db.saveDbase(config.data_all_packages, all_packages)
-
-    def update_full_resource_list(self):
-        """
-            TODO: use update_full_dataset_list output here
-        """
-        package_list = self.get_package_list()
-        db = DatabasePlainFiles(config.data_path)
-        all_resources = []
-        number_of_datasets = len(package_list)
-        print "Number of datasets in the "+str(config.ckan_base_url)+" : "+str(number_of_datasets)
-        for num, package_id in enumerate(package_list):
-            try:
-                print "Processing package " + str(num) + " out of " + str(number_of_datasets)
-                package = Package(package_id)
-                for resource in package.resources:
-                   all_resources.append(resource) 
-                del package
-            except BaseException as e:
-                print str(e)
-        db.saveDbase(config.data_all_resources, all_resources)
-
-    def get_sparqlified_list(self):
-        return os.listdir(config.rdf_files_exposed_path)
-
-    def update_exposed_rdf_list(self):
-        db = DatabasePlainFiles(config.root_path)
-        db.saveDbaseRaw('get_exposed_rdf_list', json.dumps(self.get_sparqlified_list()))
-        
     def update_sparqlified_list(self):
         #delete all items
         for file in glob.glob(os.path.join(config.rdf_files_exposed_path + "*")):
@@ -347,7 +154,13 @@ class CkanApplication():
             
 if __name__ == '__main__':
     ckan_app = CkanApplication()
-    print ckan_app.get_rdf_for_lodstats()
+
+    #ckan_app.create_new_wiki_pages()
+    ckan_app.synchronize()
+    #ckan_app.update()
+    #ckan_app.clean_sparqlified()
+
+    #print ckan_app.get_rdf_for_lodstats()
     #ckan_app.get_resource_data()
     #ckan_app.get_rdf_and_sparql_list()
     #ckan_app.update_all_rdf_resources()
@@ -355,7 +168,6 @@ if __name__ == '__main__':
     #ckan_app.update_metadata_for_all_resources()
     #ckan_app.update_exposed_rdf_list()
     #ckan_app.update_sparqlified_list()
-    #ckan_app.clean_sparqlified()
     #ckan_app.create_new_wiki_pages()
     #ckan_app.wiki_pages_diff()
     #ckan_app.get_csv2rdf_pages()
