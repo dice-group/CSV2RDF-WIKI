@@ -13,7 +13,6 @@ from ckan.package import Package
 from prefixcc import PrefixCC
 from ckan.resource import Resource
 from tabular.tabularfile import TabularFile
-from ckan.ckanio import CkanIO
 
 class Mapping():
     def __init__(self, resource_id = None):
@@ -196,7 +195,6 @@ class Mapping():
         """
             Auxilary method for tabular to spaqrlify-ml convertion
         """
-        print prop
         prop = prop.split('%5E%5E')[0]
         
         if(len(prop.split('%3A')) == 1): # %3A = :
@@ -381,7 +379,7 @@ class Mapping():
                 if(not line_num in omitRows):
                     processed_file.write(line)
         except BaseException as e:
-            print str(e)
+            logging.warning("An exception occured: %s" % str(e))
         finally:
             original_file.close()
             processed_file.close()

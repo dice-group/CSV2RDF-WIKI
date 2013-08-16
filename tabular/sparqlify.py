@@ -5,6 +5,7 @@ import threading
 import Queue
 import time
 import json
+import logging
 
 from config import config
 from database import DatabasePlainFiles
@@ -50,14 +51,14 @@ class Sparqlify():
         # \123 or hex e.g. 0xface if you need
         
         #print sparqlify_call
-        print str(' '.join(sparqlify_call))
+        logging.info(str(' '.join(sparqlify_call)))
         
         rdf_file = os.path.join(config.rdf_files_path, str(self.resource_id) + '_' + str(mapping_name) + '.rdf')
         f = open(rdf_file, 'w')
         process = subprocess.Popen(sparqlify_call, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #sparqlify_message = process.stderr.read()
         sparqlify_message = ""
-        print rdf_file
+        logging.info("rdf_file: %s" % rdf_file)
 
         stdout_queue = Queue.Queue()
         stdout_reader = AsynchronousFileReader(process.stdout, stdout_queue)
@@ -75,12 +76,13 @@ class Sparqlify():
                 line = stdout_queue.get()
                 f.write(line)
                 if(stdout_size % 1000 == 0):
-                    print "Processed %d lines" % stdout_size
+                    logging.info("Processed %d lines of %s" % (stdout_size, rdf_file))
+                    
 
             # Show what we received from standard error.
             while not stderr_queue.empty():
                 line = stderr_queue.get()
-                print 'Received line on standard error: ' + repr(line)
+                logging.info('Received line on standard error: ' + repr(line))
 
             # Sleep a bit before asking the readers again.
             time.sleep(.1)

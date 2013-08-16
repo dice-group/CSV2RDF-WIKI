@@ -4,7 +4,9 @@
 import cherrypy
 import json
 import pystache
+import logging
 
+from config import config
 from server import pystachetempl
 from ckan.resource import Resource
 from tabular.sparqlify import Sparqlify
@@ -43,7 +45,7 @@ class CSV2RDFApp(object):
         
         (sparqlify_message, returncode) = sparqlify.transform_resource_to_rdf(mapping_name)
 
-        print sparqlify_message
+        logging.info(sparqlify_message)
         
         rdf_edit = pystachetempl.RdfEdit(resource, configuration_name)
         return self.renderer.render(rdf_edit)
