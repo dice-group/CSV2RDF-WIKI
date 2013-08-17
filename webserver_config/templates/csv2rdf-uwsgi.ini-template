@@ -3,11 +3,11 @@
 
 # Django-related settings
 # the base directory (full path)
-chdir           = /home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI
+chdir           = __CSV2RDF__ 
 # Django's wsgi file
 module          = run
 # the virtualenv (full path)
-home            = /home/ivan/.virtualenvs/csv2rdf
+home            = __VIRTUAL_ENV__
 
 # process-related settings
 # master
@@ -15,7 +15,7 @@ master          = true
 # maximum number of worker processes
 processes       = 10
 # the socket (use the full path to be safe
-socket          = //home/ivan/.virtualenvs/csv2rdf/src/CSV2RDF-WIKI/csv2rdf.sock
+socket          = /__CSV2RDF__/csv2rdf.sock
 # ... with appropriate permissions - may be needed
 chmod-socket    = 666
 # clear environment on exit
