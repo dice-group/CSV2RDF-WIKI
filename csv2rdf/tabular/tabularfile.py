@@ -7,9 +7,9 @@ import csv
 import requests
 from magic import Magic
 
-from config import config
-from database import DatabasePlainFiles
-from ckan.resource import Resource
+import csv2rdf.config
+import csv2rdf.database
+import csv2rdf.ckan.resource
 
 
 class TabularFile():
@@ -18,12 +18,12 @@ class TabularFile():
         self.filename = self.id
     
     def download(self):
-        resource = Resource(self.id)
+        resource = csv2rdf.ckan.resource.Resource(self.id)
         resource.init()
         try:
-            r = requests.get(resource.url, timeout=config.ckan_request_timeout)
+            r = requests.get(resource.url, timeout=csv2rdf.config.config.ckan_request_timeout)
             assert r.ok, r
-            file = DatabasePlainFiles(config.resources_path)
+            file = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
             file.saveDbaseRaw(self.filename, r.content)
             logging.info("File %s downloaded and saved successfully" % self.id)
             return self.get_csv_file_path()
@@ -37,16 +37,16 @@ class TabularFile():
         return os.path.getsize(filepath)
 
     def get_csv_number_of_lines(self):
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         return db.count_line_number(self.filename)
 
     def delete(self):
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         db.delete(self.filename)
         return True
         
     def get_csv_file_path(self):
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         if(db.is_exists(self.filename)):
             return db.get_path_to_file(self.filename)
         else:
@@ -55,13 +55,13 @@ class TabularFile():
     def get_csv_file_url(self):
         file_path = self.get_csv_file_path()
         if(file_path):
-            return os.path.join(config.server_base_url, file_path)
+            return os.path.join(csv2rdf.config.config.server_base_url, file_path)
         else:
             return False
     
     def read_resource_file(self):
         try:
-            file = DatabasePlainFiles(config.resources_path)
+            file = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
             return file.loadDbaseRaw(self.filename)
         except BaseException as e:
             print "Could not read the resource! " + str(e)
@@ -78,7 +78,7 @@ class TabularFile():
             This function take the first line of the csv file
             as a header. Should work in 60% of all cases.
         """
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         with open(db.get_path_to_file(self.filename), 'rU') as csvfile:
             reader = csv.reader(csvfile)
             try:
@@ -118,7 +118,7 @@ class TabularFile():
             return (encoding, info) tuple
             info is a plain string and has to be parsed 
         """
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         filename = db.get_path_to_file(self.filename)
         mgc_encoding = Magic(mime=False, mime_encoding=True)
         mgc_string = Magic(mime=False, mime_encoding=False)
@@ -127,7 +127,7 @@ class TabularFile():
         return (encoding, info)
     
     def isHTML(self):
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         file_chunk = db.loadDbaseChunk(self.filename)
         check_1 = ".*\<\!DOCTYPE html PUBLIC.*"
         result = False
@@ -137,7 +137,7 @@ class TabularFile():
         return result
 
     def isXML(self):
-        db = DatabasePlainFiles(config.resources_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         file_chunk = db.loadDbaseChunk(self.filename)
         check = ".*\<\?xml version=\"1.0\""
         result = False
@@ -172,8 +172,8 @@ class TabularFile():
         ssconvert_call = ["ssconvert", #from gnumeric package
                           "-T",
                           "Gnumeric_stf:stf_csv",
-                          config.resources_path + resource_id,
-                          config.resources_path + resource_id]
+                          csv2rdf.config.config.resources_path + resource_id,
+                          csv2rdf.config.config.resources_path + resource_id]
         print ' '.join(ssconvert_call)
         pipe = subprocess.Popen(ssconvert_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
@@ -185,7 +185,7 @@ class TabularFile():
         #check number of files
         sevenza_call = ["7za", 
                           "l",
-                          config.resources_path + filename]
+                          csv2rdf.config.config.resources_path + filename]
         pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
         pattern = "(\d+) files"
@@ -199,13 +199,13 @@ class TabularFile():
             #extract
             sevenza_call = ["7za", 
                             "e",
-                            config.resources_path + filename]
+                            csv2rdf.config.config.resources_path + filename]
             pipe = subprocess.Popen(sevenza_call, stdout=subprocess.PIPE)
             pipe_message = pipe.stdout.read()
             #move to original
             mv_call = ["mv",
-                       config.resources_path + original_filename,
-                       config.resources_path + filename]
+                       csv2rdf.config.config.resources_path + original_filename,
+                       csv2rdf.config.config.resources_path + filename]
             pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
             pipe_message = pipe.stdout.read()
         else:
@@ -245,7 +245,7 @@ class TabularFile():
         """
             Returns the list of downloaded csv CKAN resources (csv files)
         """
-        csv_list = os.listdir(config.resources_path)
+        csv_list = os.listdir(csv2rdf.config.config.resources_path)
         return csv_list
             
 if __name__ == '__main__':

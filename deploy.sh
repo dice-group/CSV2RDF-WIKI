@@ -42,8 +42,8 @@ else
     sed -i "s%__CSV2RDF__%$DIR%g" $DIR/webserver_config/csv2rdf-supervisor.conf
     echo "Linking created configuration to /etc/supervisor/conf.d/csv2rdf-supervisor.conf ..." 
     sudo ln -s $DIR/webserver_config/csv2rdf-supervisor.conf /etc/supervisor/conf.d/csv2rdf-supervisor.conf
-    sudo service supervisor restart
-    echo "\n"
+    sudo service supervisor stop
+    sudo service supervisor start
 fi
 
 echo "Configuring nginx..."
@@ -57,6 +57,21 @@ else
     sed -i "s%__HOSTNAME__%$HOSTNAME%g" $DIR/webserver_config/csv2rdf-nginx.conf
     echo "Linking created configuration to /etc/nginx/sites-enabled/csv2rdf-nginx.conf ..."
     sudo ln -s $DIR/webserver_config/csv2rdf-nginx.conf /etc/nginx/sites-enabled/csv2rdf-nginx.conf
+
+    while true; do
+        read -p "Developer's deploy? (will edit /etc/hosts) [yn] " yn
+        case $yn in
+            [Yy]* ) 
+                echo "# __CSV2RDF__ begin" | sudo tee -a /etc/hosts; 
+                echo "127.0.0.1 $HOSTNAME" | sudo tee -a /etc/hosts; 
+                echo "# __CSV2RDF__ end" | sudo tee -a /etc/hosts; 
+                break;;
+            [Nn]* ) 
+                exit;;
+            * ) echo "Please answer yes or no.";;
+        esac
+    done
+
     echo "Restarting nginx..."
     sudo service nginx restart
 fi

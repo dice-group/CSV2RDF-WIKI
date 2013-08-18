@@ -16,3 +16,5 @@ sudo rm /etc/supervisor/conf.d/csv2rdf-supervisor.conf
 echo "Removing link: /etc/nginx/sites-enabled/csv2rdf-nginx.conf" 
 sudo rm /etc/nginx/sites-enabled/csv2rdf-nginx.conf 
 
+echo "Removing entry from /etc/hosts file..."
+ 

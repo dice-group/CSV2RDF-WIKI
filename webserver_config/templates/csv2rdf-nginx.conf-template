@@ -18,7 +18,11 @@ server {
 
     # Django media
     location /server/static  {
-        alias __CSV2RDF__/server/static;
+        alias __CSV2RDF__/csv2rdf/server/static;
+    }
+
+    location /legal {
+        alias __CSV2RDF__/csv2rdf/legal;
     }
 
     location /sparqlified_exposed {
@@ -33,14 +37,10 @@ server {
         alias __CSV2RDF__/get_exposed_rdf_list;
     }
 
-    location /legal {
-        alias __CSV2RDF__/legal;
-    }
-
     # Finally, send all non-media requests to the Django server.
     location / {
         uwsgi_pass  cherrypy;
-        include     __CSV2RDF__/uwsgi_params; # the uwsgi_params file you installed
+        include     __CSV2RDF__/webserver_config/uwsgi_params; # the uwsgi_params file you installed
         }
     access_log /var/log/nginx/__HOSTNAME__.access.log;
     error_log /var/log/nginx/__HOSTNAME__.error.log;

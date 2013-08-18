@@ -5,7 +5,7 @@
 # the base directory (full path)
 chdir           = __CSV2RDF__ 
 # Django's wsgi file
-module          = run
+module          = csv2rdf.run
 # the virtualenv (full path)
 home            = __VIRTUAL_ENV__
 

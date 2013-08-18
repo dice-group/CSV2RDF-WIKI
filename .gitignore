@@ -8,6 +8,5 @@ get_exposed_rdf_list
 *.pyc
 *.log
 *.swp
-csv2rdf-nginx.conf
-csv2rdf-supervisor.conf
-csv2rdf-uwsgi.ini
+webserver_config/*
+!webserver_config/templates

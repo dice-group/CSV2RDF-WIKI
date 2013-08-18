@@ -1,12 +1,12 @@
 import requests
 from ckanclient import CkanClient
 
-from config import config
-from database import DatabasePlainFiles
-from interfaces import AuxilaryInterface
+import csv2rdf.config
+import csv2rdf.database
+import csv2rdf.interfaces
 
 
-class Package(AuxilaryInterface):
+class Package(csv2rdf.interfaces.AuxilaryInterface):
     """ Reflects the CKAN package.
         CKAN package contains one or several CKAN resources
         Properties:
@@ -28,8 +28,8 @@ class Package(AuxilaryInterface):
     """
     def __init__(self, package_name):
         self.name = package_name
-        self.ckan = CkanClient(base_location=config.ckan_api_url,
-                               api_key=config.ckan_api_key)
+        self.ckan = CkanClient(base_location=csv2rdf.config.config.ckan_api_url,
+                               api_key=csv2rdf.config.config.ckan_api_key)
         self.initialize()
         
     def initialize(self):
@@ -40,7 +40,7 @@ class Package(AuxilaryInterface):
         """
             Overwrites existing files!
         """
-        db = DatabasePlainFiles(config.resource_dir)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resource_dir)
         for resource in self.resources:
             url = resource['url']
             filename = self.extract_filename_url(url)

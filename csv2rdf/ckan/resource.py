@@ -3,11 +3,11 @@ import re
 import json
 import requests
 
-from config import config
-from interfaces import AuxilaryInterface
+import csv2rdf.config
+import csv2rdf.interfaces
 
 
-class Resource(AuxilaryInterface):
+class Resource(csv2rdf.interfaces.AuxilaryInterface):
     """ Reflects the CKAN resource.
         Properties:
             resource_group_id, cache_last_updated, revision_timestamp,
@@ -48,8 +48,8 @@ class Resource(AuxilaryInterface):
         """
         data = json.dumps({'id': self.id})
         headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
-        url = config.ckan_api_url + '/action/resource_show'
-        r = requests.post(url, timeout=config.ckan_request_timeout, data=data, headers=headers)
+        url = csv2rdf.config.config.ckan_api_url + '/action/resource_show'
+        r = requests.post(url, timeout=csv2rdf.config.config.ckan_request_timeout, data=data, headers=headers)
         assert r.ok, r
         resource = json.loads(r.content)
         resource = resource["result"]
@@ -61,8 +61,8 @@ class Resource(AuxilaryInterface):
             for this resource
             by using revision_id
         """
-        url = config.ckan_api_url + '/rest/revision/' + self.revision_id
-        r = requests.get(url, timeout=config.ckan_request_timeout)
+        url = csv2rdf.config.config.ckan_api_url + '/rest/revision/' + self.revision_id
+        r = requests.get(url, timeout=csv2rdf.config.config.ckan_request_timeout)
         assert r.ok, r
         revision = json.loads(r.content)
         return revision["packages"][0]
@@ -79,10 +79,10 @@ class Resource(AuxilaryInterface):
     #
 
     def get_ckan_url(self):
-        return str(config.ckan_base_url) + '/dataset/' + str(self.package_name) + '/resource/' + str(self.id)
+        return str(csv2rdf.config.config.ckan_base_url) + '/dataset/' + str(self.package_name) + '/resource/' + str(self.id)
 
     def get_wiki_url(self):
-        return config.wiki_base_url + '/wiki/' + config.wiki_csv2rdf_namespace + self.id
+        return csv2rdf.config.config.wiki_base_url + '/wiki/' + csv2rdf.config.config.wiki_csv2rdf_namespace + self.id
 
 if __name__ == '__main__':
     res = Resource('2625cb04-6a73-4154-9e22-bde490d5b61e')

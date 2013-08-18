@@ -1,13 +1,13 @@
 import logging
 
-from config import config
+import csv2rdf.config
 
-from ckan.ckanio import CkanIO
-from tabular.tabularfile import TabularFile
+import csv2rdf.ckan.ckanio
+import csv2rdf.tabular.tabularfile
 
 class Queries():
     def __init__(self):
-        self.io = CkanIO()
+        self.io = csv2rdf.ckan.ckanio.CkanIO()
 
     def get_outdated_and_new_csv_resources(self):
         """
@@ -23,7 +23,7 @@ class Queries():
         for resource in csv_ckan_list:
             csv_ckan_list_ids.append(resource['id'])
 
-        tf = TabularFile('')
+        tf = csv2rdf.tabular.tabularfile.TabularFile('')
         csv_local_list = tf.get_csv_resource_list_local()
 
         resources_outdated = []

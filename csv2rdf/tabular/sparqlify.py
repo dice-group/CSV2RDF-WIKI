@@ -7,10 +7,10 @@ import time
 import json
 import logging
 
-from config import config
-from database import DatabasePlainFiles
-from tabular.mapping import Mapping
-from tabular.tabularfile import TabularFile
+import csv2rdf.config
+import csv2rdf.database
+import csv2rdf.tabular.mapping
+import csv2rdf.tabular.tabularfile
 
 
 class Sparqlify():
@@ -21,13 +21,13 @@ class Sparqlify():
         if(not resource_id):
             resource_id = self.resource_id
                 
-        tabular_file = TabularFile(resource_id)
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(resource_id)
         if(tabular_file.get_csv_file_path()):
             file_path = tabular_file.get_csv_file_path()
         else:
             file_path = tabular_file.download()
 
-        mapping = Mapping(resource_id)
+        mapping = csv2rdf.tabular.mapping.Mapping(resource_id)
         mapping.init()
         mapping_path = mapping.get_mapping_path(mapping_name)
         mapping_current = mapping.get_mapping_by_name(mapping_name)
@@ -38,7 +38,7 @@ class Sparqlify():
         delimiter = mapping_current['delimiter']
         
         sparqlify_call = ["java",
-                          "-cp", config.sparqlify_jar_path,
+                          "-cp", csv2rdf.config.config.sparqlify_jar_path,
                           "org.aksw.sparqlify.csv.CsvMapperCliMain",
                           "-f", file_path,
                           "-c", mapping_path,
@@ -53,7 +53,7 @@ class Sparqlify():
         #print sparqlify_call
         logging.info(str(' '.join(sparqlify_call)))
         
-        rdf_file = os.path.join(config.rdf_files_path, str(self.resource_id) + '_' + str(mapping_name) + '.rdf')
+        rdf_file = os.path.join(csv2rdf.config.config.rdf_files_path, str(self.resource_id) + '_' + str(mapping_name) + '.rdf')
         f = open(rdf_file, 'w')
         process = subprocess.Popen(sparqlify_call, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #sparqlify_message = process.stderr.read()
@@ -106,7 +106,7 @@ class Sparqlify():
             resource_id = self.resource_id
         
         filename = resource_id + '_' + mapping_name + '.rdf'
-        db = DatabasePlainFiles(config.rdf_files_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.rdf_files_path)
         if(db.is_exists(filename)):
             return db.get_path_to_file(filename)
         else:
@@ -117,15 +117,15 @@ class Sparqlify():
             resource_id = self.resource_id
         file_path = self.get_rdf_file_path(configuration_name, resource_id=resource_id)
         if(file_path):
-            return os.path.join(config.server_base_url, self.get_rdf_file_path(configuration_name))
+            return os.path.join(csv2rdf.config.config.server_base_url, self.get_rdf_file_path(configuration_name))
         else:
             return False
 
     def get_sparqlified_list(self):
-        return os.listdir(config.rdf_files_exposed_path)
+        return os.listdir(csv2rdf.config.config.rdf_files_exposed_path)
 
     def update_exposed_rdf_list(self):
-        db = DatabasePlainFiles(config.root_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.root_path)
         db.saveDbaseRaw('get_exposed_rdf_list', json.dumps(self.get_sparqlified_list()))
 
 class AsynchronousFileReader(threading.Thread):

@@ -7,18 +7,18 @@ import wikitools
 from unidecode import unidecode
 import tempfile
 
-from config import config
-from database import DatabasePlainFiles
-from ckan.package import Package
-from prefixcc import PrefixCC
-from ckan.resource import Resource
-from tabular.tabularfile import TabularFile
+import csv2rdf.config
+import csv2rdf.database
+import csv2rdf.ckan.package
+import csv2rdf.prefixcc
+import csv2rdf.ckan.resource
+import csv2rdf.tabular.tabularfile
 
 class Mapping():
     def __init__(self, resource_id = None):
         self.resource_id = resource_id
-        self.wiki_site = wikitools.Wiki(config.wiki_api_url)
-        self.wiki_site.login(config.wiki_username, password=config.wiki_password)
+        self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)
+        self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
     
     def init(self):
         self.wiki_page = self.request_wiki_page()
@@ -43,12 +43,12 @@ class Mapping():
                  }
         request = wikitools.APIRequest(self.wiki_site, params)
         result = request.query()
-        db = DatabasePlainFiles(config.data_path)
-        db.saveDbase(config.data_all_csv2rdf_pages, result)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
+        db.saveDbase(csv2rdf.config.config.data_all_csv2rdf_pages, result)
 
     def get_csv2rdf_wiki_page_list(self):
-        db = DatabasePlainFiles(config.data_path)
-        return db.loadDbase(config.data_all_csv2rdf_pages)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
+        return db.loadDbase(csv2rdf.config.config.data_all_csv2rdf_pages)
 
     def get_all_csv2rdf_page_ids(self):
         """
@@ -68,7 +68,7 @@ class Mapping():
         if(not resource_id):
             resource_id = self.resource_id
         
-        title = config.wiki_csv2rdf_namespace + resource_id
+        title = csv2rdf.config.config.wiki_csv2rdf_namespace + resource_id
         params = {'action':'query', 'prop':'revisions', 'rvprop':'content', 'titles':title}
         request = wikitools.APIRequest(self.wiki_site, params)
         result = request.query()
@@ -154,7 +154,7 @@ class Mapping():
             resource_id = self.resource_id
         
         csv2rdf_mapping = ''
-        prefixcc = PrefixCC()
+        prefixcc = csv2rdf.prefixcc.PrefixCC()
         #scan all colX values and extract prefixes
         prefixes = []
         properties = {} #properties['col1'] = id >>>> ?obs myprefix:id ?col1
@@ -219,7 +219,7 @@ class Mapping():
         if(not resource_id):
             resource_id = self.resource_id
             
-        db = DatabasePlainFiles(config.sparqlify_mappings_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.sparqlify_mappings_path)
         for mapping in mappings:
             sparqlifyml = self.convert_mapping_to_sparqlifyml(mapping, resource_id=resource_id)
             filename = resource_id + '_' + mapping['name'] + '.sparqlify'
@@ -234,7 +234,7 @@ class Mapping():
             resource_id = self.resource_id
             
         text = text.encode('utf-8')
-        title = config.wiki_csv2rdf_namespace + resource_id
+        title = csv2rdf.config.config.wiki_csv2rdf_namespace + resource_id
         page = wikitools.Page(self.wiki_site, title=title)
         result = page.edit(text=text, bot=True)
         return result
@@ -243,7 +243,7 @@ class Mapping():
         if(not resource_id):
             resource_id = self.resource_id
 
-        title = config.wiki_csv2rdf_namespace + resource_id
+        title = csv2rdf.config.config.wiki_csv2rdf_namespace + resource_id
         try:
             page = wikitools.Page(self.wiki_site, title=title)
             result = page.delete()
@@ -258,10 +258,10 @@ class Mapping():
         if(not resource_id):
             resource_id = self.resource_id
         
-        resource = Resource(resource_id)
+        resource = csv2rdf.ckan.resource.Resource(resource_id)
         resource.init()
-        package = Package(resource.package_name)
-        tabular_file = TabularFile(resource_id)
+        package = csv2rdf.ckan.package.Package(resource.package_name)
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(resource_id)
         
         page = '{{CSV2RDFHeader}} \n'
         page += '\n'
@@ -312,12 +312,12 @@ class Mapping():
         self.create_wiki_page(self.wiki_page)
         
     def update_metadata_csv_filesize(self):
-        tabular_file = TabularFile(self.resource_id) 
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id) 
         csv_filesize = tabular_file.get_csv_filesize()
         self.metadata['filesize'] = str(csv_filesize)
 
     def update_metadata_csv_number_of_lines(self):
-        tabular_file = TabularFile(self.resource_id)
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id)
         csv_number_of_lines = tabular_file.get_csv_number_of_lines()
         self.metadata['csv_number_of_lines'] = str(csv_number_of_lines)
 
@@ -333,13 +333,13 @@ class Mapping():
             using the default mapping here (mapping 0)
         """
         rdf_filename = self.resource_id + "_" + self.mappings[0]['name'] + ".rdf"
-        db = DatabasePlainFiles(config.rdf_files_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.rdf_files_path)
         rdf_number_of_triples = db.count_line_number(rdf_filename)
         self.metadata['rdf_number_of_triples'] = str(rdf_number_of_triples)
 
     def update_metadata_rdf_last_sparqlified(self):
         rdf_filename = self.resource_id + "_" + self.mappings[0]['name'] + ".rdf"
-        db = DatabasePlainFiles(config.rdf_files_path)
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.rdf_files_path)
         rdf_last_sparqlified = db.get_last_access_time(rdf_filename)
         self.metadata['rdf_last_sparqlified'] = str(rdf_last_sparqlified)
 
@@ -389,7 +389,7 @@ class Mapping():
     def get_mapping_path(self, configuration_name, resource_id=None):
         if(not resource_id):
             resource_id = self.resource_id
-        file_path = os.path.join(config.sparqlify_mappings_path, str(resource_id) + '_' + str(configuration_name) + '.sparqlify')
+        file_path = os.path.join(csv2rdf.config.config.sparqlify_mappings_path, str(resource_id) + '_' + str(configuration_name) + '.sparqlify')
         if(os.path.exists(file_path)):
             return file_path
         else:
@@ -400,7 +400,7 @@ class Mapping():
             resource_id = self.resource_id
         file_path = self.get_mapping_path(configuration_name, resource_id=resource_id)
         if(file_path):
-            return os.path.join(config.server_base_url, self.get_mapping_path(configuration_name, resource_id=resource_id))
+            return os.path.join(csv2rdf.config.config.server_base_url, self.get_mapping_path(configuration_name, resource_id=resource_id))
         else:
             return False
         
@@ -419,7 +419,7 @@ class Mapping():
 
     def get_outdated_and_new_wiki_pages(self):
         logging.info("Looking for outdated and new wiki pages ... Started.")
-        tf = TabularFile('')
+        tf = csv2rdf.tabular.tabularfile.TabularFile('')
         resources_ids = tf.get_csv_resource_list_local()
 
         page_ids_list = self.get_all_csv2rdf_page_ids()
