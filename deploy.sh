@@ -15,6 +15,8 @@ echo "Current virtual enviroment: $VIRTUAL_ENV"
 
 echo "Creating necessary folders..."
 mkdir $DIR/sparqlified
+mkdir $DIR/files
+mkdir $DIR/logs
 
 echo "Configuring application config..."
 if [ -f $DIR/csv2rdf/config/config.py ]

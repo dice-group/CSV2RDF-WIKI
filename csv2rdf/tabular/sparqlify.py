@@ -53,7 +53,6 @@ class Sparqlify():
         logging.info(str(' '.join(sparqlify_call)))
 
         rdf_file = os.path.join(csv2rdf.config.config.rdf_files_path, str(self.resource_id) + '_' + str(mapping_name) + '.rdf')
-        open(rdf_file, 'a').close() 
         f = open(rdf_file, 'w')
         process = subprocess.Popen(sparqlify_call, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         #sparqlify_message = process.stderr.read()
