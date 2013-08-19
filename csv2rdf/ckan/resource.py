@@ -3,9 +3,8 @@ import re
 import json
 import requests
 
-import csv2rdf.config
+import csv2rdf.config.config
 import csv2rdf.interfaces
-
 
 class Resource(csv2rdf.interfaces.AuxilaryInterface):
     """ Reflects the CKAN resource.

@@ -13,8 +13,50 @@ echo $DIR
 echo "The virtual enviroment should be activated (for example, \$workon csv2rdf)."
 echo "Current virtual enviroment: $VIRTUAL_ENV"
 
-echo "Configuring uwsgi..."
+echo "Creating necessary folders..."
+mkdir $DIR/sparqlified
 
+echo "Configuring application config..."
+if [ -f $DIR/csv2rdf/config/config.py ]
+then
+    echo "Error: csv2rdf/config/config.py already exists!"
+else
+    cp $DIR/csv2rdf/config/config.py-template $DIR/csv2rdf/config/config.py
+    read -p "Specify hostname (e.g. csv2rdf.aksw.org): " HOSTNAME
+    read -p "Specify CKAN URI (e.g. http://publicdata.eu): " CKAN_BASEURI
+    read -p "Specify CKAN API key (e.g. 00000000-0000-0000-0000-000000000000): " CKAN_API_KEY
+    read -p "Specify WIKI URI (e.g. http://wiki.publicdata.eu): " WIKI_BASEURI
+    read -p "Specify WIKI username: " WIKI_USERNAME
+    read -p "Specify WIKI password: " WIKI_PASSWORD
+    read -p "Specify WIKI namespace (e.g. Csv2rdf:): " WIKI_CSV2RDF_NAMESPACE
+
+    sed -i "s%__HOSTNAME__%$HOSTNAME%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__CKAN_BASEURI__%$CKAN_BASEURI%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__CKAN_API_KEY__%$CKAN_API_KEY%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__WIKI_BASEURI__%$WIKI_BASEURI%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__WIKI_USERNAME__%$WIKI_USERNAME%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__WIKI_PASSWORD__%$WIKI_PASSWORD%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__WIKI_CSV2RDF_NAMESPACE__%$WIKI_CSV2RDF_NAMESPACE%g" $DIR/csv2rdf/config/config.py
+    sed -i "s%__CSV2RDF__%$DIR%g" $DIR/csv2rdf/config/config.py
+fi
+
+echo "Configuring mustache templates..."
+if [ -f $DIR/csv2rdf/server/static/templates/baseUrl.mustache ]
+then
+    echo "Error: mustache templates already exist!"
+else
+    cp $DIR/csv2rdf/server/static/templates/baseUrl.mustache-template $DIR/csv2rdf/server/static/templates/baseUrl.mustache
+    sed -i "s%__HOSTNAME__%$HOSTNAME%g" $DIR/csv2rdf/server/static/templates/baseUrl.mustache
+    cp $DIR/csv2rdf/server/static/templates/ckaninstance.mustache-template $DIR/csv2rdf/server/static/templates/ckaninstance.mustache
+    sed -i "s%__CKAN_BASEURI__%$CKAN_BASEURI%g" $DIR/csv2rdf/server/static/templates/ckaninstance.mustache
+    cp $DIR/csv2rdf/server/static/templates/wikiBaseUrl.mustache-template $DIR/csv2rdf/server/static/templates/wikiBaseUrl.mustache
+    sed -i "s%__WIKI_BASEURI__%$WIKI_BASEURI%g" $DIR/csv2rdf/server/static/templates/wikiBaseUrl.mustache
+    cp $DIR/csv2rdf/server/static/templates/wikiNamespace.mustache-template $DIR/csv2rdf/server/static/templates/wikiNamespace.mustache
+    sed -i "s%__WIKI_CSV2RDF_NAMESPACE__%$WIKI_CSV2RDF_NAMESPACE%g" $DIR/csv2rdf/server/static/templates/wikiNamespace.mustache
+fi
+
+
+echo "Configuring uwsgi..."
 if [ -f $DIR/webserver_config/csv2rdf-uwsgi.ini ]
 then
     echo "Error: will not deploy uwsgi. Configuration already exists!"
@@ -52,7 +94,6 @@ then
     echo "Error: will not deploy nginx. Configuration already exists!"
 else
     cp $DIR/webserver_config/templates/csv2rdf-nginx.conf-template $DIR/webserver_config/csv2rdf-nginx.conf
-    read -p "Specify the hostname (for instance, www.example.com): " HOSTNAME
     sed -i "s%__CSV2RDF__%$DIR%g" $DIR/webserver_config/csv2rdf-nginx.conf
     sed -i "s%__HOSTNAME__%$HOSTNAME%g" $DIR/webserver_config/csv2rdf-nginx.conf
     echo "Linking created configuration to /etc/nginx/sites-enabled/csv2rdf-nginx.conf ..."

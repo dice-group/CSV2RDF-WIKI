@@ -1,0 +1,40 @@
+#This server URI
+server_base_url = 'http://__HOSTNAME__/'
+
+#CKAN API
+ckan_base_url='__CKAN_BASEURI__'
+ckan_api_url='__CKAN_BASEURI__/api'
+ckan_api_key='__CKAN_API_KEY__'
+ckan_request_timeout = 25 #timeout for requesting info from CKAN API in seconds
+
+#MediaWiki API
+wiki_base_url = "__WIKI_BASEURI__"
+wiki_csv2rdf_namespace = "__WIKI_CSV2RDF_NAMESPACE__" #Csv2rdf:
+wiki_api_url = "__WIKI_BASEURI__/api.php"
+wiki_username = "__WIKI_USERNAME__"
+wiki_password = "__WIKI_PASSWORD__"
+
+#Root
+root_path = "__CSV2RDF__"
+
+#pathes to libraries
+sparqlify_jar_path = root_path + "/csv2rdf/libs/sparqlify.jar"
+
+#pathes to local folders
+resources_path = root_path + "/files/csv/" #contains downloaded and cleaned csv files
+sparqlify_mappings_path = root_path + "/files/sparqlify_mappings/" #contains mappings for every config in the mappings wiki
+rdf_files_path = root_path + "/sparqlified/" #contains converted to RDF files
+rdf_files_exposed_path = root_path + "/sparqlified_exposed/" #contains soft links to each (only one) resource
+
+#data files
+data_csv_resources_path = root_path + "/data/csv_resources/"
+data_path = root_path + "/data/"
+data_all_csv2rdf_pages_file = "csv2rdf_pages"
+data_all_packages = "all_packages"
+data_all_resources = "all_resources"
+data_rdf = "rdf"
+data_rdf_compressed = "rdf_compressed"
+data_endpoints = "endpoints"
+data_rdf_html = "rdf_html"
+data_rdf_and_sparql_csv = "rdf_and_sparql_csv"
+data_for_lodstats = "rdf_for_lodstats"

@@ -14,6 +14,13 @@
 
 [program:csv2rdf]
 command = __VIRTUAL_ENV__/bin/uwsgi --ini __CSV2RDF__/webserver_config/csv2rdf-uwsgi.ini
+stdout_logfile=__CSV2RDF__/logs/wsgi.log
+stderr_logfile=__CSV2RDF__/logs/wsgi_err.log
+autostart=true
+autorestart=true
+redirect_stderr=true
+stopwaitsecs=60
+stopsignal=INT
 
 ;[eventlistener:crashmail]
 ;command=/usr/local/bin/crashmail -a -m iermilov@informatik.uni-leipzig.de
