@@ -2,9 +2,12 @@ import re
 
 import json
 import requests
+import logging
 
 import csv2rdf.config.config
 import csv2rdf.interfaces
+
+logger = logging.getLogger(__name__)
 
 class Resource(csv2rdf.interfaces.AuxilaryInterface):
     """ Reflects the CKAN resource.
@@ -71,6 +74,21 @@ class Resource(csv2rdf.interfaces.AuxilaryInterface):
             return True
         else:
             return False
+
+    def search_by_uri(self, uri):
+        data = json.dumps({'id': self.id})
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+        url = csv2rdf.config.config.ckan_api_url + '/action/resource_search?query=url:'+str(uri)
+        r = requests.post(url, timeout=csv2rdf.config.config.ckan_request_timeout, data=data, headers=headers)
+        assert r.ok, r
+        resource = json.loads(r.content)
+        resource = resource["result"]["results"]
+        try:
+            resource = resource[0]
+        except BaseException as e:
+            logger.warning("No resource found with URI: %s"%uri)
+            logger.warning("Exception occured %s"%str(e))
+        return resource
 
     #
     # Interface methods - getters
