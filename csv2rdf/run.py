@@ -65,6 +65,12 @@ class CSV2RDFApp(object):
             return json.dumps(head)
         except:
             return json.dumps('')
+
+    @cherrypy.expose    
+    def getUriByCkanResourceId(self, resource_id):
+        resource = csv2rdf.ckan.resource.Resource(resource_id)
+        resource.init() 
+        return json.dumps(resource.url)
     
     @cherrypy.expose        
     def get_exposed_rdf_list(self):
