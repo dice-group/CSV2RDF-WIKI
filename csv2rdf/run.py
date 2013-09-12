@@ -49,7 +49,6 @@ class CSV2RDFApp(object):
         
         rdf_edit = csv2rdf.server.pystachetempl.RdfEdit(resource, configuration_name)
         return self.renderer.render(rdf_edit)
-        #TODO: make page with the editor!
         
     ####### AJAX calls
     
