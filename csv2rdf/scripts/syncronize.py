@@ -1,4 +1,4 @@
-import ckan.application
+import csv2rdf.ckan.application
 
-ckan_app = ckan.application.CkanApplication()
+ckan_app = csv2rdf.ckan.application.CkanApplication()
 ckan_app.synchronize()
