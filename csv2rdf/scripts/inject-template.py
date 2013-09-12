@@ -12,4 +12,4 @@ for line in f.readlines():
     split_place = int(template_end[0]) + 1
     mapping.wiki_page = mapping.wiki_page[:split_place] + [geo_qb_templates] + mapping.wiki_page[split_place:]
     mapping.wiki_page = '\n'.join(mapping.wiki_page)
-    break
+    mapping.create_wiki_page(mapping.wiki_page)
