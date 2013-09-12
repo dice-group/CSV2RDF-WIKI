@@ -122,7 +122,7 @@ class Mapping():
                     continue
                     #line = lines[num-1] + lines[num]
                 prop = line.split('=')[0]
-                value = str(line.split('=')[1])
+                value = str(line.split('=')[1].encode('utf-8'))
                 prop = prop.strip()
                 #Encode value to URL
                 value = value[:-1]
