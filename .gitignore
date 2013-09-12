@@ -2,7 +2,6 @@ files/
 data/
 sparqlified/
 sparqlified_exposed/
-config/config.py
 .ropeproject/
 get_exposed_rdf_list
 *.pyc
@@ -10,3 +9,8 @@ get_exposed_rdf_list
 *.swp
 webserver_config/*
 !webserver_config/templates
+csv2rdf/config/config.py
+csv2rdf/server/static/templates/baseUrl.mustache
+csv2rdf/server/static/templates/ckaninstance.mustache
+csv2rdf/server/static/templates/wikiBaseUrl.mustache
+csv2rdf/server/static/templates/wikiNamespace.mustache
