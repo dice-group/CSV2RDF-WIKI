@@ -11,6 +11,10 @@
 ;
 ;[supervisorctl]
 ;serverurl=unix:///home/akswadmin/www/csv2rdf-server/supervisor_uwsgi.sock
+;
+;[eventlistener:crashmail]
+;command=/usr/local/bin/crashmail -a -m iermilov@informatik.uni-leipzig.de
+;events=PROCESS_STATE
 
 [program:csv2rdf]
 command = __VIRTUAL_ENV__/bin/uwsgi --ini __CSV2RDF__/webserver_config/csv2rdf-uwsgi.ini
@@ -21,7 +25,3 @@ autorestart=true
 redirect_stderr=true
 stopwaitsecs=60
 stopsignal=INT
-
-;[eventlistener:crashmail]
-;command=/usr/local/bin/crashmail -a -m iermilov@informatik.uni-leipzig.de
-;events=PROCESS_STATE

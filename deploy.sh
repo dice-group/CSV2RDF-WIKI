@@ -24,13 +24,24 @@ then
     echo "Error: csv2rdf/config/config.py already exists!"
 else
     cp $DIR/csv2rdf/config/config.py-template $DIR/csv2rdf/config/config.py
-    read -p "Specify hostname (e.g. csv2rdf.aksw.org): " HOSTNAME
-    read -p "Specify CKAN URI (e.g. http://publicdata.eu): " CKAN_BASEURI
-    read -p "Specify CKAN API key (e.g. 00000000-0000-0000-0000-000000000000): " CKAN_API_KEY
-    read -p "Specify WIKI URI (e.g. http://wiki.publicdata.eu): " WIKI_BASEURI
-    read -p "Specify WIKI username: " WIKI_USERNAME
-    read -p "Specify WIKI password: " WIKI_PASSWORD
-    read -p "Specify WIKI namespace (e.g. Csv2rdf:): " WIKI_CSV2RDF_NAMESPACE
+    read -p "Specify hostname [csv2rdf.aksw.org]: " HOSTNAME
+    read -p "Specify CKAN URI [http://publicdata.eu]: " CKAN_BASEURI
+    read -p "Specify CKAN API key [00000000-0000-0000-0000-000000000000]: " CKAN_API_KEY
+    read -p "Specify WIKI URI [http://wiki.publicdata.eu]: " WIKI_BASEURI
+    read -p "Specify WIKI username [wiki_username]: " WIKI_USERNAME
+    read -p "Specify WIKI password [wiki_password]: " WIKI_PASSWORD
+    read -p "Specify WIKI namespace [Csv2rdf:]: " WIKI_CSV2RDF_NAMESPACE
+    read -p "Specify the number of Sparqlify (Java) workers [5]: " SPARQLIFY_JAVA_WORKERS
+
+    #Defaults
+    [ -z "$HOSTNAME" ] && HOSTNAME="csv2rdf.aksw.org"
+    [ -z "$CKAN_BASEURI" ] && CKAN_BASEURI="http://publicdata.eu"
+    [ -z "$CKAN_API_KEY" ] && CKAN_API_KEY="00000000-0000-0000-0000-000000000000"
+    [ -z "$WIKI_BASEURI" ] && WIKI_BASEURI="http://wiki.publicdata.eu"
+    [ -z "$WIKI_USERNAME" ] && WIKI_USERNAME="wiki_username"
+    [ -z "$WIKI_PASSWORD" ] && WIKI_PASSWORD="wiki_password"
+    [ -z "$WIKI_CSV2RDF_NAMESPACE" ] && WIKI_CSV2RDF_NAMESPACE="Csv2rdf:"
+    [ -z "$SPARQLIFY_JAVA_WORKERS" ] && SPARQLIFY_JAVA_WORKERS="5"
 
     sed -i "s%__HOSTNAME__%$HOSTNAME%g" $DIR/csv2rdf/config/config.py
     sed -i "s%__CKAN_BASEURI__%$CKAN_BASEURI%g" $DIR/csv2rdf/config/config.py
@@ -82,8 +93,16 @@ then
     echo "Error: will not deploy supervisor. Configuration already exists!"
 else
     cp $DIR/webserver_config/templates/csv2rdf-supervisor.conf-template $DIR/webserver_config/csv2rdf-supervisor.conf
+
+    for((i=1; i<=$SPARQLIFY_JAVA_WORKERS; i++))
+    do
+        echo "" >> $DIR/webserver_config/csv2rdf-supervisor.conf
+        sed "s%__ITERATOR__%$i%g" $DIR/webserver_config/templates/csv2rdf-supervisor-sparqlify_java_handler.conf-template >> $DIR/webserver_config/csv2rdf-supervisor.conf
+    done
+
     sed -i "s%__VIRTUAL_ENV__%$VIRTUAL_ENV%g" $DIR/webserver_config/csv2rdf-supervisor.conf
     sed -i "s%__CSV2RDF__%$DIR%g" $DIR/webserver_config/csv2rdf-supervisor.conf
+
     echo "Linking created configuration to /etc/supervisor/conf.d/csv2rdf-supervisor.conf ..." 
     sudo ln -s $DIR/webserver_config/csv2rdf-supervisor.conf /etc/supervisor/conf.d/csv2rdf-supervisor.conf
     sudo service supervisor stop

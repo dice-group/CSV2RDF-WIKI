@@ -1,0 +1,9 @@
+[program:sparqlify_java_handler__ITERATOR__]
+command = __VIRTUAL_ENV__/bin/python __CSV2RDF__/csv2rdf/tabular/sparqlify_java_handler.py
+stdout_logfile=__CSV2RDF__/logs/sparqlify_java_handler__ITERATOR__.out
+stderr_logfile=__CSV2RDF__/logs/sparqlify_java_handler__ITERATOR__.err
+autostart=true
+autorestart=true
+redirect_stderr=true
+stopwaitsecs=60
+stopsignal=INT

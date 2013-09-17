@@ -43,12 +43,14 @@ class CSV2RDFApp(object):
         resource.init()
         sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(resource_id)
         
-        (sparqlify_message, returncode) = sparqlify.transform_resource_to_rdf(mapping_name)
+        if(sparqlify.transform_resource_to_rdf(mapping_name)):
+            logging.info("The resource %s %s was sent to the queue." % (resource_id, mapping_name))
+            
+            rdf_edit = csv2rdf.server.pystachetempl.RdfEdit(resource, mapping_name)
+            return self.renderer.render(rdf_edit)
+        else:
+            return self.renderer.render(rdf_edit)
 
-        logging.info(sparqlify_message)
-        
-        rdf_edit = csv2rdf.server.pystachetempl.RdfEdit(resource, configuration_name)
-        return self.renderer.render(rdf_edit)
         
     ####### AJAX calls
     
