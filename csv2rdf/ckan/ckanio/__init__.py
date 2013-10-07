@@ -7,6 +7,8 @@ import csv2rdf.ckan.resource
 import csv2rdf.ckan.package
 
 import csv2rdf.config
+import csv2rdf.config.config
+import csv2rdf.config.rdf_formats
 
 class CkanIO():
     def __init__(self):
@@ -68,11 +70,11 @@ class CkanIO():
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
         all_packages = self.get_full_package_list()
         all_resources = []
-        logging.info("Updating full resource list: %s" % csv2rdf.config.config.data_all_resources)
+        logging.info("Updating full resource list: %s" % csv2rdf.config.config.data_full_resource_list)
         for num, package in enumerate(all_packages):
             for resource in package.resources:
                all_resources.append(resource) 
-        db.saveDbase(csv2rdf.config.config.data_all_resources, all_resources)
+        db.saveDbase(csv2rdf.config.config.data_full_resource_list, all_resources)
         logging.info("DONE!")
 
     def get_full_resource_list(self):
@@ -80,7 +82,7 @@ class CkanIO():
             Returns the list of all resources (CKAN dump)
         """
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
-        return db.loadDbase(csv2rdf.config.config.data_all_resources)
+        return db.loadDbase(csv2rdf.config.config.data_full_resource_list)
 
     def update_csv_resource_list(self):
         """
@@ -91,14 +93,14 @@ class CkanIO():
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
         csv_resources = []
 
-        logging.info("Updating CSV resource list: %s" % csv2rdf.config.config.data_csv_resources)
+        logging.info("Updating CSV resource list: %s" % csv2rdf.config.config.data_csv_resource_list)
         for resource in all_resources:
             r = csv2rdf.ckan.resource.Resource(resource['id'])
             r.init_from_dump(resource)
             if(r.is_csv()):
                 csv_resources.append(resource)
 
-        db.saveDbase(csv2rdf.config.config.data_csv_resources, csv_resources)
+        db.saveDbase(csv2rdf.config.config.data_csv_resource_list, csv_resources)
         logging.info("DONE!")
 
     def get_csv_resource_list(self):
@@ -117,10 +119,10 @@ class CkanIO():
         rdf_compressed = []
         endpoints = []
         rdf_html = []
-        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_rdf_resources)
-        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_rdf_compressed_resources)
-        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_endpoint_resources)
-        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_rdf_html_resources)
+        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_rdf_resource_list)
+        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_rdf_compressed_resource_list)
+        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_endpoint_resource_list)
+        logging.info("Updating RDF resource list: %s" % csv2rdf.config.config.data_rdf_html_resource_list)
         for resource in resource_list:
             if(resource['format'] in csv2rdf.config.rdf_formats.rdf_formats):
                 res = csv2rdf.ckan.resource.Resource(resource['id'])
@@ -139,10 +141,10 @@ class CkanIO():
                 res.init_from_dump(resource)
                 rdf_html.append(res)
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
-        db.saveDbase(csv2rdf.config.config.data_rdf_resources, rdf)
-        db.saveDbase(csv2rdf.config.config.data_rdf_compressed_resources, rdf_compressed)
-        db.saveDbase(csv2rdf.config.config.data_endpoint_resources, endpoints)
-        db.saveDbase(csv2rdf.config.config.data_rdf_html_resources, rdf_html)
+        db.saveDbase(csv2rdf.config.config.data_rdf_resource_list, rdf)
+        db.saveDbase(csv2rdf.config.config.data_rdf_compressed_resource_list, rdf_compressed)
+        db.saveDbase(csv2rdf.config.config.data_endpoint_resource_list, endpoints)
+        db.saveDbase(csv2rdf.config.config.data_rdf_html_resource_list, rdf_html)
         logging.info("DONE!")
 
     def get_resource_list(self, type):

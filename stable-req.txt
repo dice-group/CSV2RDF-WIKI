@@ -15,3 +15,4 @@ ropemode==0.2
 uWSGI==1.9.13
 wikitools==1.1.1
 wsgiref==0.1.2
+pika
