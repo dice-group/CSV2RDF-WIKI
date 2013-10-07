@@ -20,12 +20,24 @@ class CkanIO():
         return self.ckan.package_list()
 
     def update_full_package_list(self):
+        full_package_list = []
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_packages_path)
+        package_list = self.get_package_list()
+        for num, package_id in enumerate(package_list):
+            try:
+                package = db.loadDbase(package_id)
+                full_package_list.append(package)
+            except BaseException as e:
+                logging.error("An exception occured, while loading package, try CkanIO.update_packages")
+                logging.error(str(e))
+        db.saveDbase(csv2rdf.config.config.data_full_package_list, full_package_list)
+            
+    def update_packages(self):
         """
             Dump the CKAN instance into the files
         """
         package_list = self.get_package_list()
-        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
-        all_packages = []
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_packages_path)
         number_of_packages = len(package_list)
         for num, package_id in enumerate(package_list):
             logging.info("processing %d out of %d package" % (num + 1, number_of_packages))
@@ -33,12 +45,12 @@ class CkanIO():
                 package = csv2rdf.ckan.package.Package(package_id)
                 # ckan object can not be pickled
                 del package.ckan 
-                all_packages.append(package)
+                db.saveDbase(package_id, package)
             except BaseException as e:
                 logging.info("An exception occured, while processing package %d, %s" % (num+1, package_id))
                 logging.info("Exception: %s" % str(e))
+            break
 
-        db.saveDbase(csv2rdf.config.config.data_all_packages, all_packages)
         logging.info("DONE!")
 
     def get_full_package_list(self):
@@ -46,7 +58,7 @@ class CkanIO():
             Returns the full package list (CKAN dump)
         """
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
-        return db.loadDbase(csv2rdf.config.config.data_all_packages)
+        return db.loadDbase(csv2rdf.config.config.data_full_package_list)
 
     def update_full_resource_list(self):
         """
@@ -141,9 +153,20 @@ class CkanIO():
         return db.loadDbase(eval("csv2rdf.config.config.data_"+str(type)+"_resources"))
 
 if __name__ == "__main__":
+    import sys
+
+    #root = logging.getLogger()
+
+    #ch = logging.StreamHandler(sys.stdout)
+    #ch.setLevel(logging.DEBUG)
+    #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    #ch.setFormatter(formatter)
+    #root.addHandler(ch)
+
     io = CkanIO()
 
     #io.get_package_list()
+    io.update_packages()
     #io.update_full_package_list()
     #print io.get_full_package_list()
     #io.update_full_resource_list()
