@@ -51,7 +51,6 @@ class CkanIO():
             except BaseException as e:
                 logging.info("An exception occured, while processing package %d, %s" % (num+1, package_id))
                 logging.info("Exception: %s" % str(e))
-            break
 
         logging.info("DONE!")
 
