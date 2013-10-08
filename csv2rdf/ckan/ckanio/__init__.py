@@ -116,7 +116,7 @@ class CkanIO():
             Returns the list of available csv CKAN resources (dumps)
         """
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
-        return db.loadDbase(csv2rdf.config.config.data_csv_resources)
+        return db.loadDbase(csv2rdf.config.config.data_csv_resource_list)
 
     def update_rdf_resources_list(self):
         """
@@ -160,7 +160,7 @@ class CkanIO():
         if(not type in types):
             return False
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_path)
-        return db.loadDbase(eval("csv2rdf.config.config.data_"+str(type)+"_resources"))
+        return db.loadDbase(eval("csv2rdf.config.config.data_"+str(type)+"_resource_list"))
 
 if __name__ == "__main__":
     import sys

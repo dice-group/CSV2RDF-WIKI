@@ -49,8 +49,24 @@ class CkanApplication():
         q = csv2rdf.ckan.ckanio.queries.Queries()
         (outdated_csv, new_csv) = q.get_outdated_and_new_csv_resources()
 
+        logging.info("Outdated resources ...")
+        for outdated_item in outdated_csv:
+            logging.info(outdated_item)
+
+        logging.info("New resources ...")
+        for new_item in new_csv:
+            logging.info(new_item)
+
         mapping = csv2rdf.tabular.mapping.Mapping('')
         (outdated_wiki_pages, new_wiki_pages) = mapping.get_outdated_and_new_wiki_pages()
+
+        logging.info("Outdated mapping pages ...")
+        for outdated_page in outdated_wiki_pages:
+            logging.info(outdated_page)
+
+        logging.info("New mapping pages ...")
+        for new_page in new_wiki_pages:
+            logging.info(new_page)
 
         #Delete outdated resources
         self.delete_outdated_items(outdated_csv, outdated_wiki_pages)
@@ -121,7 +137,6 @@ class CkanApplication():
             mapping = csv2rdf.tabular.mapping.Mapping(page_id)
             default_page = mapping.generate_default_wiki_page()
             mapping.create_wiki_page(default_page)
-            break
         logging.info("Creating new wiki mappings for CSV resources ... Complete.")
 
     def update_sparqlified_list(self):
@@ -157,7 +172,7 @@ if __name__ == '__main__':
     ckan_app = CkanApplication()
 
     #ckan_app.create_new_wiki_pages()
-    ckan_app.synchronize()
+    #ckan_app.synchronize()
     #ckan_app.update()
     #ckan_app.clean_sparqlified()
 

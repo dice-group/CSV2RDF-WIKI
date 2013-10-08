@@ -253,7 +253,6 @@ class Mapping():
     
     def generate_default_wiki_page(self, resource_id = None):
         """
-            Check this method! Does not work yet!!!
         """
         if(not resource_id):
             resource_id = self.resource_id
