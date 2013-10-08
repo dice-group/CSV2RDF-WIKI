@@ -1,4 +1,5 @@
 import logging
+import os
 
 from ckanclient import CkanClient
 
@@ -25,14 +26,19 @@ class CkanIO():
         full_package_list = []
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_packages_path)
         package_list = self.get_package_list()
+        logging.info("updating full package list file: %s" % csv2rdf.config.config.data_full_package_list)
+        package_list_length = len(package_list)
         for num, package_id in enumerate(package_list):
+            logging.info("Reading package number %d out of %d" % (num + 1, package_list_length))
             try:
                 package = db.loadDbase(package_id)
                 full_package_list.append(package)
             except BaseException as e:
                 logging.error("An exception occured, while loading package, try CkanIO.update_packages")
                 logging.error(str(e))
+        logging.info("Saving full package list to file, length is %s" % len(full_package_list))
         db.saveDbase(csv2rdf.config.config.data_full_package_list, full_package_list)
+        logging.info("DONE!")
             
     def update_packages(self):
         """
@@ -43,6 +49,8 @@ class CkanIO():
         number_of_packages = len(package_list)
         for num, package_id in enumerate(package_list):
             logging.info("processing %d out of %d package" % (num + 1, number_of_packages))
+            if(os.path.exists(csv2rdf.config.config.data_packages_path + package_id)):
+                continue
             try:
                 package = csv2rdf.ckan.package.Package(package_id)
                 # ckan object can not be pickled
@@ -73,6 +81,7 @@ class CkanIO():
         for num, package in enumerate(all_packages):
             for resource in package.resources:
                all_resources.append(resource) 
+        logging.info("Dumping a full resource list to a file, length is %s" % len(all_resources))
         db.saveDbase(csv2rdf.config.config.data_full_resource_list, all_resources)
         logging.info("DONE!")
 

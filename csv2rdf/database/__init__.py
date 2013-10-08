@@ -1,9 +1,13 @@
 import os
 
-import pickle
 import mmap
 import datetime
 import csv
+
+try:
+    import cPickle as pickle
+except:
+    import pickle
 
 
 class DatabasePlainFiles:
