@@ -46,4 +46,5 @@ data_for_lodstats = "rdf_for_lodstats"
 #logging configuration
 import logging
 main_log_file = root_path + "/logs/csv2rdf.log"
-logging.basicConfig(filename=main_log_file,level=logging.DEBUG)
+format_string = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+logging.basicConfig(filename=main_log_file,level=logging.DEBUG, format=format_string)
