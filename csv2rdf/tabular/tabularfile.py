@@ -123,7 +123,9 @@ class TabularFile():
         mgc_encoding = Magic(mime=False, mime_encoding=True)
         mgc_string = Magic(mime=False, mime_encoding=False)
         encoding = mgc_encoding.from_file(filename)
+        logging.debug("File encoding: %s" % encoding)
         info = mgc_string.from_file(filename)
+        logging.debug("File info: %s" % info)
         return (encoding, info)
 
     def isHTML(self):
