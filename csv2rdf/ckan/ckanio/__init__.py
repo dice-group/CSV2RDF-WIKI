@@ -153,20 +153,11 @@ class CkanIO():
         return db.loadDbase(eval("csv2rdf.config.config.data_"+str(type)+"_resources"))
 
 if __name__ == "__main__":
-    import sys
-
-    #root = logging.getLogger()
-
-    #ch = logging.StreamHandler(sys.stdout)
-    #ch.setLevel(logging.DEBUG)
-    #formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    #ch.setFormatter(formatter)
-    #root.addHandler(ch)
-
+    import csv2rdf.config.logging
     io = CkanIO()
 
     #io.get_package_list()
-    io.update_packages()
+    #io.update_packages()
     #io.update_full_package_list()
     #print io.get_full_package_list()
     #io.update_full_resource_list()
