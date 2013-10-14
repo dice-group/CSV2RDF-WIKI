@@ -40,3 +40,8 @@ data_endpoints = "endpoints"
 data_rdf_html = "rdf_html"
 data_rdf_and_sparql_csv = "rdf_and_sparql_csv"
 data_for_lodstats = "rdf_for_lodstats"
+
+#logging configuration
+import logging
+main_log_file = root_path + "/logs/csv2rdf.log"
+logging.basicConfig(filename=main_log_file,level=logging.DEBUG)
