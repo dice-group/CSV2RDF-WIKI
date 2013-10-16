@@ -10,9 +10,10 @@ from magic import Magic
 import csv2rdf.config
 import csv2rdf.database
 import csv2rdf.ckan.resource
+import csv2rdf.interfaces
 
 
-class TabularFile():
+class TabularFile(csv2rdf.interfaces.StringMatchInterface):
     def __init__(self, resource_id):
         self.id = resource_id
         self.filename = self.id
@@ -96,23 +97,57 @@ class TabularFile():
         logging.debug("File encoding: %s" % encoding)
         logging.debug("File info: %s" % info)
 
-        if(re.match('.*HTML.*', info) or
-           re.match('.*[Tt]orrent.*', info) or
-           self.isXML() or
-           self.isHTML()):
-            logging.debug("File is html, torrent or xml file ... Deleting")
+        #Delete matches
+        if(self.match('mswordbinary', encoding)):
+            logging.debug("Resource %s is a MS Word, deleting." % self.id)
             self.delete()
-            return True
 
-        if(encoding == "utf-16le"):
-            #TODO: work with utf-8
-            logging.debug("File is in UTF-16 encoding ... recoding to ASCII.")
+        if(self.match('Composite Document.*No summary', encoding)):
+            logging.debug("Resource %s is unknown Composite Document, deleting." % self.id)
+            self.delete()
+
+        if(self.match('BitTorrent', info)):
+            logging.debug("Resource %s is a BitTorrent file, deleting." % self.id)
+            self.delete()
+
+        if(self.match('PDF', info)):
+            logging.debug("Resource %s is a PDF file, deleting." % self.id)
+            self.delete()
+
+        if(self.match('XML', info)):
+            logging.debug("Resource %s is a XML document, deleting." % self.id)
+            self.delete()
+
+        if(self.match('HTML', info)):
+            logging.debug("Resource %s is a HTML document, deleting." % self.id)
+            self.delete()
+
+        #MS Excel
+        if(self.match('ms-excelbinary', encoding) or
+           self.match('Excel', info)):
+            logging.debug("Resource %s is a Excel table, processing." % self.id)
+            self._process_xls(filename)
+
+        #Archive data
+        if(self.match('gzip', info) or
+           self.match('tarbinary', encoding)):
+            logging.debug("Resource %s is a .tar.gz archive, processing." % self.id)
+            self._process_archive(filename)
+
+        if(self.match('7-zip', info) or
+           self.match('Zip', info)):
+            logging.debug("Resource %s is a .7z or .zip archive, processing." % self.id)
+
+        #UTF-8 UTF-16LE encodings
+        if(self.match('utf-16le', encoding)):
+            logging.debug("Resource %s has UTF-16LE encoding, processing." % self.id)
             self._process_utf16(filename)
-        elif(re.match("^binary", encoding) or
-             re.match("^application/.*", encoding)):
-            self._process_based_on(info, filename)
-        else:
-            return True
+
+        if(self.match('utf-8', encoding)):
+            logging.debug("Resource %s has UTF-8 encoding, processing." % self.id)
+
+        #no matches?
+        return True
 
     def get_info_about(self):
         """
@@ -129,63 +164,17 @@ class TabularFile():
         logging.debug("File info: %s" % info)
         return (encoding, info)
 
-    def isHTML(self):
-        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
-        file_chunk = db.loadDbaseChunk(self.filename)
-        check_1 = ".*\<\!DOCTYPE html PUBLIC.*"
-        result = False
-        for line in file_chunk:
-            if(re.match(check_1, line)):
-                result = True
-        return result
-
-    def isXML(self):
-        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
-        file_chunk = db.loadDbaseChunk(self.filename)
-        check = ".*\<\?xml version=\"1.0\""
-        result = False
-        for line in file_chunk:
-            if(re.match(check, line)):
-                    print line
-                    result = True
-        return result
-
-    def _process_based_on(self, info, filename):
-        """
-            The order is significant here
-        """
-        if(re.match(".*archive.*", info)):
-            self._process_archive(filename)
-        elif(re.match(".*Composite Document File V2 Document.*Excel.*", info) or
-           re.match(".*Microsoft Excel 2007+.*", info) or
-           not re.match(".*Composite Document File V2 Document.*Word.*", info)):
-            logging.debug("Converting excel sheet to CSV")
-            self._process_xls(filename)
-        elif(re.match(".*Composite Document File V2 Document.*Word.*", info)):
-            logging.debug("File is a word document ... Deleting.")
-            self.delete()
-            return False
-        else:
-            logging.debug("Could not determine format ... Deleting.")
-            self.delete()
-            return False
-
     def _process_xls(self, resource_id):
-        print resource_id
         ssconvert_call = ["ssconvert", #from gnumeric package
                           "-T",
                           "Gnumeric_stf:stf_csv",
                           csv2rdf.config.config.resources_path + resource_id,
                           csv2rdf.config.config.resources_path + resource_id]
-        print ' '.join(ssconvert_call)
         pipe = subprocess.Popen(ssconvert_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
-        print pipe_message
-        self.validate()
+        logging.debug(pipe_message)
 
     def _process_archive(self, filename):
-        #unzip archive
-        #check number of files
         sevenza_call = ["7za",
                           "l",
                           csv2rdf.config.config.resources_path + filename]
@@ -211,10 +200,11 @@ class TabularFile():
                        csv2rdf.config.config.resources_path + filename]
             pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
             pipe_message = pipe.stdout.read()
+            logging.debug(pipe_message)
         else:
             #more than 1 file in the archive
+            logging.debug("Resource %s is an archive and has > 1 files inside, deleting." % self.id)
             self.delete()
-            return False
 
     def _process_utf16(self, filename):
         f_in = open(filename, 'rU')
@@ -234,6 +224,7 @@ class TabularFile():
                     filename]
         pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
+        logging.debug(pipe_message)
 
     def _read_in_chunks(self, file_object, chunk_size=1024):
         """Lazy function (generator) to read a file piece by piece.
@@ -257,6 +248,44 @@ if __name__ == '__main__':
     tabular_file = TabularFile('2daa0e60-4c36-487d-bb29-b3eba4e5ff0e')
     tabular_file.download()
     print tabular_file.validate()
+
+    #Delete cases
+    #mswordbinary:
+    tabular_file = TabularFile('46b54553-eb4d-470b-9dae-f45d05a2bfdc')
+    #Composite Document.*No summary
+    tabular_file = TabularFile('8a736d1c-e74f-473c-b299-26535bac56f1')
+    #BitTorrent
+    tabular_file = TabularFile('2b25aaf9-ad77-489e-9b30-c6da311dd990')
+    #PDF
+    tabular_file = TabularFile('cd23c58d-8bf4-443f-ac2d-678e37c835d2')
+    #XML
+    tabular_file = TabularFile('f3dc8c6a-f0cd-4004-8a14-ed9f2ebc337c')
+    #HTML
+    tabular_file = TabularFile('e278f3c9-a038-40bd-8e9b-c055bb551de6')
+
+    #Excel cases
+    tabular_file = TabularFile('938266d1-d453-4c46-901a-2f0dc91daaac')
+    tabular_file = TabularFile('96129c64-e4a8-49d1-928b-24c16944d5b3')
+    tabular_file = TabularFile('033f30af-e509-423d-8a27-958df9bbb15d')
+    tabular_file = TabularFile('108fd45b-bda5-4ad7-9c6b-f26704447b5f')
+    tabular_file = TabularFile('00b4658d-3783-4f6b-b0b8-0c3b08d7f731')
+
+    #Archives
+    #gzip
+    tabular_file = TabularFile('9a54203b-1ac1-43ef-b93d-ba29bbd4db6a')
+    #tarbinary
+    tabular_file = TabularFile('1d3fe6f0-9c5a-45a9-9418-89ad4a672bea')
+    #7-zip
+    tabular_file = TabularFile('b8ba97d5-4661-46a7-b055-366e865a7c13')
+    #Zip
+    tabular_file = TabularFile('92d1fa6a-3f89-441d-ab98-8ea65ba34f24')
+
+    #UTF-8
+    tabular_file = TabularFile('bb3e753c-e27a-48cf-9488-e2d9c85e55ea')
+    tabular_file = TabularFile('c9c6f5f1-a89d-4e3c-9fa6-940d42f61212')
+    #UTF-16LE
+    tabular_file = TabularFile('63b159d7-90c5-443b-846d-f700f74ea062')
+    tabular_file = TabularFile('c3585646-d1f3-4555-9286-79ed8c9b7f5f')
 
     #tabular_file = TabularFile('1aa9c015-3c65-4385-8d34-60ca0a875728')
     #print tabular_file.get_csv_file_url()
