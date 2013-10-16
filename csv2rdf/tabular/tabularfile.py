@@ -24,13 +24,14 @@ class TabularFile():
             r = requests.get(resource.url, timeout=csv2rdf.config.config.ckan_request_timeout)
             assert r.ok, r
             file = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
-            file.saveDbaseRaw(self.filename, r.content)
-            logging.info("File %s downloaded and saved successfully" % self.id)
-            return self.get_csv_file_path()
+            if(not file.is_exists(self.filename)):
+                file.saveDbaseRaw(self.filename, r.content)
+                logging.info("File %s downloaded and saved successfully" % self.id)
         except BaseException as e:
             logging.warning("Could not download the resource %s " % str(self.id))
             logging.warning("Exception occured: %s" % str(e))
-            return False
+        finally:
+            return self.get_csv_file_path()
 
     def get_csv_filesize(self):
         filepath = self.get_csv_file_path()
