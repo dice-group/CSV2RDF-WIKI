@@ -5,22 +5,37 @@ import cherrypy
 import json
 import pystache
 import logging
+import os
 
-import csv2rdf.config
-import csv2rdf.server.pystachetempl
+import csv2rdf.config.config
 import csv2rdf.ckan.application
 import csv2rdf.ckan.resource
 import csv2rdf.tabular.sparqlify
 
+# Template objects
+from csv2rdf.server.pystachetempl.index import IndexTemplate
+from csv2rdf.server.pystachetempl.csv2rdfTemplate import Csv2rdfTemplate
+from csv2rdf.server.pystachetempl.rdfedit import RdfEditTemplate
+
 
 class CSV2RDFApp(object):
     def __init__(self):
-        self.renderer = pystache.Renderer(search_dirs="csv2rdf/server/static/templates/")
+        self.renderer = pystache.Renderer(search_dirs=self.get_template_search_dirs())
 
     @cherrypy.expose(alias='index.html')
     def index(self):
-        index = csv2rdf.server.pystachetempl.Index()
+        index = IndexTemplate()
         return self.renderer.render(index)
+
+    def get_template_search_dirs(self):
+        template_root = os.path.join(csv2rdf.config.config.root_path,
+                                     "csv2rdf", "server", "static",
+                                     "javascript","src")
+        search_dirs = []
+        for root, dirs, files in os.walk(template_root):
+            search_dirs.append(root)
+
+        return search_dirs
 
     @cherrypy.expose(alias='csv2rdf.html')
     def csv2rdf(self):
@@ -31,7 +46,7 @@ class CSV2RDFApp(object):
         res3 = csv2rdf.ckan.resource.Resource('1aa9c015-3c65-4385-8d34-60ca0a875728')
         resources = [res1, res2, res3]
         map(lambda x: x.init(), resources)
-        page = csv2rdf.server.pystachetempl.Csv2rdf(resources)
+        page = Csv2rdfTemplate(resources)
         return self.renderer.render(page)
 
     @cherrypy.expose(alias="rdf_edit.html")
@@ -46,7 +61,7 @@ class CSV2RDFApp(object):
         if(sparqlify.transform_resource_to_rdf(mapping_name)):
             logging.info("The resource %s %s was sent to the queue." % (resource_id, mapping_name))
 
-            rdf_edit = csv2rdf.server.pystachetempl.RdfEdit(resource, mapping_name)
+            rdf_edit = RdfEditTemplate(resource, mapping_name)
             return self.renderer.render(rdf_edit)
         else:
             return self.renderer.render(rdf_edit)
@@ -95,7 +110,7 @@ class CSV2RDFApp(object):
 
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
-    cherrypy.quickstart(publicdataeu, '/', 'csv2rdf/server/config')
+    cherrypy.quickstart(publicdataeu, '/', 'server/config')
     cherrypy.config.update('server/config')
 
 def application(environ, start_response):
