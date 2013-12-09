@@ -87,6 +87,29 @@ class Queries():
         #db = DatabasePlainFiles(config.data_path)
         #db.saveListToCSV(config.data_rdf_and_sparql_csv, output, fieldnames) 
 
+    def detect_format(self, format_string):
+        nt_formats = ["application/x-ntriples", "nt", "gzip:ntriples", "n-triples", "ntriples", "nt:meta", "nt:transparency-international-corruption-perceptions-index", "rdf, nt", "text/ntriples", "compressed tarfile containing n-triples", "bz2:nt", "gz:nt"]
+        nq_formats = ["application/x-nquads", "nquads", "gzip::nquads", "gz:nq"]
+        ttl_formats = ["text/turtle", "rdf/turtle", "ttl", "turtle", "application/turtle", "example/turtle", "example/x-turtle", "meta/turtle", "meta/urtle", "rdf/turtle", "text/ttl", "text/turtle", "ttl:e1:csv", "7z:ttl", "gz:ttl", "gz:ttl:owl", "ttl.bzip2"]
+        n3_formats = ["text/n3", "n3", "rdf/n3", "application/n3", "example/n3", "example/n3 ", "example/rdf+n3", "text/rdf+n3"]
+        rdf_formats = ["application/rdf+xml", "rdf", "rdf/xml", "owl", "application/rdf xml", "application/rdf+xml ", "application/rdfs", "example/owl", "example/rdf", "example/rdf xml", "example/rdf+xml", "meta/rdf+schema", "meta/rdf+xml", "meta/rdf-schema", "meta/rdf-schema ", "rdf+xml", "rdf+xml ", "rdf, owl", "rdf (gzipped)", "gzip:rdf/xml", ]
+        sparql_formats = [ 'RDF endpoint', 'RDF, SPARQL+XML', 'SPARQ/JSON', 'SPARQL', 'SPARQL/JSON', 'SPARQL/XML', 'api/linked-data', 'api/sparql', 'api/sparql ', 'api/dcat', 'rdf, sparql', 'html, rdf, dcif', 'rdf, csv, xml', 'RDF/XML, HTML, JSON', 'RDF, SPARQL+XML', 'sparql' ]
+
+        if format_string in nt_formats:
+            return "nt"
+        elif format_string in nq_formats:
+            return "nq"
+        elif format_string in ttl_formats:
+            return "ttl"
+        elif format_string in n3_formats:
+            return "n3"
+        elif format_string in rdf_formats:
+            return "rdf"
+        elif format_string in sparql_formats:
+            return "sparql"
+        else:
+            return ""
+
     def get_rdf_for_lodstats(self):
         rdf = self.io.get_resource_list("rdf")
         rdf_compressed = self.io.get_resource_list("rdf_compressed")
@@ -108,20 +131,8 @@ class Queries():
                 output_item['package_name'] = resource.package_name + "_" + str(md5.new(resource.url.encode('utf-8')).hexdigest())
             output_item['uri'] = (resource.url).encode('utf-8')
             #routine from the LODStats
-            if resource.format.lower() in ["application/x-ntriples", "nt", "gzip:ntriples", "n-triples", "ntriples", "nt:meta", "nt:transparency-international-corruption-perceptions-index", "rdf, nt", "text/ntriples", "compressed tarfile containing n-triples", "bz2:nt", "gz:nt"]:
-                output_item['format'] = "nt"
-            elif resource.format.lower() in ["application/x-nquads", "nquads", "gzip::nquads", "gz:nq"]:
-                output_item['format'] = "nq"
-            elif resource.format.lower() in ["text/turtle", "rdf/turtle", "ttl", "turtle", "application/turtle", "example/turtle", "example/x-turtle", "meta/turtle", "meta/urtle", "rdf/turtle", "text/ttl", "text/turtle", "ttl:e1:csv", "7z:ttl", "gz:ttl", "gz:ttl:owl", "ttl.bzip2"]:
-                output_item['format'] = "ttl"
-            elif resource.format.lower() in ["text/n3", "n3", "rdf/n3", "application/n3", "example/n3", "example/n3 ", "example/rdf+n3", "text/rdf+n3"]:
-                output_item['format'] = "n3"
-            elif resource.format.lower() in ["application/rdf+xml", "rdf", "rdf/xml", "owl", "application/rdf xml", "application/rdf+xml ", "application/rdfs", "example/owl", "example/rdf", "example/rdf xml", "example/rdf+xml", "meta/rdf+schema", "meta/rdf+xml", "meta/rdf-schema", "meta/rdf-schema ", "rdf+xml", "rdf+xml ", "rdf, owl", "rdf (gzipped)", "gzip:rdf/xml", ]:
-                output_item['format'] = "rdf"
-            elif resource.format.lower() in [ 'RDF endpoint', 'RDF, SPARQL+XML', 'SPARQ/JSON', 'SPARQL', 'SPARQL/JSON', 'SPARQL/XML', 'api/linked-data', 'api/sparql', 'api/sparql ', 'api/dcat', 'rdf, sparql', 'html, rdf, dcif', 'rdf, csv, xml', 'RDF/XML, HTML, JSON', 'RDF, SPARQL+XML', 'sparql' ]:
-                output_item['format'] = "sparql"
-            else:
-                continue
+            format_string = resource.format.lower()
+            output_item['format'] = self.detect_format(format_string)
             output.append(output_item)
        
         return output
