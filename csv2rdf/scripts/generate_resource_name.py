@@ -1,5 +1,7 @@
 #!/home/lodstats/.virtualenvs/thedatahub/bin/python
 
+import sys
+
 from optparse import OptionParser
 
 parser = OptionParser()
@@ -19,13 +21,25 @@ for resource in full_resource_list:
     if(resource['url'] == resource_uri):
         resource_object = resource
 
+if(not resource_object):
+    sys.exit('')
+
 from csv2rdf.ckan.package import Package
 package = Package(resource_object['package_id'])
 package_name = package.name
 
 import requests
-r = requests.head(resource_object['url'])
-filesize_in_mb = str( int(r.headers['content-length']) / (1024*1024) )
+try:
+    r = requests.head(resource_object['url'], timeout=1)
+    if(r.status_code == requests.codes.ok):
+        filesize_in_mb = str( int(r.headers['content-length']) / (1024*1024) )
+    else:
+        from random import randrange
+        filesize_in_mb = "br"+str(randrange(10))
+except BaseException as e:
+    from random import randrange
+    filesize_in_mb = "br"+str(randrange(10))
+    print str(e)
 
 from csv2rdf.ckan.ckanio import queries
 q = queries.Queries()
