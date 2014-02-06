@@ -30,11 +30,11 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface):
                 logging.info("File %s downloaded and saved successfully" % self.id)
             else:
                 logging.info("File %s already exists" % self.id)
+            return self.get_csv_file_path()
         except BaseException as e:
             logging.warning("Could not download the resource %s " % str(self.id))
             logging.warning("Exception occured: %s" % str(e))
-        finally:
-            return self.get_csv_file_path()
+            return False
 
     def get_csv_filesize(self):
         filepath = self.get_csv_file_path()
