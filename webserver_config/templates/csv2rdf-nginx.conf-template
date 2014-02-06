@@ -29,6 +29,10 @@ server {
         alias __CSV2RDF__/sparqlified_exposed;
     }
 
+    location /robots.txt {
+        alias __CSV2RDF__/robots.txt;
+    }
+
     location /sparqlified {
         alias __CSV2RDF__/sparqlified;
     }
