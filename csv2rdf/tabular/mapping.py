@@ -19,19 +19,27 @@ class Mapping():
         self.resource_id = resource_id
         self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
+
+    def init_mappings_only(self):
+        self.wiki_page = self.request_wiki_page()
+        if(self.wiki_page):
+            self.metadata = self.extract_metadata_from_wiki_page(self.wiki_page)
+            self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
+            self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
+            self.mappings = self.process_mappings(self.mappings)
+            return True
+        else:
+            return self.wiki_page
     
     def init(self):
-        self.wiki_page = self.request_wiki_page()
-        self.metadata = self.extract_metadata_from_wiki_page(self.wiki_page)
-        self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
-        self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
-        self.mappings = self.process_mappings(self.mappings)
+        self.init_mappings_only()
         self.save_csv_mappings(self.mappings)
 
     def process_mappings(self, mappings):
         for mapping in mappings:
             mapping['omitRows'] = self.process_omitRows(mapping['omitRows']) if mapping['omitRows'] != '-1' else [-1]
             mapping['omitCols'] = self.process_omitCols(mapping['omitCols']) if mapping['omitCols'] != '-1' else [-1]
+            mapping['header'] = self.process_header(mapping['header']) if mapping['header'] != '-1' else [1]
             mapping['delimiter'] = mapping['delimiter'] if ('delimiter' in mapping) else ','
         return mappings
 
@@ -365,6 +373,9 @@ class Mapping():
         return output
 
     def process_omitCols(self, string):
+        return self.process_omitRows(string)
+
+    def process_header(self, string):
         return self.process_omitRows(string)
 
     def process_file(self, original_file_path, mapping_current):
