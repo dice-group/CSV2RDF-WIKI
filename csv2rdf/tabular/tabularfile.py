@@ -18,6 +18,9 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface):
         self.id = resource_id
         self.filename = self.id
 
+    def get_json_table(self):
+        pass
+
     def download(self):
         resource = csv2rdf.ckan.resource.Resource(self.id)
         resource.init()
@@ -53,6 +56,12 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface):
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.resources_path)
         if(db.is_exists(self.filename)):
             return db.get_path_to_file(self.filename)
+        else:
+            return False
+
+    def is_exists(self):
+        if(self.get_csv_file_path()):
+            return True
         else:
             return False
 

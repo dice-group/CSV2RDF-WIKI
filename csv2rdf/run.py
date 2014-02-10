@@ -11,6 +11,7 @@ import csv2rdf.config.config
 import csv2rdf.ckan.application
 import csv2rdf.ckan.resource
 import csv2rdf.tabular.sparqlify
+import csv2rdf.tabular.mapping
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -107,6 +108,18 @@ class CSV2RDFApp(object):
         black_list = f.read()
         f.close()
         return black_list.split('\n')
+
+    ####### csv2rdf-interface (ember): AJAX calls
+    @cherrypy.expose
+    def getDataForRefine(self, resourceId):
+        #necessary data:
+        #mapping
+        mapping = csv2rdf.tabular.mapping.Mapping(resourceId)
+        mapping.init()
+        #first 20 lines of the csv file
+        tf = csv2rdf.tabular.tabularfile.TabularFile(resourceId)
+        tf.get_json_table()
+        pass
 
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()

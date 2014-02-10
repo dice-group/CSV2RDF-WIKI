@@ -20,6 +20,10 @@ class SparqlifyJavaHandler(object):
         process_return_code = self.transform_resource_to_rdf(self.mapping_name, self.resource_id)
         print "Process returned %s" % process_return_code
 
+    def file_is_exists(self):
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id)
+        return tabular_file.is_exists()
+
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
             resource_id = self.resource_id
@@ -131,10 +135,14 @@ def messaging_callback(ch, method, properties, body):
     resource_id = payload["resource_id"]
     mapping_name = payload["mapping_name"]
     sparqlify_java_handler = SparqlifyJavaHandler(resource_id, mapping_name)
-    print "Started resource processing..."
-    sparqlify_java_handler.process_resource()
-    #send ack
-    ch.basic_ack(delivery_tag = method.delivery_tag)
+    if(sparqlify_java_handler.file_is_exists()):
+        print "Started resource processing..."
+        sparqlify_java_handler.process_resource()
+        #send ack
+        ch.basic_ack(delivery_tag = method.delivery_tag)
+    else:
+        print "File does not exist... Deleting message from queue"
+        ch.basic_ack(delivery_tag = method.delivery_tag)
 
 if __name__ == "__main__":
     exchange = "sparqlify_java_exchange"

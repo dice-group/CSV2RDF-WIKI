@@ -388,11 +388,10 @@ class Mapping():
                 #line_num = 0 is a header, we do not process it
                 if(not line_num in omitRows):
                     processed_file.write(line)
-        except BaseException as e:
-            logging.warning("An exception occured: %s" % str(e))
-        finally:
             original_file.close()
             processed_file.close()
+        except BaseException as e:
+            logging.warning("An exception occured: %s" % str(e))
 
         return processed_file
 
