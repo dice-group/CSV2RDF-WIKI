@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import logging
+import pandas
 
 import csv
 import requests
@@ -11,15 +12,35 @@ import csv2rdf.config
 import csv2rdf.database
 import csv2rdf.ckan.resource
 import csv2rdf.interfaces
+import csv2rdf.tabular.mapping
 
 
-class TabularFile(csv2rdf.interfaces.StringMatchInterface):
+class TabularFile(csv2rdf.interfaces.StringMatchInterface,
+                  csv2rdf.interfaces.AuxilaryInterface):
     def __init__(self, resource_id):
         self.id = resource_id
         self.filename = self.id
 
-    def get_json_table(self):
-        pass
+    def get_csv_data(self, mapping_name='default-tranformation-configuration'):
+        """
+            return first 20 rows of the csv file in pandas DataFrame format
+            using default-tranformation-configuration wiki mapping by default
+        """
+        resource_id = self.id
+        m = csv2rdf.tabular.mapping.Mapping(resource_id=resource_id)
+        wikipage_exists = m.init_mappings_only()
+        if(wikipage_exists):
+            m = m.get_mapping_by_name(mapping_name)
+            skiprows = self.convert_to_zero_index(m['omitRows'])
+            sep = m['delimiter']
+            csv_obj = pandas.read_csv(self.get_csv_file_path(),
+                                      skiprows=skiprows,
+                                      sep=sep,
+                                      nrows=20, 
+                                      error_bad_lines=False)
+            return csv_obj
+        else:
+            return False
 
     def download(self):
         resource = csv2rdf.ckan.resource.Resource(self.id)
@@ -268,7 +289,6 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface):
         return csv_list
 
 if __name__ == '__main__':
-
     #Case 1: good CSV file
     #tabular_file = TabularFile('2daa0e60-4c36-487d-bb29-b3eba4e5ff0e')
     #tabular_file.download()

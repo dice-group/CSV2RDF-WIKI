@@ -13,6 +13,12 @@ class AuxilaryInterface():
     def extract_filename_url(self, url):
         return url.split('/')[-1].split('#')[0].split('?')[0]
 
+    def convert_to_zero_index(self, list_one_index):
+        list_zero_index = []
+        for item in list_one_index:
+            list_zero_index.append(item - 1)
+        return list_zero_index
+
 class StringMatchInterface():
     def match(self, expr, string):
         import re
