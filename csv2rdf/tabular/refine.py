@@ -26,6 +26,8 @@ class Refine(object):
         #first 20 lines of the csv file
         tf = TabularFile(resource_id)
         csv_obj = tf.get_csv_data()
+        csv_obj = csv_obj.fillna(0)
+
         for column in csv_obj.columns:
             table_column = {}
             table_column['name'] = column
@@ -47,5 +49,6 @@ class Refine(object):
         return json.dumps(json_dump)
 
 if __name__ == "__main__":
-    refine = Refine("0e8012f2-fdbb-4a88-ab11-5d8b012b06a2")
+    #refine = Refine("0e8012f2-fdbb-4a88-ab11-5d8b012b06a2")
+    refine = Refine("13fd759b-549c-44dd-83a2-684e7a0b0147")
     print refine.pack_csv_mappings_in_json()
