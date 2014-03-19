@@ -62,7 +62,8 @@ class Refine(object):
         csv_table = self.get_csv_table()
         json_dump = {
                      "mappings": mappings,
-                     "csv": csv_table
+                     "header": csv_table['header'],
+                     "rows": csv_table['rows']
                     }
         return json.dumps(json_dump)
 
