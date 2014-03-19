@@ -20,24 +20,42 @@ class Refine(object):
 
     def get_csv_table(self):
         resource_id = self.resource_id
-        table = {}
-        table['columns'] = []
 
         #first 20 lines of the csv file
         tf = TabularFile(resource_id)
         csv_obj = tf.get_csv_data()
         csv_obj = csv_obj.fillna(0)
+        return self.structure_by_rows(csv_obj)
 
-        for column in csv_obj.columns:
+    def structure_by_cols(self, dataframe):
+        table = {}
+        table['columns'] = []
+        for column in dataframe.columns:
             table_column = {}
             table_column['name'] = column
             table_column['content'] = []
-            for item in csv_obj[column]:
+            for item in dataframe[column]:
                 if(not isinstance(item, str)):
                     item = numpy.asscalar(item)
                 table_column['content'].append(item)
             table['columns'].append(table_column);
         return table
+
+    def structure_by_rows(self, dataframe):
+        table = {}
+        table['rows'] = []
+        table['header'] = []
+        for column in dataframe.columns:
+            table['header'].append(column)
+        datamatrix = dataframe.as_matrix()
+        for row in datamatrix:
+            row_to_append = []
+            for item in row:
+                row_to_append.append(item)
+            table['rows'].append(row_to_append)
+
+        return table
+
 
     def pack_csv_mappings_in_json(self):
         mappings = self.get_mappings()

@@ -116,6 +116,13 @@ class CSV2RDFApp(object):
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.pack_csv_mappings_in_json()
 
+    ####### Metadata export
+    @cherrypy.expose
+    def getResourceMetadata(self, resourceId):
+        resource = csv2rdf.ckan.resource.Resource(resourceId)
+        resource.init()
+        return resource.get_metadata()
+
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
     cherrypy.quickstart(publicdataeu, '/', 'server/config')
