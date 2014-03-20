@@ -146,5 +146,6 @@ class Resource(csv2rdf.interfaces.AuxilaryInterface):
 if __name__ == '__main__':
     res = Resource('2625cb04-6a73-4154-9e22-bde490d5b61e')
     res.init()
+    import ipdb; ipdb.set_trace()
     print res.get_metadata()
     pass

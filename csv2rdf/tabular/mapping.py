@@ -13,8 +13,9 @@ import csv2rdf.ckan.package
 import csv2rdf.prefixcc
 import csv2rdf.ckan.resource
 import csv2rdf.tabular.tabularfile
+import csv2rdf.interfaces
 
-class Mapping():
+class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     def __init__(self, resource_id = None):
         self.resource_id = resource_id
         self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)

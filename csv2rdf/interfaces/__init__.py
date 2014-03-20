@@ -1,3 +1,5 @@
+import json
+
 class AuxilaryInterface():
     def __str__(self):
         #print self.__class__
@@ -18,6 +20,9 @@ class AuxilaryInterface():
         for item in list_one_index:
             list_zero_index.append(item - 1)
         return list_zero_index
+
+    def to_JSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
 
 class StringMatchInterface():
     def match(self, expr, string):

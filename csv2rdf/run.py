@@ -110,11 +110,6 @@ class CSV2RDFApp(object):
         f.close()
         return black_list.split('\n')
 
-    ####### csv2rdf-interface (ember): AJAX calls
-    @cherrypy.expose
-    def getDataForRefine(self, resourceId):
-        refine = csv2rdf.tabular.refine.Refine(resourceId)
-        return refine.pack_csv_mappings_in_json()
 
     ####### Metadata export
     @cherrypy.expose
@@ -123,6 +118,32 @@ class CSV2RDFApp(object):
         resource.init()
         return resource.get_metadata()
 
+class CSV2RDFRefineAPI(object):
+    ####### csv2rdf-interface (ember): AJAX calls
+    @cherrypy.expose(alias="refines")
+    def getDataForRefine(self, resourceId):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        refine = csv2rdf.tabular.refine.Refine(resourceId)
+        return refine.get_data_json()
+
+    @cherrypy.expose(alias="tables")
+    def getDataTable(self, resourceId):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        refine = csv2rdf.tabular.refine.Refine(resourceId)
+        return refine.get_csv_table_json()
+
+    @cherrypy.expose(alias="mappings")
+    def getDataMappings(self, resourceId):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        refine = csv2rdf.tabular.refine.Refine(resourceId)
+        return refine.get_mappings_json()
+
+    @cherrypy.expose(alias="resources")
+    def getDataResource(self, resourceId):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        refine = csv2rdf.tabular.refine.Refine(resourceId)
+        return refine.get_resource_json()
+
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
     cherrypy.quickstart(publicdataeu, '/', 'server/config')
@@ -130,4 +151,5 @@ if __name__ == '__main__':
 
 def application(environ, start_response):
     cherrypy.tree.mount(CSV2RDFApp(), '/', 'csv2rdf/server/config')
+    cherrypy.tree.mount(CSV2RDFRefineAPI(), '/api/', 'csv2rdf/server/config')
     return cherrypy.tree(environ, start_response)
