@@ -46,6 +46,7 @@ data_endpoint_resource_list = "endpoints"
 data_rdf_html_resource_list = "rdf_html"
 data_rdf_and_sparql_csv = "rdf_and_sparql_csv"
 data_for_lodstats = "rdf_for_lodstats"
+data_licenses = "licenses"
 
 #logging configuration
 import logging
