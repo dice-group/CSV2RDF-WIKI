@@ -6,11 +6,7 @@ r = requests.get(ckan_api_url + "/rest/licenses")
 assert r.status_code, requests.codes.ok
 licenses = json.loads(r.content)
 for num, license in enumerate(licenses):
-    print license['title'], 
-    print license['url']
-    print license['is_okd_compliant']
-    print license['is_osi_compliant']
-    print license['is_generic']
+    print license['title'], license['url'], license['is_okd_compliant'], license['is_osi_compliant'], license['is_generic']
 
 #Save licenses to file with current datestamp
 import cPickle

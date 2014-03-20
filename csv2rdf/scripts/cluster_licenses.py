@@ -1,4 +1,7 @@
 from csv2rdf.ckan.ckanio import CkanIO
+import pprint
+pp = pprint.PrettyPrinter()
+
 ckanio = CkanIO()
 full_package_list = ckanio.get_full_package_list()
 #full_package_list = [{"license_id": "some_id"},
@@ -9,8 +12,20 @@ full_package_list = ckanio.get_full_package_list()
 #                     {"license_id": "some_id"},
 #                     {"license_id": "some_id2"}]
 licenses = {}
-for package in full_package_list:
-    licenses[package.license_id] = licenses.get(package.license_id, 0) + 1
+for package in full_package_list: 
+    if( hasattr(package, 'license_url')):
+        license_url = package.license_url 
+    else:
+        license_url = ''
+    license_by_id = licenses.get(package.license_id, 0)
+    if(license_by_id == 0):
+        count = 1
+    else:
+        count = license_by_id['count'] + 1
+    licenses[package.license_id] = {'license_title': package.license_title,
+                                    'license': package.license,
+                                    'license_url': license_url,
+                                    'count': count}
 
 import cPickle
 import datetime
