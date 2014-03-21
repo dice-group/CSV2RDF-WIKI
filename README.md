@@ -10,5 +10,8 @@ add 'captchaid' and 'captchaword' to valid args for page.edit function
 Requirements:
 gnumeric
 
+It is necessary to change pystache template delimiters to ('{{{', '}}}'):
+in pystache.defaults
+
 TODOs:
 

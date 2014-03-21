@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+{{{> header}}}
+
+{{{> navigation}}}
+<!--
+{{> globaljs}}
+
+                <th ng-switch-when="true">Suggestion for {{selectedMapping}}</th>
+                <th ng-switch-default>No mappings selected></th>
+ng-switch on="selectedMapping"
+-->
+<!-- page specific script -->
+<script type="text/javascript">
+    var ckanResourceId = "{{{resource_id}}}";
+    var wikiMappingId = "{{{mapping_name}}}";
+    var localhostUri = "{{{localhost_uri}}}";
+</script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.0.2/angular.js"></script>
+<script src="server/static/javascript/src/app/mappingEditInterface/mappingEditInterface.js"></script>
+
+
+<body ng-app="MappingEditInterface">
+<div ng-controller="EditInterfaceCtrl">
+    <h2>Mapping for resource {{{resource_id}}}</h1>
+    <div>
+    	<table class="table table-bordered">
+    		<thead>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Value</th>
+                </tr>
+        	</thead>
+        	<tbody ng-repeat="(key, value) in mappings">
+    	        <tr>
+    	            <td>{{key}}</td>
+    	            <td ng-click="mappingRouter(key, value)">{{value}}</td>
+    	        </tr>
+            </tbody>
+    	</table>
+    </div>
+
+    <div class="span4">
+        <table class="table table-condensed">
+            <thead>
+                <tr ng-switch on="selectedMapping">
+                    <th ng-click="changeSuggestions()">[x]</th>
+                    <th ng-switch-default>Suggestions for {{selectedMapping.name}}</th>
+                    <th ng-switch-when="">No mappings selected!</th>
+                </tr>
+            </thead>
+            <tbody ng-repeat="suggestion in suggestions" ng-switch on="isSuggestionEmpty()">
+                <tr>
+                    <td ng-click="takeOverSuggestion(suggestion)">[x]</td>
+                    <td>{{suggestion.uriPrefixed}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="span7">
+        <div ng-repeat="line in wikiTemplate()">
+            <span>{{line}}</span><br>
+        </div>
+    </div>
+
+</div>
+
+</body>
+
+
+{{{> footer}}}
+</html>

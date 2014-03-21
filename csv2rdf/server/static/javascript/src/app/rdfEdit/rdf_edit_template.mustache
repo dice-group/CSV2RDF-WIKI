@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-{{> header}}
+{{{> header}}}
 
-{{> navigation}}
+{{{> navigation}}}
 
-{{> codemirror}}
+{{{> codemirror}}}
 
-{{> globaljs}}
+{{{> globaljs}}}
 <!-- page specific script -->
 <script type="text/javascript">
-    var CKANEntryId = "{{entityName}}";
-    var CKANResourceId = "{{resourceId}}";
+    var CKANEntryId = "{{{entityName}}}";
+    var CKANResourceId = "{{{resourceId}}}";
 </script>
 
 <script src="server/static/javascript/rdfedit.js"></script>
@@ -17,18 +17,18 @@
 <body>
     <div class="container">
         <div class="row">
-        {{#item}}
+        {{{#item}}}
             <h4>
-                The transformation is added to the processing queue! <a href="{{rdf_file_url}}">Download RDF!</a>
+                The transformation is added to the processing queue! <a href="{{{rdf_file_url}}}">Download RDF!</a>
             </h4>
             
             
-            The transformation is in progress now. Navigate to the <a href="{{ckan_url}}">{{description}}</a> CKAN resource. <br/>
-            You can review transformation config on <a href="{{wiki_url}}">publicdata.eu wiki</a>. <br/>
-        {{/item}}    
+            The transformation is in progress now. Navigate to the <a href="{{{ckan_url}}}">{{{description}}}</a> CKAN resource. <br/>
+            You can review transformation config on <a href="{{{wiki_url}}}">publicdata.eu wiki</a>. <br/>
+        {{{/item}}}    
         </div>
     </div>
 </body>
 
-{{> footer}}
+{{{> footer}}}
 </html>
