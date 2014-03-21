@@ -1,0 +1,2 @@
+User-agent: *
+Disallow: /rdf_edit.html

@@ -35,6 +35,7 @@ data_path = root_path + "/data/"
 data_csv2rdf_wiki_pages_file = data_path + "csv2rdf_wiki_pages/"
 data_all_csv2rdf_pages = data_path + "all_csv2rdf_pages"
 data_packages_path = data_path + "packages/"
+data_packages_metadata_path = data_path + "packages_metadata/"
 data_full_package_list = data_path + "full_package_list"
 data_resources_path = data_path + "resources/"
 data_full_resource_list = data_path + "full_resource_list"
@@ -45,6 +46,7 @@ data_endpoint_resource_list = "endpoints"
 data_rdf_html_resource_list = "rdf_html"
 data_rdf_and_sparql_csv = "rdf_and_sparql_csv"
 data_for_lodstats = "rdf_for_lodstats"
+data_licenses = "licenses"
 
 #logging configuration
 import logging

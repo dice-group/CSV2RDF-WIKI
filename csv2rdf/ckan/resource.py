@@ -7,6 +7,10 @@ import logging
 import csv2rdf.config.config
 import csv2rdf.interfaces
 
+#For metadata export
+import RDF
+from csv2rdf.ckan.package import Package
+
 logger = logging.getLogger(__name__)
 
 class Resource(csv2rdf.interfaces.AuxilaryInterface):
@@ -90,6 +94,44 @@ class Resource(csv2rdf.interfaces.AuxilaryInterface):
             logger.warning("Exception occured %s"%str(e))
         return resource
 
+    def get_metadata(self):
+        """
+            Resource has to be initialized
+        """
+
+        package_name = self.request_package_name()
+        package = Package(package_name)
+        package_metadata = package.get_metadata()
+
+        model = RDF.Model()
+        parser = RDF.Parser()
+        parser.parse_string_into_model(model, package_metadata, "http://localhost/")
+
+        output_model = RDF.Model()
+        #title is label
+        title_predicate = "http://purl.org/dc/terms/title"
+        qs = RDF.Statement(subject = None, 
+                           predicate = RDF.Node(uri_string = title_predicate), 
+                           object = None)
+        for statement in model.find_statements(qs): 
+            statement.subject = RDF.Node(RDF.Uri("http://data.publicdata.eu/"+str(self.id)))
+            statement.predicate = RDF.Node(RDF.Uri("http://www.w3.org/2000/01/rdf-schema#label"))
+            output_model.add_statement(statement)
+            break
+        #description is comment
+        description_predicate = "http://purl.org/dc/terms/description"
+        qs = RDF.Statement(subject = None, 
+                           predicate = RDF.Node(uri_string = description_predicate), 
+                           object = None)
+        for statement in model.find_statements(qs): 
+            statement.subject = RDF.Node(RDF.Uri("http://data.publicdata.eu/"+str(self.id)))
+            statement.predicate = RDF.Node(RDF.Uri("http://www.w3.org/2000/01/rdf-schema#comment"))
+            output_model.add_statement(statement)
+            break
+
+        serializer = RDF.Serializer()
+        return serializer.serialize_model_to_string(output_model)
+
     #
     # Interface methods - getters
     # Use these methods to get all the necessary info!
@@ -104,5 +146,6 @@ class Resource(csv2rdf.interfaces.AuxilaryInterface):
 if __name__ == '__main__':
     res = Resource('2625cb04-6a73-4154-9e22-bde490d5b61e')
     res.init()
-    print res
+    import ipdb; ipdb.set_trace()
+    print res.get_metadata()
     pass

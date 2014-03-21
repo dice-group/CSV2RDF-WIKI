@@ -1,7 +1,7 @@
 import requests
 from ckanclient import CkanClient
 
-import csv2rdf.config
+import csv2rdf.config.config
 import csv2rdf.database
 import csv2rdf.interfaces
 
@@ -35,6 +35,30 @@ class Package(csv2rdf.interfaces.AuxilaryInterface):
     def initialize(self):
         entity = self.ckan.package_entity_get(self.name)
         self.unpack_object_to_self(entity)
+
+    def get_metadata(self, dataset=None):
+        if(dataset is None):
+            dataset = self.name
+
+        dataset_meta = self.cache_metadata_get(dataset)
+        if(not dataset_meta):
+            url = csv2rdf.config.config.ckan_base_url + "/dataset/"+dataset+".rdf"
+            r = requests.get(url)
+            assert r.status_code == requests.codes.ok #is 200?
+            dataset_meta = r.content
+            self.cache_metadata_put(dataset, dataset_meta)
+        return dataset_meta
+
+    def cache_metadata_get(self, dataset):
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_packages_metadata_path)
+        if db.is_exists(dataset):
+            return db.loadDbase(dataset)
+        else:
+            return False
+
+    def cache_metadata_put(self, dataset, metadata):
+        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_packages_metadata_path)
+        db.saveDbase(dataset, metadata)
         
     def download_all_resources(self):
         """
@@ -59,4 +83,5 @@ class Package(csv2rdf.interfaces.AuxilaryInterface):
         
 if __name__ == '__main__':
     package = Package('financial-transactions-data-ago-cps')
-    print package.resources
+    #print package.resources
+    print package.get_metadata()

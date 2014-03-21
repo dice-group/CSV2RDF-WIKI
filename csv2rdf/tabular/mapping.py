@@ -13,25 +13,34 @@ import csv2rdf.ckan.package
 import csv2rdf.prefixcc
 import csv2rdf.ckan.resource
 import csv2rdf.tabular.tabularfile
+import csv2rdf.interfaces
 
-class Mapping():
+class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     def __init__(self, resource_id = None):
         self.resource_id = resource_id
         self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
+
+    def init_mappings_only(self):
+        self.wiki_page = self.request_wiki_page()
+        if(self.wiki_page):
+            self.metadata = self.extract_metadata_from_wiki_page(self.wiki_page)
+            self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
+            self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
+            self.mappings = self.process_mappings(self.mappings)
+            return True
+        else:
+            return self.wiki_page
     
     def init(self):
-        self.wiki_page = self.request_wiki_page()
-        self.metadata = self.extract_metadata_from_wiki_page(self.wiki_page)
-        self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
-        self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
-        self.mappings = self.process_mappings(self.mappings)
+        self.init_mappings_only()
         self.save_csv_mappings(self.mappings)
 
     def process_mappings(self, mappings):
         for mapping in mappings:
             mapping['omitRows'] = self.process_omitRows(mapping['omitRows']) if mapping['omitRows'] != '-1' else [-1]
             mapping['omitCols'] = self.process_omitCols(mapping['omitCols']) if mapping['omitCols'] != '-1' else [-1]
+            mapping['header'] = self.process_header(mapping['header']) if mapping['header'] != '-1' else [1]
             mapping['delimiter'] = mapping['delimiter'] if ('delimiter' in mapping) else ','
         return mappings
 
@@ -367,6 +376,9 @@ class Mapping():
     def process_omitCols(self, string):
         return self.process_omitRows(string)
 
+    def process_header(self, string):
+        return self.process_omitRows(string)
+
     def process_file(self, original_file_path, mapping_current):
         omitRows = mapping_current['omitRows']
 
@@ -377,11 +389,10 @@ class Mapping():
                 #line_num = 0 is a header, we do not process it
                 if(not line_num in omitRows):
                     processed_file.write(line)
-        except BaseException as e:
-            logging.warning("An exception occured: %s" % str(e))
-        finally:
             original_file.close()
             processed_file.close()
+        except BaseException as e:
+            logging.warning("An exception occured: %s" % str(e))
 
         return processed_file
 
