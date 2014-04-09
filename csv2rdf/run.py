@@ -144,6 +144,20 @@ class CSV2RDFRefineAPI(object):
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_resource_json()
 
+class TableREST(object):
+    exposed = True
+
+    @cherrypy.tools.json_out()
+    @cherrypy.tools.authorize_self()
+    def GET(self, *vpath):
+        pass
+
+    @cherrypy.tools.json_out()
+    @cherrypy.tools.authorize_self()
+    def PUT(self, *vpath):
+        pass
+
+
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
     cherrypy.quickstart(publicdataeu, '/', 'server/config')

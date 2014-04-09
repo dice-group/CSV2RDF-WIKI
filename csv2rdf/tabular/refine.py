@@ -55,12 +55,18 @@ class Refine(object):
         table['rows'] = []
         table['header'] = []
         for column in dataframe.columns:
-            table['header'].append(column)
+            header = {}
+            header['label'] = column
+            header['uri'] = ''
+            table['header'].append(header)
         datamatrix = dataframe.as_matrix()
         for row in datamatrix:
             row_to_append = []
             for item in row:
-                row_to_append.append(item)
+                row_item = {}
+                row_item['label'] = item
+                row_item['uri'] = ''
+                row_to_append.append(row_item)
             table['rows'].append(row_to_append)
 
         return table
