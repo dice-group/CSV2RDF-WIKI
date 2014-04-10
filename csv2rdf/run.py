@@ -144,18 +144,14 @@ class CSV2RDFRefineAPI(object):
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_resource_json()
 
-class TableREST(object):
-    exposed = True
-
-    @cherrypy.tools.json_out()
-    @cherrypy.tools.authorize_self()
-    def GET(self, *vpath):
-        pass
-
-    @cherrypy.tools.json_out()
-    @cherrypy.tools.authorize_self()
-    def PUT(self, *vpath):
-        pass
+class TransformAPI(object):
+    @cherrypy.expose
+    def index(self):
+        cl = cherrypy.request.headers['Content-Length']
+        rawbody = cherrypy.request.body.read(int(cl))
+        body = json.loads(rawbody)
+        print rawbody
+        return "Updated!"
 
 
 if __name__ == '__main__':
@@ -166,4 +162,5 @@ if __name__ == '__main__':
 def application(environ, start_response):
     cherrypy.tree.mount(CSV2RDFApp(), '/', 'csv2rdf/server/config')
     cherrypy.tree.mount(CSV2RDFRefineAPI(), '/api/', 'csv2rdf/server/config')
+    cherrypy.tree.mount(TransformAPI(), '/api/transform/', 'csv2rdf/server/config')
     return cherrypy.tree(environ, start_response)
