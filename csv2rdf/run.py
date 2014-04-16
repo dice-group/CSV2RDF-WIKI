@@ -145,13 +145,16 @@ class CSV2RDFRefineAPI(object):
         return refine.get_resource_json()
 
 class TransformAPI(object):
+
     @cherrypy.expose
     def index(self):
+        cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
         cl = cherrypy.request.headers['Content-Length']
         rawbody = cherrypy.request.body.read(int(cl))
-        body = json.loads(rawbody)
-        print rawbody
-        return "Updated!"
+        table = json.loads(rawbody)
+        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify('')
+        sparqlify.process_table_from_json(table)
+        return "In a queue now!"
 
 
 if __name__ == '__main__':

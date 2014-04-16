@@ -9,7 +9,6 @@ from csv2rdf.ckan.resource import Resource
 class Refine(object):
     def __init__(self, resource_id):
         self.resource_id = resource_id
-        pass
 
     def get_mappings(self):
         resource_id = self.resource_id
