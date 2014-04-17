@@ -151,13 +151,14 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
         cherrypy.response.headers["Accept"] = "application/json"
-        cl = cherrypy.request.headers['Content-Length']
-        rawbody = cherrypy.request.body.read(cl)
+        #cl = cherrypy.request.headers['Content-Length']
+        #rawbody = cherrypy.request.body.read(cl)
         json_load = ' '.join(cherrypy.request.params.keys())
-        table = json.loads(json_load)
-        print table
-        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify('')
-        sparqlify.process_table_from_json(table)
+        json_load = json.loads(json_load)
+        id = json_load['id']
+        header = json_load['header']
+        mapping = csv2rdf.tabular.mapping.Mapping(id)
+        mapping.update_mapping_header(header)
         return "In a queue now!"
     refine.exposed = True
     #refine._cp_config = {'tools.json_in.on': True}

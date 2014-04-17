@@ -21,6 +21,20 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
 
+    def update_mapping_header(self, header):
+        self.init_mappings_only()
+        mapping = self.get_mapping_by_name('default-tranformation-configuration')
+        mapping['name'] = 'csv2rdf-interface-generated'
+        for num, item in enumerate(header):
+            key = "col" + str(num + 1)
+            if(item['uri'] == ''):
+                mapping[key] = item['label']
+            else:
+                mapping[key] = item['uri']
+        wikified_mapping = self.convert_mapping_to_wiki_template(mapping)
+        print wikified_mapping
+            
+
     def init_mappings_only(self):
         self.wiki_page = self.request_wiki_page()
         if(self.wiki_page):
@@ -157,6 +171,23 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
             if(not line == ''):
                 output.append(line)
         return '\n'.join(output)
+
+    def convert_mapping_to_wiki_template(self, mapping, resource_id = None):
+        if(not resource_id):
+            resource_id = self.resource_id
+
+        result_mapping = mapping.copy()
+        result_mapping['header'] = str(mapping['header'])[1:-1]
+        result_mapping['omitCols'] = str(mapping['omitCols'])[1:-1]
+        result_mapping['omitRows'] = str(mapping['omitRows'])[1:-1]
+        del(result_mapping['type'])
+        #'header': [1], u'omitCols': [-1], u'col10': 'rdfs%3Acomment', 'delimiter': ',', u'omitRows': [-1], 'type': u'RelCSV2RDF'
+        wiki_template = "{{RelCSV2RDF| \n"
+        for item in result_mapping:
+            print item
+            wiki_template += "%s = %s |\n" % (item, urllib.unquote(result_mapping[item]))
+        wiki_template += "}}"
+        return wiki_template
 
     def convert_mapping_to_sparqlifyml(self, mapping, resource_id = None):
         if(not resource_id):
@@ -450,8 +481,10 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
 if __name__ == '__main__':
     #mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
     mapping = Mapping('00e0737c-6920-479a-9916-ff83b9de692c')
-    mapping.init()
-    mapping.update_metadata()
+    mapping.init_mappings_only()
+    import ipdb; ipdb.set_trace()
+    #mapping.init()
+    #mapping.update_metadata()
     #print mapping.wiki_page
     #print mapping.metadata
     #print mapping.mappings

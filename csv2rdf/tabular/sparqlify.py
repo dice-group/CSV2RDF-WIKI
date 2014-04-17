@@ -14,9 +14,6 @@ class Sparqlify():
     def __init__(self, resource_id):
         self.resource_id = resource_id
 
-    def process_table_from_json(self, table):
-        print table
-
     
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
