@@ -144,17 +144,23 @@ class CSV2RDFRefineAPI(object):
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_resource_json()
 
-class TransformAPI(object):
-
-    @cherrypy.expose
-    def index(self):
-        cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+    #@cherrypy.expose(alias="refine")
+    #def refine(self, **jsonText):
+    def refine(self, *args, **kw):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        cherrypy.response.headers["Accept"] = "application/json"
         cl = cherrypy.request.headers['Content-Length']
-        rawbody = cherrypy.request.body.read(int(cl))
-        table = json.loads(rawbody)
+        rawbody = cherrypy.request.body.read(cl)
+        json_load = ' '.join(cherrypy.request.params.keys())
+        table = json.loads(json_load)
+        print table
         sparqlify = csv2rdf.tabular.sparqlify.Sparqlify('')
         sparqlify.process_table_from_json(table)
         return "In a queue now!"
+    refine.exposed = True
+    #refine._cp_config = {'tools.json_in.on': True}
 
 
 if __name__ == '__main__':
@@ -165,5 +171,4 @@ if __name__ == '__main__':
 def application(environ, start_response):
     cherrypy.tree.mount(CSV2RDFApp(), '/', 'csv2rdf/server/config')
     cherrypy.tree.mount(CSV2RDFRefineAPI(), '/api/', 'csv2rdf/server/config')
-    cherrypy.tree.mount(TransformAPI(), '/api/transform/', 'csv2rdf/server/config')
     return cherrypy.tree(environ, start_response)

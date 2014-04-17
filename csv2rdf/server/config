@@ -3,3 +3,4 @@ server.socket_host: "localhost"
 server.socket_port: 8090
 server.environment: "production"
 engine.autoreload_on: True
+request.dispatch: cherrypy.dispatch.MethodDispatcher()
