@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+from copy import copy
 
 import urllib
 import wikitools
@@ -22,24 +23,32 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
 
     def update_mapping_header(self, header):
+        print header
         self.init_mappings_only()
         mapping = self.get_mapping_by_name('default-tranformation-configuration')
-        mapping['name'] = 'csv2rdf-interface-generated'
+        new_mapping = copy(mapping)
+        new_mapping['name'] = 'csv2rdf-interface-generated'
         for num, item in enumerate(header):
             key = "col" + str(num + 1)
             if(item['uri'] == ''):
-                mapping[key] = item['label']
+                new_mapping[key] = item['label']
             else:
-                mapping[key] = item['uri']
-        wikified_mapping = self.convert_mapping_to_wiki_template(mapping)
+                new_mapping[key] = item['uri']
+        wikified_mapping = self.convert_mapping_to_wiki_template(new_mapping)
         print wikified_mapping
-            
+        old_mapping = self.get_mapping_by_name(new_mapping['name'])
+        if(old_mapping):
+            old_mapping_start = self.mappings_start[mapping['name']]
+            old_mapping_end = self.mappings_end[mapping['name']]
+            self.delete_template_from_wiki_page(old_mapping_start, old_mapping_end)
+        self.add_mapping_to_wiki_page(wikified_mapping)
+        self.create_wiki_page(self.wiki_page)
 
     def init_mappings_only(self):
         self.wiki_page = self.request_wiki_page()
         if(self.wiki_page):
             self.metadata = self.extract_metadata_from_wiki_page(self.wiki_page)
-            self.mappings = self.extract_mappings_from_wiki_page(self.wiki_page)
+            (self.mappings, self.mappings_start, self.mappings_end) = self.extract_mappings_from_wiki_page(self.wiki_page)
             self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
             self.mappings = self.process_mappings(self.mappings)
             return True
@@ -106,7 +115,7 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     
     def extract_metadata_from_wiki_page(self, wiki_page):
         (templates, template_start, template_end) = self.parse_template(wiki_page, 'CSV2RDFMetadata')
-        self.delete_template_from_wiki_page(template_start, template_end)
+        self.delete_template_from_wiki_page(template_start, template_end, 'CSV2RDFMetadata')
         if(len(templates) != 0):
             return templates[0]
         else:
@@ -115,18 +124,20 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     def extract_mappings_from_wiki_page(self, wiki_page):        
         (templates, template_start, template_end) = self.parse_template(wiki_page, 'RelCSV2RDF')
         #self.delete_template_from_wiki_page(template_start, template_end)
-        return templates
+        return (templates, template_start, template_end)
 
     def parse_template(self, wiki_page, template_name):
         lines = wiki_page.split('\n')
         templates = []
         inside_template = False        
-        template_start = []
-        template_end = []
+        template_start = {}
+        template_end = {}
         for num, line in enumerate(lines):
             if(re.match('^{{'+template_name, line)):
                 inside_template = True
-                template_start.append(num)
+                if(not template_name in template_start):
+                    template_start[template_name] = []
+                template_start[template_name].append(num)
                 template = {}
                 template['type'] = line[2:] #'RelCSV2RDF|'
                 template['type'] = template['type'][:-1] # 'RelCSV2RDF'
@@ -137,7 +148,9 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
                 templates.append(template)
                 del template
                 inside_template = False
-                template_end.append(num)
+                if(not template_name in template_end):
+                    template_end[template_name] = []
+                template_end[template_name].append(num)
                 continue
             
             if(inside_template):
@@ -156,10 +169,10 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
 
         return (templates, template_start, template_end)
 
-    def delete_template_from_wiki_page(self, template_start, template_end):
+    def delete_template_from_wiki_page(self, template_start, template_end, template_name=None):
         lines = self.wiki_page.split('\n')
-        for i in range(0, len(template_start)):
-            for j in range(template_start[i], template_end[i] + 1):
+        for i in range(0, len(template_start['CSV2RDFMetadata'])):
+            for j in range(template_start['CSV2RDFMetadata'][i], template_end['CSV2RDFMetadata'][i] + 1):
                 lines[j] = ''
 
         self.wiki_page = '\n'.join(lines)
@@ -389,6 +402,11 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         for key in metadata.keys():
             lines.append(key +"="+metadata[key]+" |")
         lines.append("}}")
+        self.wiki_page = '\n'.join(lines)
+
+    def add_mapping_to_wiki_page(self, mapping):
+        lines = self.wiki_page.split('\n')
+        lines.append(mapping)
         self.wiki_page = '\n'.join(lines)
         
     def process_omitRows(self, string):
