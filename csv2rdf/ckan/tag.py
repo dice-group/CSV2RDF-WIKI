@@ -46,6 +46,18 @@ class Tag(csv2rdf.interfaces.AuxilaryInterface):
                     resources.append(resource)
         return resources
 
+    def get_tag_list_by_popularity(self):
+        import cPickle
+        from csv2rdf.config.config import data_path
+        filename = "tags"
+        filepath = data_path + filename
+        tags = cPickle.load(open(filepath, 'r'))
+
+        import operator
+        sorted_tags = sorted(tags.iteritems(), key=operator.itemgetter(1), reverse=True)
+
+        return sorted_tags
+
     def interesting_tags(self):
         return [#'abfall',
                 #'abfalle',
@@ -145,6 +157,11 @@ if __name__ == '__main__':
     tag = Tag('')
     import pprint
     pp = pprint.PrettyPrinter()
-    tag_1 = tag.interesting_tags()[0]
-    pp.pprint(tag.get_tag_csv_resources(tag_1))
-    pass
+    #pp.pprint(tag.get_tag_list_by_popularity()[0:50])
+    for tag_tuple in tag.get_tag_list_by_popularity()[0:50]:
+        tag_name = tag_tuple[0]
+        print "Tag: "+tag_name.encode('utf-8')
+        print ""
+        for resource in tag.get_tag_csv_resources(tag_name):
+            print '"' + resource['description'].encode('utf-8') + '", ' + resource['url'].encode('utf-8') + ", " + tag_name.encode('utf-8')
+        print ""

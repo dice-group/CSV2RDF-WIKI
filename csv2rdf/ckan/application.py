@@ -183,7 +183,7 @@ if __name__ == '__main__':
     #ckan_app.update_full_resource_list()
     #ckan_app.update_metadata_for_all_resources()
     #ckan_app.update_exposed_rdf_list()
-    #ckan_app.update_sparqlified_list()
+    ckan_app.update_sparqlified_list()
     #ckan_app.create_new_wiki_pages()
     #ckan_app.wiki_pages_diff()
     #ckan_app.get_csv2rdf_pages()

@@ -23,7 +23,6 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
 
     def update_mapping_header(self, header):
-        print header
         self.init_mappings_only()
         mapping = self.get_mapping_by_name('default-tranformation-configuration')
         new_mapping = copy(mapping)
@@ -35,14 +34,14 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
             else:
                 new_mapping[key] = item['uri']
         wikified_mapping = self.convert_mapping_to_wiki_template(new_mapping)
-        print wikified_mapping
         old_mapping = self.get_mapping_by_name(new_mapping['name'])
         if(old_mapping):
-            old_mapping_start = self.mappings_start[mapping['name']]
-            old_mapping_end = self.mappings_end[mapping['name']]
+            old_mapping_start = self.mappings_start[new_mapping['name']]
+            old_mapping_end = self.mappings_end[new_mapping['name']]
             self.delete_template_from_wiki_page(old_mapping_start, old_mapping_end)
         self.add_mapping_to_wiki_page(wikified_mapping)
         self.create_wiki_page(self.wiki_page)
+        self.update_metadata()
 
     def init_mappings_only(self):
         self.wiki_page = self.request_wiki_page()
@@ -115,7 +114,7 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     
     def extract_metadata_from_wiki_page(self, wiki_page):
         (templates, template_start, template_end) = self.parse_template(wiki_page, 'CSV2RDFMetadata')
-        self.delete_template_from_wiki_page(template_start, template_end, 'CSV2RDFMetadata')
+        self.delete_template_from_wiki_page(template_start['CSV2RDFMetadata'], template_end['CSV2RDFMetadata'])
         if(len(templates) != 0):
             return templates[0]
         else:
@@ -132,25 +131,46 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         inside_template = False        
         template_start = {}
         template_end = {}
+        template_start_one = 0
+        template_end_one = 0
         for num, line in enumerate(lines):
             if(re.match('^{{'+template_name, line)):
                 inside_template = True
-                if(not template_name in template_start):
-                    template_start[template_name] = []
-                template_start[template_name].append(num)
                 template = {}
+                template_start_one = num
                 template['type'] = line[2:] #'RelCSV2RDF|'
                 template['type'] = template['type'][:-1] # 'RelCSV2RDF'
                 continue
             
             if(inside_template and re.match('^}}', line)):
+                template_end_one = num
+                #print template
+
+                if(template['type'].startswith('RelCSV2RDF')):
+                    if(not template['name'] in template_start):
+                        template_start[template['name']] = []
+
+                    if(not template['name'] in template_end):
+                        template_end[template['name']] = []
+                    template_end[template['name']] = [template_end_one]
+
+                    template_start[template['name']] = [template_start_one]
+
+                else:
+                    if(not template_name in template_start):
+                        template_start[template_name] = []
+
+                    if(not template_name in template_end):
+                        template_end[template_name] = []
+
+                    template_start[template_name].append(template_start_one)
+                    template_end[template_name].append(template_end_one)
+
                 #push mapping to the mappings
                 templates.append(template)
                 del template
                 inside_template = False
-                if(not template_name in template_end):
-                    template_end[template_name] = []
-                template_end[template_name].append(num)
+
                 continue
             
             if(inside_template):
@@ -171,8 +191,8 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
 
     def delete_template_from_wiki_page(self, template_start, template_end, template_name=None):
         lines = self.wiki_page.split('\n')
-        for i in range(0, len(template_start['CSV2RDFMetadata'])):
-            for j in range(template_start['CSV2RDFMetadata'][i], template_end['CSV2RDFMetadata'][i] + 1):
+        for i in range(0, len(template_start)):
+            for j in range(template_start[i], template_end[i] + 1):
                 lines[j] = ''
 
         self.wiki_page = '\n'.join(lines)
@@ -197,7 +217,6 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         #'header': [1], u'omitCols': [-1], u'col10': 'rdfs%3Acomment', 'delimiter': ',', u'omitRows': [-1], 'type': u'RelCSV2RDF'
         wiki_template = "{{RelCSV2RDF| \n"
         for item in result_mapping:
-            print item
             wiki_template += "%s = %s |\n" % (item, urllib.unquote(result_mapping[item]))
         wiki_template += "}}"
         return wiki_template
