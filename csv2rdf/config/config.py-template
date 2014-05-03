@@ -48,6 +48,9 @@ data_rdf_and_sparql_csv = "rdf_and_sparql_csv"
 data_for_lodstats = "rdf_for_lodstats"
 data_licenses = "licenses"
 
+#data.gov catalogue cache
+data_gov_pages_folder = data_path + "datagovpages/"
+
 #logging configuration
 import logging
 main_log_folder = root_path + "/logs/"

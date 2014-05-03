@@ -11,6 +11,9 @@ import csv2rdf.config
 import csv2rdf.config.config
 import csv2rdf.config.rdf_formats
 
+import cPickle
+from csv2rdf.config import config
+
 class CkanIO():
     def __init__(self):
         self.ckan = CkanClient(base_location=csv2rdf.config.config.ckan_api_url,
@@ -20,7 +23,14 @@ class CkanIO():
         """
             Returns the list of package names (unique identifiers)
         """
-        return self.ckan.package_list()
+        #return self.ckan.package_list()
+        return self.get_package_list_datagov()
+
+    def get_package_list_datagov(self):
+        f = open(config.data_gov_pages_folder + "datasets", "rb")
+        dataset_name_list = cPickle.load(f)
+        f.close()
+        return dataset_name_list
 
     def update_full_package_list(self):
         full_package_list = []

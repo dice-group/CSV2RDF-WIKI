@@ -35,8 +35,8 @@ class CkanApplication():
         logging.info("Dumping data from the CKAN ... Complete.")
 
         logging.info("Updating the list of wiki pages ... Started.")
-        mapping = csv2rdf.tabular.mapping.Mapping('')
-        mapping.update_csv2rdf_wiki_page_list()
+        #mapping = csv2rdf.tabular.mapping.Mapping('')
+        #mapping.update_csv2rdf_wiki_page_list()
         logging.info("Updating the list of wiki pages ... Complete.")
 
     def synchronize(self):
