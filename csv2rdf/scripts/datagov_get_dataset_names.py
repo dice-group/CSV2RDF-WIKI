@@ -5,4 +5,4 @@ f = open(config.data_gov_pages_folder + "datasets", "rb")
 dataset_name_list = cPickle.load(f)
 f.close()
 
-print dataset_name_list[0]
+print len(dataset_name_list)

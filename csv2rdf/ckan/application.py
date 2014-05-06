@@ -27,7 +27,7 @@ class CkanApplication():
         """
         logging.info("Dumping data from the CKAN ... Started.")
         io = csv2rdf.ckan.ckanio.CkanIO()
-        io.update_packages()
+        #io.update_packages()
         io.update_full_package_list()
         io.update_full_resource_list()
         io.update_csv_resource_list()

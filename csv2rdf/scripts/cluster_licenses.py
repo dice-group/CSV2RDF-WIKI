@@ -1,7 +1,14 @@
-from csv2rdf.ckan.ckanio import CkanIO
+#from csv2rdf.ckan.ckanio import CkanIO
+import csv2rdf.config.config
+import csv2rdf.database
+from os import listdir
+from os.path import isfile, join
 
-ckanio = CkanIO()
-full_package_list = ckanio.get_full_package_list()
+#ckanio = CkanIO()
+#full_package_list = ckanio.get_full_package_list()
+data_packages_path = csv2rdf.config.config.data_packages_path
+package_list = [f for f in listdir(data_packages_path) if isfile(join(data_packages_path, f)) ]
+db = csv2rdf.database.DatabasePlainFiles(data_packages_path)
 print "Loaded package list"
 #full_package_list = [{"license_id": "some_id"},
 #                     {"license_id": "some_id"},
@@ -11,7 +18,12 @@ print "Loaded package list"
 #                     {"license_id": "some_id"},
 #                     {"license_id": "some_id2"}]
 licenses = {}
-for package in full_package_list: 
+for package_id in package_list: 
+    print "Processing " + str(package_id)
+    try:
+        package = db.loadDbase(package_id)
+    except BaseException as e:
+        print str(e)
     if( hasattr(package, 'license_url')):
         license_url = package.license_url 
     else:

@@ -1,5 +1,7 @@
 import logging
 import os
+from os import listdir
+from os.path import isfile, join
 
 from ckanclient import CkanClient
 
@@ -34,12 +36,15 @@ class CkanIO():
 
     def update_full_package_list(self):
         full_package_list = []
-        db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.data_packages_path)
-        package_list = self.get_package_list()
+        data_packages_path = csv2rdf.config.config.data_packages_path
+        db = csv2rdf.database.DatabasePlainFiles(data_packages_path)
+        #package_list = self.get_package_list()
+        package_list = [f for f in listdir(data_packages_path) if isfile(join(data_packages_path, f)) ]
         logging.info("updating full package list file: %s" % csv2rdf.config.config.data_full_package_list)
         package_list_length = len(package_list)
         for num, package_id in enumerate(package_list):
             logging.info("Reading package number %d out of %d" % (num + 1, package_list_length))
+            logging.info("Reading package %s" % (package_id))
             try:
                 package = db.loadDbase(package_id)
                 full_package_list.append(package)
@@ -173,12 +178,11 @@ class CkanIO():
         return db.loadDbase(eval("csv2rdf.config.config.data_"+str(type)+"_resource_list"))
 
 if __name__ == "__main__":
-    import csv2rdf.config.logging
     io = CkanIO()
 
     #io.get_package_list()
     #io.update_packages()
-    #io.update_full_package_list()
+    io.update_full_package_list()
     #print io.get_full_package_list()
     #io.update_full_resource_list()
     #io.get_full_resource_list()

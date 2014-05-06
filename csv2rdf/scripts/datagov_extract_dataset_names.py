@@ -13,7 +13,6 @@ for i in range(1, number_of_pages + 1):
     soup = BeautifulSoup(page)
     for dataset in soup.find_all(href=re.compile("dataset/")):
         dataset_name_list.append(dataset["href"].split("/")[-1])
-    break
  
 import cPickle
 f = open(config.data_gov_pages_folder + "datasets", "wb")
