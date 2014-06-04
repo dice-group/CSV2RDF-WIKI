@@ -114,7 +114,10 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     
     def extract_metadata_from_wiki_page(self, wiki_page):
         (templates, template_start, template_end) = self.parse_template(wiki_page, 'CSV2RDFMetadata')
-        self.delete_template_from_wiki_page(template_start['CSV2RDFMetadata'], template_end['CSV2RDFMetadata'])
+        try:
+            self.delete_template_from_wiki_page(template_start['CSV2RDFMetadata'], template_end['CSV2RDFMetadata'])
+        except BaseException as e:
+            print str(e)
         if(len(templates) != 0):
             return templates[0]
         else:

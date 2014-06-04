@@ -1,8 +1,23 @@
 import cPickle
 from csv2rdf.config.config import data_path
-filename = "licenses_precise06May2014"
+
+def encode(string):
+    if(string is None):
+        return ""
+    elif(type(string) is int):
+        return string
+    elif(string is ""):
+        return "N/A"
+    else:
+        return string.encode('utf-8')
+
+filename = "licenses_precise21March2014"
 filepath = data_path + filename
 licenses = cPickle.load(open(filepath, 'rb'))
 for license in licenses:
-    arr = [str(license), str(licenses[license]['count']), str(licenses[license]['license_title']), str(licenses[license]['license_url']), str(licenses[license]['license'])]
+    arr = [str(encode(license)), 
+           str(encode(licenses[license]['count'])), 
+           str(encode(licenses[license]['license_title'])), 
+           str(encode(licenses[license]['license_url'])), 
+           str(encode(licenses[license]['license']))]
     print ", ".join(arr)
