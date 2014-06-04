@@ -22,6 +22,8 @@ root_path = "__CSV2RDF__"
 
 #pathes to libraries
 sparqlify_jar_path = root_path + "/csv2rdf/libs/sparqlify.jar"
+limes_jar_path = root_path + "/csv2rdf/libs/limes.jar"
+limes_dtd_path = root_path + "/csv2rdf/libs/limes.dtd"
 
 #pathes to local folders
 resources_path = root_path + "/files/csv/" #contains downloaded and cleaned csv files
