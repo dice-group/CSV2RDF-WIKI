@@ -8,3 +8,4 @@ requests
 pandas
 python-magic
 pika
+foxpy
