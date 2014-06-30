@@ -1,5 +1,7 @@
 import re
+import json
 import foxpy.fox
+import spotlight
 from csv2rdf.ckan.resource import Resource
 from csv2rdf.ckan.package import Package
 from csv2rdf.tabular.mapping import Mapping
@@ -7,8 +9,8 @@ from csv2rdf.tabular.tabularfile import TabularFile
 from csv2rdf.tabular.refine import Refine
 
 class Classificator(object):
-    def __init__(self):
-        self.fox = foxpy.fox.Fox()
+    def __init__(self, foxlight=4):
+        self.fox = foxpy.fox.Fox(foxlight) #foxlight stands for NER method, see Fox class for details
 
     def concatHeaders(self, headers):
         uniqueHeaders = set()
@@ -53,11 +55,45 @@ class Classificator(object):
         package = Package(resource.package_name)
         return (resource, package, headers, table)
 
-    def classify(self, text):
+    def classifyFox(self, text):
         (text, output, log) = self.fox.recognizeText(text)
         return (text, output, log)
 
-    def classifyResource(self, resourceId):
+    def classifySpotlight(self, text):
+        annotationServiceUri = 'http://spotlight.dbpedia.org/rest/annotate'
+        confidence = 0.5
+        support = 20
+        return spotlight.annotate(annotationServiceUri, text, confidence=confidence, support=support)
+
+    def getEntitiesSpotlight(self, resourceId):
+        spotlight = self.classifyResource(resourceId, classifierName="Spotlight")
+        entitiesRecognized = set()
+        for structuralElement in spotlight:
+            structuralElementName = structuralElement.keys()[0]
+            entities = structuralElement[structuralElementName]
+            for entity in entities:
+                entitiesRecognized.add(entity['URI'])
+        return entitiesRecognized
+
+    def getEntitiesFox(self, resourceId):
+        fox = classificator.classifyResource(resourceId, classifierName="Fox")
+        entitiesRecognized = set()
+        for structuralElement in fox:
+            structuralElementName = structuralElement.keys()[0]
+            (text, entities, log) = structuralElement[structuralElementName]
+            entities = json.loads(entities)
+            if( '@graph' in entities ):
+                for entity in entities['@graph']:
+                    entitiesRecognized.add(entity['means'])
+        return entitiesRecognized
+
+    def getEntities(self, resourceId):
+        spotlightEntities = self.getEntitiesSpotlight(resourceId)
+        foxEntities = self.getEntitiesFox(resourceId)
+        import ipdb; ipdb.set_trace()
+
+    def classifyResource(self, resourceId, classifierName='Fox'):
+        classifier = eval('self.classify'+classifierName)
         classified = []
         (resource, package, headers, table) = self.getResourceMetadata(resourceId)
         itemsToClassify = [
@@ -80,10 +116,13 @@ class Classificator(object):
                     tmp += key + " " + stringToClassify[key] + "\n"
                 stringToClassify = tmp
             
-            classified.append({item: self.fox.recognizeText(stringToClassify)})
+            try:
+                classified.append({item: classifier(stringToClassify)})
+            except BaseException as e:
+                print str(e)
         return classified
 
 if __name__ == "__main__":
     testResourceId = "8b51874e-cda8-4910-a3c0-9140e11164a3"
     classificator = Classificator()
-    print classificator.classifyResource(testResourceId)
+    entities = classificator.getEntities(testResourceId)
