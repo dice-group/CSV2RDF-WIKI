@@ -19,11 +19,27 @@ class TestClassify(object):
 
     def getClassifiedResourceIds(self):
         return self.getFilenamesFromFolder(data_classified_path + 'neropennlp')
+    
+    def getEntitiesResourceIds(self):
+        return self.getFilenamesFromFolder(data_classified_path + 'entities')
 
     def getClassifiedFullpath(self):
         from os.path import join
         classified = [ join(data_classified_path, f) for f in self.getFilenamesFromFolder(data_classified_path)]
         return classified
+
+    def getEntitiesTop10(self):
+        resourceIds = self.getAvailableResourceIds()
+        classificator = Classificator()
+        for resourceId in resourceIds[3:10]:
+            print "processing %s" % resourceId
+            try:
+                classified = classificator.getEntities(resourceId)
+                pickle.dump(classified, open(data_classified_path + 'entities/' + resourceId, 'wb'))
+            except BaseException as e:
+                print str(e)
+            break
+
 
     def classifyTop500(self):
         resourceIds = self.getAvailableResourceIds()
@@ -77,9 +93,19 @@ class TestClassify(object):
             print path
             self.printClassified(path)
 
+    def analyseEntities(self):
+        resourceIds = self.getEntitiesResourceIds()
+        for resourceId in resourceIds:
+            entities = pickle.load(open(data_classified_path + 'entities/' + resourceId, 'rU'))
+            for entityUri in entities:
+                if(not entityUri.startswith('http://scms.eu')):
+                    print entityUri
+
 if __name__ == "__main__":
     testclassify = TestClassify()
-    testclassify.analyseOne()
+    testclassify.analyseEntities()
+    #testclassify.getEntitiesTop10()
+    #testclassify.analyseOne()
     #testclassify.classifyTop500()
     #testclassify.classifyTheSame()
     #testclassify.analyseClassified()

@@ -2,17 +2,51 @@ import re
 import json
 import foxpy.fox
 import spotlight
+
+from SPARQLWrapper import SPARQLWrapper, JSON
 from csv2rdf.ckan.resource import Resource
 from csv2rdf.ckan.package import Package
 from csv2rdf.tabular.mapping import Mapping
 from csv2rdf.tabular.tabularfile import TabularFile
 from csv2rdf.tabular.refine import Refine
+from csv2rdf.config.config import data_classified_cache_path
+from csv2rdf.database import DatabasePlainFiles
 
-class Classificator(object):
+class Classifier(object):
     def __init__(self, foxlight=4):
         self.fox = foxpy.fox.Fox(foxlight) #foxlight stands for NER method, see Fox class for details
 
-    def concatHeaders(self, headers):
+    def getEntitiesWithClasses(self, resourceId):
+        entities = set(self.getEntities(resourceId))
+        classes = self._getClassesForEntities(entities)
+        return list(entities.union(classes))
+
+    def getEntities(self, resourceId):
+        db = DatabasePlainFiles(data_classified_cache_path + resourceId)
+        if(db.is_exists(resourceId)):
+            return db.loadDbase(resourceId)
+        else:
+            spotlightEntities = self._getEntitiesSpotlight(resourceId)
+            foxEntities = self._getEntitiesFox(resourceId)
+            entities = list(spotlightEntities.union(foxEntities))
+            db.saveDbase(resourceId, entities)
+            return entities
+
+    def _getClassesForEntities(self, entities):
+        sparql = SPARQLWrapper("http://dbpedia.org/sparql")
+        classes = set()
+        for entity in entities:
+            sparql.setQuery("""
+                SELECT ?type
+                WHERE { <%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type . }
+            """ % entity)
+            sparql.setReturnFormat(JSON)
+            results = sparql.query().convert()
+            for result in results['results']['bindings']:
+                classes.add(result['type']['value'])
+        return classes
+
+    def _concatHeaders(self, headers):
         uniqueHeaders = set()
         for header in headers:
             for item in header[header.keys()[0]]:
@@ -23,7 +57,7 @@ class Classificator(object):
             concatHeaders += item + " "
         return concatHeaders
 
-    def concatTable(self, table):
+    def _concatTable(self, table):
         concatTable = ""
         for col in table['columns'][1:]: #remove header
             colContent = ""
@@ -38,35 +72,35 @@ class Classificator(object):
             concatTable = 'no strings in the table'
         return concatTable
 
-    def getResourceMetadata(self, resourceId):
+    def _getResourceMetadata(self, resourceId):
         resource = Resource(resourceId)
         resource.init()
         
         mapping = Mapping(resourceId)
         headers = mapping.get_mapping_headers()
-        headers = self.concatHeaders(headers)
+        headers = self._concatHeaders(headers)
 
         tf = TabularFile(resourceId)
         csvDataframe = tf.get_csv_data()
         refine = Refine(resourceId)
         table = refine.structure_by_cols(csvDataframe)
-        table = self.concatTable(table)
+        table = self._concatTable(table)
 
         package = Package(resource.package_name)
         return (resource, package, headers, table)
 
-    def classifyFox(self, text):
+    def _classifyFox(self, text):
         (text, output, log) = self.fox.recognizeText(text)
         return (text, output, log)
 
-    def classifySpotlight(self, text):
+    def _classifySpotlight(self, text):
         annotationServiceUri = 'http://spotlight.dbpedia.org/rest/annotate'
         confidence = 0.5
         support = 20
         return spotlight.annotate(annotationServiceUri, text, confidence=confidence, support=support)
 
-    def getEntitiesSpotlight(self, resourceId):
-        spotlight = self.classifyResource(resourceId, classifierName="Spotlight")
+    def _getEntitiesSpotlight(self, resourceId):
+        spotlight = self._classifyResource(resourceId, classifierName="Spotlight")
         entitiesRecognized = set()
         for structuralElement in spotlight:
             structuralElementName = structuralElement.keys()[0]
@@ -75,8 +109,8 @@ class Classificator(object):
                 entitiesRecognized.add(entity['URI'])
         return entitiesRecognized
 
-    def getEntitiesFox(self, resourceId):
-        fox = classificator.classifyResource(resourceId, classifierName="Fox")
+    def _getEntitiesFox(self, resourceId):
+        fox = self._classifyResource(resourceId, classifierName="Fox")
         entitiesRecognized = set()
         for structuralElement in fox:
             structuralElementName = structuralElement.keys()[0]
@@ -87,15 +121,11 @@ class Classificator(object):
                     entitiesRecognized.add(entity['means'])
         return entitiesRecognized
 
-    def getEntities(self, resourceId):
-        spotlightEntities = self.getEntitiesSpotlight(resourceId)
-        foxEntities = self.getEntitiesFox(resourceId)
-        import ipdb; ipdb.set_trace()
 
-    def classifyResource(self, resourceId, classifierName='Fox'):
-        classifier = eval('self.classify'+classifierName)
+    def _classifyResource(self, resourceId, classifierName='Fox'):
+        classifier = eval('self._classify'+classifierName)
         classified = []
-        (resource, package, headers, table) = self.getResourceMetadata(resourceId)
+        (resource, package, headers, table) = self._getResourceMetadata(resourceId)
         itemsToClassify = [
                     'resource.description',
                     'package.author',
@@ -117,12 +147,14 @@ class Classificator(object):
                 stringToClassify = tmp
             
             try:
-                classified.append({item: classifier(stringToClassify)})
+                classifiedOne = classifier(stringToClassify)
+                classified.append({item: classifiedOne})
             except BaseException as e:
                 print str(e)
         return classified
 
 if __name__ == "__main__":
     testResourceId = "8b51874e-cda8-4910-a3c0-9140e11164a3"
-    classificator = Classificator()
-    entities = classificator.getEntities(testResourceId)
+    classifier = Classifier()
+    classes = classifier.getEntitiesWithClasses(testResourceId)
+    print classes
