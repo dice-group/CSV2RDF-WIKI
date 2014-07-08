@@ -1,0 +1,94 @@
+16675e7c-9b91-4763-9ffc-0fbedd9362ee
+Mapping instance has no attribute 'mappings'
+a72a48dc-297e-43d8-80c0-a21e23836eed
+{('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Northern_Ireland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Scotland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country'}
+758c5dae-d799-45ec-b203-ffe73381555f
+Mapping instance has no attribute 'mappings'
+27761af1-519a-4bad-a2cf-3c439d6907cc
+Mapping instance has no attribute 'mappings'
+93629a70-8c0e-495d-8e46-39644eb3687e
+{('package.author', u'http://dbpedia.org/resource/Performance_management'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Criminal_law'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Crown_Court'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Crown_Prosecution_Service'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.tags', u'http://dbpedia.org/resource/Court'): u'http://dbpedia.org/ontology/Settlement',
+ ('package.tags', u'http://dbpedia.org/resource/Legal_case'): '',
+ ('package.tags', u'http://dbpedia.org/resource/Service_of_process'): '',
+ ('package.tags', u'http://dbpedia.org/resource/The_Crown'): u'http://dbpedia.org/ontology/Agent',
+ ('package.title', u'http://dbpedia.org/resource/Crown_Prosecution_Service'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.title', u'http://dbpedia.org/resource/Legal_case'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Property_damage'): ''}
+ce3039e2-abd6-4c98-b6ae-3c42a1b7d333
+Mapping instance has no attribute 'mappings'
+51780ac8-0a41-4f55-95bf-f79f851b3987
+Mapping instance has no attribute 'mappings'
+7b8bda9e-b943-44d5-ac47-937fd78e23a2
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+fbe026c1-0350-4187-879e-cb5f10449beb
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.author', u'http://dbpedia.org/resource/Team'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Department_for_Work_and_Pensions'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.tags', u'http://dbpedia.org/resource/Department_for_Work_and_Pensions'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.title', u'http://dbpedia.org/resource/Department_for_Work_and_Pensions'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.title', u'http://dbpedia.org/resource/Hospitality'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Department_for_Work_and_Pensions'): u'http://dbpedia.org/ontology/GovernmentAgency'}
+8146fef1-58a0-43d0-8108-b74b21203d69
+Mapping instance has no attribute 'mappings'
+e3d9aedb-8820-4543-8a3d-f0508748c796
+Mapping instance has no attribute 'mappings'
+fb79e231-8f41-4bce-9d4e-a1bae359041e
+{('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/North_Lancashire_%28UK_Parliament_constituency%29'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+3d91a611-fbce-42a9-8614-9d38ab7202bf
+{('package.author', u'http://dbpedia.org/resource/South_Gloucestershire'): u'http://dbpedia.org/ontology/PopulatedPlace',
+ ('package.extras', u'http://dbpedia.org/resource/South_Gloucestershire'): u'http://dbpedia.org/ontology/PopulatedPlace',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.tags', u'http://dbpedia.org/resource/Gloucestershire'): u'http://dbpedia.org/ontology/AdministrativeRegion',
+ ('package.title', u'http://dbpedia.org/resource/South_Gloucestershire'): u'http://dbpedia.org/ontology/PopulatedPlace'}
+a0a85afd-cb65-47d6-98d4-5dabac1e52b7
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Northern_Ireland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Scotland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/Data'): ''}
+7ad382ce-2887-4d8f-bd63-c77c79c07f6c
+Mapping instance has no attribute 'mappings'
+7f9f6bc5-179e-4c14-a849-f22540d6142f
+Mapping instance has no attribute 'mappings'
+805fec80-30aa-4856-9df5-5bf9aec87019
+Mapping instance has no attribute 'mappings'
+c85a15d1-7eef-4404-98a3-d8f54be0f1f0
+{('package.extras', u'http://dbpedia.org/resource/Gaming_control_board'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.tags', u'http://dbpedia.org/resource/Commission_%28remuneration%29'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Senior_%28education%29'): ''}
+8796563b-a8d9-43fa-8669-d505e6c7d2a3
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/Derbyshire'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/NHS_Wales'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.extras', u'http://dbpedia.org/resource/Northern_Ireland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Scotland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Derbyshire'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/NHS_Wales'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.title', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+47055b3f-26f7-4869-a1a5-2ec6bf3a3618
+'float' object has no attribute 'item'

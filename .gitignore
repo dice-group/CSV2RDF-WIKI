@@ -8,6 +8,7 @@ get_exposed_rdf_list
 *.pyc
 *.log
 *.swp
+*.db
 webserver_config/*
 !webserver_config/templates
 csv2rdf/config/config.py

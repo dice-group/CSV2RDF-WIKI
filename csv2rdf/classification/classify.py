@@ -2,6 +2,7 @@ import re
 import json
 import foxpy.fox
 import spotlight
+import dbpediao.ontology
 
 from SPARQLWrapper import SPARQLWrapper, JSON
 from csv2rdf.ckan.resource import Resource
@@ -15,11 +16,28 @@ from csv2rdf.database import DatabasePlainFiles
 class Classifier(object):
     def __init__(self, foxlight=4):
         self.fox = foxpy.fox.Fox(foxlight) #foxlight stands for NER method, see Fox class for details
+        self.dbpediao = dbpediao.ontology.OntologyReasoner()
 
     def getEntitiesWithClasses(self, resourceId):
         entities = set(self.getEntities(resourceId))
-        classes = self._getClassesForEntities(entities)
-        return list(entities.union(classes))
+        #consider only dbpedie entities)
+        dbpediaEntities = [x for x in entities if x[1].startswith('http://dbpedia')]
+        classes = self._getClassesForEntities(dbpediaEntities)
+        return classes
+
+    def getEntitiesWithClassesJson(self, resourceId):
+        entitiesJson = []
+        entities = self.getEntitiesWithClasses(resourceId)
+        for entity in entities:
+            structureElem = entity[0]
+            entityUri = entity[1]
+            print entityUri
+            entityclass = entities[entity]
+            entityJson = {"structureElement": structureElem,
+                          "uri": entityUri,
+                          "class": entityclass}
+            entitiesJson.append(entityJson)
+        return entitiesJson
 
     def getEntities(self, resourceId):
         db = DatabasePlainFiles(data_classified_cache_path + resourceId)
@@ -34,16 +52,19 @@ class Classifier(object):
 
     def _getClassesForEntities(self, entities):
         sparql = SPARQLWrapper("http://dbpedia.org/sparql")
-        classes = set()
+        classes = {}
         for entity in entities:
             sparql.setQuery("""
                 SELECT ?type
                 WHERE { <%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?type . }
-            """ % entity)
+            """ % entity[1])
             sparql.setReturnFormat(JSON)
             results = sparql.query().convert()
+            classes[entity] = set()
             for result in results['results']['bindings']:
-                classes.add(result['type']['value'])
+                if(result['type']['value'].startswith('http://dbpedia.org/ontology')):
+                    classes[entity].add(result['type']['value'])
+            classes[entity] = self.dbpediao.findBottomConcept(classes[entity])
         return classes
 
     def _concatHeaders(self, headers):
@@ -106,7 +127,7 @@ class Classifier(object):
             structuralElementName = structuralElement.keys()[0]
             entities = structuralElement[structuralElementName]
             for entity in entities:
-                entitiesRecognized.add(entity['URI'])
+                entitiesRecognized.add((structuralElementName,entity['URI']))
         return entitiesRecognized
 
     def _getEntitiesFox(self, resourceId):
@@ -118,9 +139,8 @@ class Classifier(object):
             entities = json.loads(entities)
             if( '@graph' in entities ):
                 for entity in entities['@graph']:
-                    entitiesRecognized.add(entity['means'])
+                    entitiesRecognized.add((structuralElementName, entity['means']))
         return entitiesRecognized
-
 
     def _classifyResource(self, resourceId, classifierName='Fox'):
         classifier = eval('self._classify'+classifierName)
@@ -133,8 +153,9 @@ class Classifier(object):
                     'package.tags',
                     'package.title',
                     'package.extras',
-                    'headers',
-                    'table'
+                    #TODO: filename
+                    #'headers',
+                    #'table'
                 ]
         for item in itemsToClassify:
             stringToClassify = eval(item)
@@ -154,7 +175,11 @@ class Classifier(object):
         return classified
 
 if __name__ == "__main__":
-    testResourceId = "8b51874e-cda8-4910-a3c0-9140e11164a3"
+    #testResourceId = "8b51874e-cda8-4910-a3c0-9140e11164a3"
+    testResourceId = "5e8ff30e-86c2-42ff-889e-c950f9d7e8c4"
     classifier = Classifier()
     classes = classifier.getEntitiesWithClasses(testResourceId)
-    print classes
+    import pprint
+    pprinter = pprint.PrettyPrinter()
+    pprinter.pprint(classes)
+    #print classes

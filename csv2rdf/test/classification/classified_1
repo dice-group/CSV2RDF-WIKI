@@ -1,0 +1,110 @@
+b93837ff-1617-4ee8-aa67-06e6d38e2fa6
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.author', u'http://dbpedia.org/resource/Governance'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+71a8cc41-20cf-40ab-a9b6-38225c3c0612
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+9c434eed-e816-4921-8c9b-6d33126eca6b
+Mapping instance has no attribute 'mappings'
+14280c7b-07b9-44e5-870f-fb6c9b406bbb
+Mapping instance has no attribute 'mappings'
+66110be2-aa7a-40c9-ab93-5d6d9ad2d92e
+{('package.extras', u'http://dbpedia.org/resource/.de'): '',
+ ('package.extras', u'http://dbpedia.org/resource/Germany'): u'http://dbpedia.org/ontology/Country'}
+769da81d-a9fc-4f9c-bf80-0adc5b9ddec1
+{('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Data'): '',
+ ('package.notes', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Funding'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Hospital'): '',
+ ('package.notes', u'http://dbpedia.org/resource/NHS_Wales'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.notes', u'http://dbpedia.org/resource/Patient'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Planning'): '',
+ ('package.title', u'http://dbpedia.org/resource/Mental_health'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Data_set'): ''}
+55814f05-11a4-455e-a325-2e54d960f115
+'float' object has no attribute 'item'
+c36730d5-a6b0-44fd-b330-0555aae9522b
+{('package.author', u'http://dbpedia.org/resource/Team'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/Northern_Ireland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Scotland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+7ba5a59b-ca80-416b-a232-4f0eb1309461
+Mapping instance has no attribute 'mappings'
+8fd7a340-6b14-4aa3-92bf-1990176589ce
+'float' object has no attribute 'item'
+b6db75e0-48ea-480b-8b98-541abce492f1
+Mapping instance has no attribute 'mappings'
+c86c7816-4048-43cc-aef2-2fe1889e9188
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/July_12'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+4dd58aa7-4890-4cf8-968f-aa12acacd398
+{('package.author', u'http://dbpedia.org/resource/Brighton'): u'http://dbpedia.org/ontology/Settlement',
+ ('package.author', u'http://dbpedia.org/resource/University_of_Sussex'): u'http://dbpedia.org/ontology/University',
+ ('package.extras', u'http://dbpedia.org/resource/Brighton'): u'http://dbpedia.org/ontology/Settlement',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/Northern_Ireland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Scotland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Brighton'): u'http://dbpedia.org/ontology/Settlement',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+55c09f3b-5e3b-43ac-974b-a3b1cd8f9a8c
+Mapping instance has no attribute 'mappings'
+73f3c201-234f-41eb-8b01-2fb3f531ae00
+{('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/General_practitioner'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Medical_prescription'): '',
+ ('package.notes', u'http://dbpedia.org/resource/Patient'): '',
+ ('package.tags', u'http://dbpedia.org/resource/General_practitioner'): '',
+ ('package.title', u'http://dbpedia.org/resource/General_practitioner'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Code'): ''}
+98faf1bc-293a-44f8-8bc5-7c878bd53485
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country'}
+1f872a04-b19d-471f-baa6-07d82a0d24fa
+{('package.author', u'http://dbpedia.org/resource/Finance'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.title', u'http://dbpedia.org/resource/NHS_Wales'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.title', u'http://dbpedia.org/resource/Surrey'): u'http://dbpedia.org/ontology/AdministrativeRegion',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+abffc49c-4374-4e20-8482-99567d110be2
+{('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Food_Standards_Agency'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Fiscal_year'): '',
+ ('package.tags', u'http://dbpedia.org/resource/Technical_standard'): '',
+ ('package.title', u'http://dbpedia.org/resource/Food_Standards_Agency'): u'http://dbpedia.org/ontology/GovernmentAgency',
+ ('resource.description', u'http://dbpedia.org/resource/March'): ''}
+80c16371-9d3a-4bdd-a0f6-be85bfb6f33d
+{('package.author', u'http://dbpedia.org/resource/Freedom_of_information'): '',
+ ('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('resource.description', u'http://dbpedia.org/resource/June_11'): '',
+ ('resource.description', u'http://dbpedia.org/resource/Return_to_Forever'): u'http://dbpedia.org/ontology/Band'}
+bffab91f-7079-4205-bb01-5715d20799a1
+{('package.extras', u'http://dbpedia.org/resource/England'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Health_department'): '',
+ ('package.extras', u'http://dbpedia.org/resource/National_Institute_for_Health_and_Clinical_Excellence'): '',
+ ('package.extras', u'http://dbpedia.org/resource/Northern_Ireland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Scotland'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/United_Kingdom'): u'http://dbpedia.org/ontology/Country',
+ ('package.extras', u'http://dbpedia.org/resource/Wales'): u'http://dbpedia.org/ontology/Country',
+ ('package.notes', u'http://dbpedia.org/resource/Financial_transaction'): '',
+ ('package.tags', u'http://dbpedia.org/resource/Transparency_%28behavior%29'): ''}
