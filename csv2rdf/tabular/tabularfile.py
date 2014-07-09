@@ -253,21 +253,23 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface,
             self.delete()
 
     def _process_utf16(self, filename):
-        f_in = open(filename, 'rU')
-        f_out = open(filename+"-converted", 'wb')
+        filepathOriginal = csv2rdf.config.config.resources_path + filename
+        filepathConverted = csv2rdf.config.config.resources_path + filename + "-converted"
+        f_in = open(filepathOriginal, 'rU')
+        f_out = open(filepathConverted, 'wb')
 
         for piece in self._read_in_chunks(f_in):
             converted_piece = piece.decode('utf-16-le', errors='ignore')
             converted_piece = converted_piece.encode('ascii', errors='ignore')
-            f_out.write(converted_piece)
+            f_out.writelines(converted_piece)
 
         f_in.close()
         f_out.close()
 
         #move converted to original
         mv_call = ["mv",
-                    filename+"-converted",
-                    filename]
+                    filepathConverted,
+                    filepathOriginal]
         pipe = subprocess.Popen(mv_call, stdout=subprocess.PIPE)
         pipe_message = pipe.stdout.read()
         logging.debug(pipe_message)
@@ -289,6 +291,10 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface,
         return csv_list
 
 if __name__ == '__main__':
+    tf = TabularFile('8b133b79-7adc-4277-8969-aa500f62504d')
+    tf.download()
+    tf.validate()
+
     #Case 1: good CSV file
     #tabular_file = TabularFile('2daa0e60-4c36-487d-bb29-b3eba4e5ff0e')
     #tabular_file.download()
@@ -339,22 +345,22 @@ if __name__ == '__main__':
 
     #Archives
     #gzip
-    tabular_file = TabularFile('9a54203b-1ac1-43ef-b93d-ba29bbd4db6a')
-    tabular_file.download()
-    tabular_file.validate()
-    #tarbinary
-    tabular_file = TabularFile('1d3fe6f0-9c5a-45a9-9418-89ad4a672bea')
-    #7-zip
-    tabular_file = TabularFile('b8ba97d5-4661-46a7-b055-366e865a7c13')
-    #Zip
-    tabular_file = TabularFile('92d1fa6a-3f89-441d-ab98-8ea65ba34f24')
+    #tabular_file = TabularFile('9a54203b-1ac1-43ef-b93d-ba29bbd4db6a')
+    #tabular_file.download()
+    #tabular_file.validate()
+    ##tarbinary
+    #tabular_file = TabularFile('1d3fe6f0-9c5a-45a9-9418-89ad4a672bea')
+    ##7-zip
+    #tabular_file = TabularFile('b8ba97d5-4661-46a7-b055-366e865a7c13')
+    ##Zip
+    #tabular_file = TabularFile('92d1fa6a-3f89-441d-ab98-8ea65ba34f24')
 
-    #UTF-8
-    tabular_file = TabularFile('bb3e753c-e27a-48cf-9488-e2d9c85e55ea')
-    tabular_file = TabularFile('c9c6f5f1-a89d-4e3c-9fa6-940d42f61212')
-    #UTF-16LE
-    tabular_file = TabularFile('63b159d7-90c5-443b-846d-f700f74ea062')
-    tabular_file = TabularFile('c3585646-d1f3-4555-9286-79ed8c9b7f5f')
+    ##UTF-8
+    #tabular_file = TabularFile('bb3e753c-e27a-48cf-9488-e2d9c85e55ea')
+    #tabular_file = TabularFile('c9c6f5f1-a89d-4e3c-9fa6-940d42f61212')
+    ##UTF-16LE
+    #tabular_file = TabularFile('63b159d7-90c5-443b-846d-f700f74ea062')
+    #tabular_file = TabularFile('c3585646-d1f3-4555-9286-79ed8c9b7f5f')
 
     #tabular_file = TabularFile('1aa9c015-3c65-4385-8d34-60ca0a875728')
     #print tabular_file.get_csv_file_url()
