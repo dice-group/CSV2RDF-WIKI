@@ -517,11 +517,25 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
 
         logging.info("Looking for outdated and new wiki pages ... Complete.")
         return (pages_outdated, pages_new)
+
+    def get_mapping_headers(self):
+        if(not hasattr(self, 'mappings')):
+            self.init_mappings_only()
+        headers = []
+        for mapping in self.mappings:
+            header = {mapping['name']: []}
+            for item in mapping:
+                if(item.startswith("col")):
+                    header[mapping['name']].append((int(item[3:]), urllib.unquote(mapping[item])))
+            header[mapping['name']].sort()
+            headers.append(header)
+        return headers
     
 if __name__ == '__main__':
     #mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
     mapping = Mapping('00e0737c-6920-479a-9916-ff83b9de692c')
     mapping.init_mappings_only()
+    mapping.get_mapping_headers()
     import ipdb; ipdb.set_trace()
     #mapping.init()
     #mapping.update_metadata()
