@@ -307,8 +307,9 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         """
         if(not resource_id):
             resource_id = self.resource_id
-            
-        text = text.encode('utf-8')
+
+        if(not type(text) is str):
+            text = unidecode(text)#.encode('utf-8')
         title = csv2rdf.config.config.wiki_csv2rdf_namespace + resource_id
         page = wikitools.Page(self.wiki_site, title=title)
         result = page.edit(text=text, bot=True)
@@ -363,6 +364,7 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         
         #Split header and create column definition
         for num, item in enumerate(header):
+            #if(not type(item) is str):
             item = unidecode(item)
             page += 'col'+str(num+1)+' = '+item.rstrip()+' |\n'
             if(num > 500): # too many columns in this csv OR bad format
@@ -530,13 +532,17 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
             header[mapping['name']].sort()
             headers.append(header)
         return headers
+
+    def create_default_wiki_page(self, resource_id=None):
+        default_wiki_page = self.generate_default_wiki_page(resource_id)
+        self.create_wiki_page(default_wiki_page, resource_id)
     
 if __name__ == '__main__':
     #mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    mapping = Mapping('00e0737c-6920-479a-9916-ff83b9de692c')
-    mapping.init_mappings_only()
-    mapping.get_mapping_headers()
-    import ipdb; ipdb.set_trace()
+    #mapping = Mapping('00e0737c-6920-479a-9916-ff83b9de692c')
+    #mapping.init_mappings_only()
+    #mapping.get_mapping_headers()
+    #import ipdb; ipdb.set_trace()
     #mapping.init()
     #mapping.update_metadata()
     #print mapping.wiki_page
@@ -549,6 +555,7 @@ if __name__ == '__main__':
     #sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mapping.create_wiki_page('Testing the test page!', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #print mapping.generate_default_wiki_page(resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    mapping = Mapping()
+    print mapping.create_default_wiki_page(resource_id='e3d9aedb-8820-4543-8a3d-f0508748c796')
     #print mapping.get_mapping_path('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #print mapping.get_mapping_url('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')

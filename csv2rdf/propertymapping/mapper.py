@@ -11,4 +11,4 @@ class Mapper(object):
 
     def _getEntities(self, resourceId):
         classifier = Classifier()
-        return classifier.getEntitiesWithClassesJson(resourceId)
+        return classifier.getClassesJson(resourceId)

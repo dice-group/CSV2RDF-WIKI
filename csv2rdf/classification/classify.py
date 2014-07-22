@@ -20,13 +20,12 @@ class Classifier(ClassifierInterface):
             exec("from "+packageName+" import "+className)
             exec(localObjectName+" = "+className+"()")
 
-    def getEntitiesWithClassesJson(self, resourceId):
+    def getClassesJson(self, resourceId):
         entitiesJson = []
-        entities = self.getEntitiesWithClasses(resourceId)
+        entities = self.getClasses(resourceId)
         for entity in entities:
             structureElem = entity[0]
             entityUri = entity[1]
-            print entityUri
             entityclass = entities[entity]
             entityJson = {"structureElement": structureElem,
                           "uri": entityUri,
@@ -53,7 +52,7 @@ if __name__ == "__main__":
     #testResourceId = "8b51874e-cda8-4910-a3c0-9140e11164a3"
     testResourceId = "5e8ff30e-86c2-42ff-889e-c950f9d7e8c4"
     classifier = Classifier()
-    classes = classifier.getClasses(testResourceId)
+    classes = classifier.getClassesJson(testResourceId)
     import pprint
     pprinter = pprint.PrettyPrinter()
     pprinter.pprint(classes)

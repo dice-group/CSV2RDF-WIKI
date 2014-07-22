@@ -14,6 +14,7 @@ import csv2rdf.tabular.sparqlify
 import csv2rdf.tabular.mapping
 import csv2rdf.tabular.refine
 import csv2rdf.lodstats
+from csv2rdf.classification.classify import Classifier
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -184,12 +185,22 @@ class CSV2RDFRefineAPI(object):
         #send request to the LODStats server
         return "In a queue now!"
     refine.exposed = True
+    
+    @cherrypy.expose
+    def classes(self, resourceId):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        classifier = Classifier()
+        return json.dumps(classifier.getClassesJson(resourceId))
 
 
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
-    cherrypy.quickstart(publicdataeu, '/', 'server/config')
-    cherrypy.config.update('server/config')
+    cherrypy.tree.mount(CSV2RDFApp(), '/', 'server/config')
+    cherrypy.tree.mount(CSV2RDFRefineAPI(), '/api/', 'server/config')
+    cherrypy.engine.start()
+    #cherrypy.tree(environ, start_response)
+    #cherrypy.quickstart(publicdataeu, '/', 'server/config')
+    #cherrypy.config.update('server/config')
 
 def application(environ, start_response):
     cherrypy.tree.mount(CSV2RDFApp(), '/', 'csv2rdf/server/config')

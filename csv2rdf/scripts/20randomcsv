@@ -1,0 +1,266 @@
+../../files/csv/afb47493-8294-4a6a-9a3c-533b07a23b24
+Department family,Entity,Date,Expense type,Expense area,Supplier,Transaction number,   Amount   ,Description,Supplier Postcode,Supplier Type,Contract Number,Project Code,Expenditure Type
+Department of Health,Monitor,12/02/2013,Other Consultancy,Transition,Centreground Policitical Communications Ltd,00017401_005,"57,600.00",Strategic advice & communications consultancy services,SW1P 3JA,,C-274-0412-BUI,,Administration
+Department of Health,Monitor,07/02/2013,IT Support,Build programme,Computers in the City,00017346_005,"29,400.00",Engineering to install new servers and SAN trays at disaster recovery site,EC3A 2BJ,,MONAX01557,,Administration
+Department of Health,Monitor,07/02/2013,IT Equipment,Build programme,Computers in the City,00017346_005,"24,000.00",2 x SAN trays for disaster recovery site,EC3A 2BJ,,MONAX01557,,Administration
+Department of Health,Monitor,07/02/2013,IT Equipment,Build programme,Computers in the City,00017346_005,"37,800.00",3 x servers for disaster recovery site,EC3A 2BJ,,MONAX01556,,Administration
+Department of Health,Monitor,19/02/2013,IT Support,Sector Development,Computers in the City,00017801_005,"33,300.00",Year 2 of 3 - 1GB LAN Extensions,EC3A 2BJ,,MONAX01617,,Administration
+Department of Health,Monitor,27/02/2013,Other Consultancy,Provider Regulation,Ernst & Young LLP,00017955_005,"1,008,000.00",Interim Fee for Contingency Planning Team for Mid Staffordshire NHS Foundation Trust,SE1 2AF,,C-290-0912-COS,,Programme
+Department of Health,Monitor,19/02/2013,Strategy Framework,Strategy,Frontier Economics,00017804_005,"231,631.64",Interim fee for Fair Playing Field Review project,WC1V 6DA,,C-285-0812-POL,,Administration
+Department of Health,Monitor,07/02/2013,Secondments,Transition,FTI Consulting Ltd,00017330_005,"45,484.80",Seconded staff,WC2E 7HA,,C-294-0912-POL,,Administration
+Department of Health,Monitor,07/02/2013,Secondments,Transition,FTI Consulting Ltd,00017330_005,"73,170.60",Seconded staff,WC2E 7HA,,C-294-0912-POL,,Administration
+
+
+
+../../files/csv/32d4a43b-f3e0-488d-982d-688bf15afae7
+"Parent Department","Organisation","Unit","Reporting Senior Post","Grade","Payscale Minimum (£)","Payscale Maximum (£)","Generic Job Title","Number of Posts in FTE","Professional/Occupational Group"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B1","56436","72185","Business Management and Improvement","1","Other"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B1","56436","72185","Corporate Support","1","Other"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B1","56436","72185","Finance","1","Finance"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B2","47942","59535","Business Management and Improvement","1","Other"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B2","47942","59535","Communication and Media","1","Communications"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B2","47942","59535","Corporate Support","1","Other"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B2","47942","59535","Finance","2","Finance"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B2","47942","59535","HR Officer","1","Human Resources"
+"Ministry of Defence","Ministry of Defence","Navy Command TLB","1105340","B2","47942","59535","Information","3","Knowledge and Information Management (KIM)"
+
+
+
+../../files/csv/3e722ac6-9e49-4bca-a4bc-99dd12d0c7f6
+Department Family,Entity,Date,Expense Type,Expense Area,Supplier,Transaction Number,Amount
+BIS,NMO,25/05/2011,Building Construction,Estates,Amey Community Ltd,90273868,36133.87
+BIS,NMO,25/05/2011,Building Construction,Estates,Amey Community Ltd,90274236,58762.02
+BIS,NMO,27/05/2011,Building Construction,Estates,Amey Community Ltd,90273990,64217.35
+BIS,NMO,25/05/2011,Building Service Charges,Estates,Amey Community Ltd,90273770,314219.9
+BIS,NMO,06/05/2011,NMS Science Programmes,Programmes,NPL Management Ltd,C2217,115556.82
+BIS,NMO,11/05/2011,NMS Science Programmes,Programmes,NPL Management Ltd,C2207,195314.14
+BIS,NMO,06/05/2011,NMS Science Programmes,Programmes,NPL Management Ltd,C2208,315057.46
+BIS,NMO,04/05/2011,NMS Science Programmes,Programmes,NPL Management Ltd,C2216,331705.53
+BIS,NMO,11/05/2011,NMS Science Programmes,Programmes,NPL Management Ltd,C2218,475602.76
+
+
+
+../../files/csv/4b02adb1-1c0b-4e9e-b51d-fb7e59064af7
+"Details of Payments where the invoice amount is over £25,000.00",,,,,,,,
+,,,,,,,,
+,,,,,,,,
+DEPARTMENT,ENTITY,DATE PAID,EXPENSE TYPE,EXPENSE AREA,SUPPLIER NAME,TRANSACTION REFERENCE,AMOUNT,VAT NO.
+DEPARTMENT OF HEALTH,NORTH WEST LONDON HOSPITALS NHS TRUST,22/11/2011,PHARMACY PURCHASES,BALANCE SHEET,AAH PHARMACEUTICALS LIMITED,1265086,"65,000.00",546 5733 22
+DEPARTMENT OF HEALTH,NORTH WEST LONDON HOSPITALS NHS TRUST,17/11/2011,OTHER MEDICAL CONSUMABLES,CLINICAL BIOCHEMISTRY,ABBOTT LABORATORIES LTD,1264244,"139,454.32",430 8670 56
+DEPARTMENT OF HEALTH,NORTH WEST LONDON HOSPITALS NHS TRUST,25/11/2011,OTHER MEDICAL CONSUMABLES,LAB MICROBIOLOGY [NPM],ABBOTT LABORATORIES LTD,1265225,"2,555.16",430 8670 56
+DEPARTMENT OF HEALTH,NORTH WEST LONDON HOSPITALS NHS TRUST,25/11/2011,POSTAGE,LAB MICROBIOLOGY [NPM],ABBOTT LABORATORIES LTD,1265225,18.00,430 8670 56
+DEPARTMENT OF HEALTH,NORTH WEST LONDON HOSPITALS NHS TRUST,25/11/2011,SEROLOGY CONSUMABLES,LAB MICROBIOLOGY [NPM],ABBOTT LABORATORIES LTD,1264307,"28,960.10",430 8670 56
+DEPARTMENT OF HEALTH,NORTH WEST LONDON HOSPITALS NHS TRUST,25/11/2011,SEROLOGY CONSUMABLES,LAB MICROBIOLOGY [NPM],ABBOTT LABORATORIES LTD,1265225,"86,767.40",430 8670 56
+
+
+
+../../files/csv/4d8d2085-c721-4ecc-9379-34f5cb661987
+Drug name,BNF Chemical name,BNF Sub Paragraph name,BNF Section name,BNF Chapter name,BNF Chapter,BNF Section,BNF Paragraph,BNF Sub paragraph,Preparation class,Standard quantity unit,Items (thousands),Owc2 Items (thousands),NIC (£thousands),Qty (thousands)
+Altacite Plus_Susp 125mg/500mg/5ml S/F,Co-Simalcite (Simeticone/Hydrotalcite),Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,3,5.25,2.05,20.22042,3009.953
+Alu-Cap_Cap 475mg,Aluminium Hydroxide,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,1,2.183,1.051,8.79383,230.865
+Alum Hydrox_Tab 500mg,Aluminium Hydroxide,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,1,1,0.001,0,0.00457,0.1
+Antacid/Oxetacaine_Oral Susp S/F,Aluminium & Magnesium & Oxetacaine,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,1,3,0.309,0,42.8204,120.46
+Asilone Antacid_Liq S/F,Aluminium & Magnesium & Act Simeticone,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,3,0.006,0,0.02857,3.2
+Asilone Antacid_Tab 250mg,Aluminium & Magnesium & Act Simeticone,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,1,0.002,0,0.0046,0.36
+Asilone Windcheaters_Cap 100mg,Simeticone,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,1,0.001,0.001,0.00546,0.084
+Asilone_Susp S/F,Aluminium & Magnesium & Act Simeticone,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,3,1.421,0.041,3.11805,799.5
+Dentinox_Infant Colic Dps,Simeticone,Antacids and Simeticone,Dyspep&Gastro-Oesophageal Reflux Disease,Gastro-intestinal system,1,1,1,0,3,3,1.807,0.703,3.74057,216.135
+
+
+
+../../files/csv/d2a7308a-6fb8-4fe8-8f71-c9f8ff11a642
+Minister,Date,Name of External Organisation,Purpose of meeting
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,"Nigel Harris, Rail Magazine",General Discussion 
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,International Maritime Organization,Introductory Meeting
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,Network Rail,Rail Issues
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,Rail Delivery Group,Rail Issues
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,Association of Train Operating Companies,Rail Issues
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,Network Rail,Rail Issues
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,British Chambers of Commerce,Rail Issues
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,Campaign for Better Transport,Rail Issues
+Secretary of State for Transport - The Rt Hon Justine Greening MP,Jan-12,Campaign for High Speed Rail,Rail Issues
+
+
+
+../../files/csv/dfae3155-4f0f-4e72-8f81-facd2f6610a9
+Unique Reference Number,Merchant Name,Transaction Amount,Comments
+TR62,,1482,KE Hub Networking Event
+TR63,,838.80,CIPD Conference
+TR64,First Great Western,1502.4,Staff into Swindon Relocation Costs
+TR65,First Great Western,603.6,Staff into Swindon Relocation Costs
+
+
+
+../../files/csv/8ad669e7-a6ef-4554-a8e8-823831763f5a
+StatBezirkNr;Statistischer Bezirk;Geb‰ude vor 1880 errichtet;Geb‰ude zwischen 1880 und 1918 errichtet;Geb‰ude zwischen 1919 und 1944 errichtet;Geb‰ude zwischen 1945 und 1960 errichtet;Geb‰ude zwischen 1961 und 1970 errichtet;Geb‰ude zwischen 1971 und 1980 errichtet;Geb‰ude zwischen 1981 und 1990 errichtet;Geb‰ude zwischen 1991 und 2000 errichtet;Geb‰ude ab 2001 errichtet;Geb‰ude mit unbekanntem Errichtungsjahr
+1;Altstadtviertel;165;85;15;24;16;9;19;6;2;5
+2;Rathausviertel;147;106;61;48;49;38;34;23;18;11
+3;Kaplanhofviertel;13;21;143;116;51;19;19;21;1;2
+4;Neustadtviertel;45;267;89;107;32;21;33;16;6;12
+5;Volksgartenviertel;62;132;117;163;41;25;24;23;8;3
+6;Rˆmerberg-Margarethen;97;94;80;91;55;37;42;37;10;1
+7;Freinberg;15;7;6;27;12;26;19;15;8;2
+8;Froschberg;6;56;379;189;119;119;76;104;35;1
+9;Keferfeld;6;14;379;81;159;152;135;90;26;3
+
+
+
+../../files/csv/72a680e1-512d-4bb0-9e10-6b06a0c40cc4
+DEPARTMENT,ENTITY,DATE PAID,EXPENSE TYPE,EXPENSE AREA,SUPPLIER NAME,TRANSACTION NUMBER,AMOUNT
+Department of Health,Whittington NHS Trust,13/12/2012,Hardware Maintenance,Finance Director,Advanced Business Solutions,506303,26515.37
+Department of Health,Whittington NHS Trust,20/12/2012,Main Works Contract,Capital,Bsw Heating Ltd,504969,25546.61
+Department of Health,Whittington NHS Trust,13/12/2012,Bank Nursing,Simmons House,Camden & Islington Nhs Foundation Trust,507024,44225.72
+Department of Health,Whittington NHS Trust,01/12/2012,Senior Manager,Pentonville Prison,Camden & Islington Nhs Foundation Trust,503759,25842.84
+Department of Health,Whittington NHS Trust,20/12/2012,Medical Equipment,Capital,Cme Mckinley Uk Ltd,508911,40067.34
+Department of Health,Whittington NHS Trust,20/12/2012,Gas,Environment,Corona Energy Retail Ltd,508544,44294.5
+Department of Health,Whittington NHS Trust,20/12/2012,Medical Equipment Lease,Theatres General,De Lage Landen,495467,66163.7
+Department of Health,Whittington NHS Trust,13/12/2012,Electricity,Environment,Edf Energy,506789,83639.57
+Department of Health,Whittington NHS Trust,01/12/2012,Membership Fee,Procurement Shared Service,Guy'S & St.Thomas' Nhs Foundation Trust,503714,39272.34
+
+
+
+../../files/csv/1b5252f7-116d-407b-aa38-306067491567
+Organisation,Company Name,Invoice No,Nett Amount,Supplier Name,Supplier Ref,Service Area Cat Desc,Detailed Expenses Desc
+37UC,BASSETLAW DISTRICT COUNCIL,1839071,607.1,ROGER ALLPORT NURSERIES,RQ066158,Leisure,Maintenance Of Grounds
+37UC,BASSETLAW DISTRICT COUNCIL,1839073,1095,REDACTIVE EVENTS LTD,RQ066157,Corporate Manangement,Expenses
+37UC,BASSETLAW DISTRICT COUNCIL,1839074,678.9,WASTE RECYCLING LTD,RQ029213,Environment,Other Services
+37UC,BASSETLAW DISTRICT COUNCIL,1839075,673.01,MANSFIELD SAND CO LTD,RQ052134,Environment,Maintenance Of Grounds
+37UC,BASSETLAW DISTRICT COUNCIL,1839077,900,G & E JOHNSON PLUMBING & HEATING SERVICES,RQ066028,Environment,Other Services
+37UC,BASSETLAW DISTRICT COUNCIL,1839078,3109.2,MIDLANDS SIGNS LEICESTER LTD,RQ000228,Support Services,Equipment/furniture/materials
+37UC,BASSETLAW DISTRICT COUNCIL,1839079,1000,CACI LTD,SS065960,Revenues And Customer Services,Other Agency & Contracted Services
+37UC,BASSETLAW DISTRICT COUNCIL,1839080,8900,CACI LTD,SS065960,Revenues And Customer Services,Other Agency & Contracted Services
+37UC,BASSETLAW DISTRICT COUNCIL,1839081,2500,APERIA LTD,SS058511,Revenues And Customer Services,Other Agency & Contracted Services
+
+
+
+../../files/csv/555b7c0e-029b-46dd-b36e-89b8e411f13c
+,,
+,,
+,,
+,,
+Local Transparency: Supplier payments cver £500,,
+Month:,September 2010,
+,,
+TransNo,Amount,Supplier Name
+,£,
+40090861,3750.00,Kenward Trust
+
+
+
+../../files/csv/320c2c8e-e4a7-4b75-9dd7-91bd753994fb
+MINISTERIAL INFORMATION 1 JULY - 30 SEPT 2012,,,
+
+HOSPITALITY RECEIVED ,,,
+
+Minister,Date ,Name of Organiation ,Type of Hospitality Received
+"Secretary of State for Defence, Rt Hon Philip Hammond MP",04-Jul-12,Spectator,Reception
+"Secretary of State for Defence, Rt Hon Philip Hammond MP",07-Jul-12,Marshall Aerospace,Corporate hospitality (Fairford International Air Tattoo)
+"Secretary of State for Defence, Rt Hon Philip Hammond MP",09-Jul-12,Sky News,Reception
+"Secretary of State for Defence, Rt Hon Philip Hammond MP",17-Jul-12,Telegraph Media Group,Lunch
+"Secretary of State for Defence, Rt Hon Philip Hammond MP",18-Sep-12,Max Hastings,Breakfast
+
+
+
+../../files/csv/8e1d74f1-a7c0-4d7e-bc7e-dce33ca3d445
+Program;N·zov programu pre rok 2009;Podprogram;N·zov podprogramu;Okruh;N·zov okruhu
+1;Obnovme si svoj dom ;1.1;Obnova kult˙rnych pamiatok;;
+1;Obnovme si svoj dom ;1.2;Obnova kult˙rnych pamiatok v lokalit·ch svetovÈho kult˙rneho dediËstva;;
+1;Obnovme si svoj dom ;1.3;Aktivity kult˙rnej politiky a ediËnej Ëinnosti v oblasti ochrany pamiatkovÈho fondu;;
+2;Kult˙rne aktivity v oblasti pam‰ùov˝ch inötit˙ciÌ;2.1;Kniûnice a kniûniËn· Ëinnosù;;
+2;Kult˙rne aktivity v oblasti pam‰ùov˝ch inötit˙ciÌ;2.2;M˙ze· a galÈrie;;
+2;Kult˙rne aktivity v oblasti pam‰ùov˝ch inötit˙ciÌ;2.3;Ochrana kult˙rneho dediËstva;;
+2;Kult˙rne aktivity v oblasti pam‰ùov˝ch inötit˙ciÌ;2.4;AkvizÌcia m˙zeÌ a galÈriÌ;;
+2;Kult˙rne aktivity v oblasti pam‰ùov˝ch inötit˙ciÌ;2.5;AkvizÌcia kniûnÌc;;
+3;AudioVÌzia 2009;3.1;Tvorba a v˝voj audiovizu·lnych diel (development);;
+
+
+
+../../files/csv/83fb2ec8-3872-4567-9fc6-b335e124aaba
+Row Labels,Sum of  Transaction Amount
+Airlines,674492.95
+Car Hire,35446.63
+Cash,515.94
+Catalogue,45975.46
+Clothing,2321.15
+Department Stores,4446.23
+Diy & Household Stores,12967.58
+Entertainment,17688.04
+Food & Drink,2189.38
+
+
+
+../../files/csv/27ef7d39-8cf4-468e-903a-600ea48ba5c0
+ˇ˛D e p a r t m e n t   F a m i l y 	 E n t i t y 	 D a t e 	 E x p e n s e   T y p e 	 E x p e n s e   A r e a 	 S u p p l i e r 	 T r a n s a c t i o n   N u m b e r 	 A m o u n t  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 G M S   A l l   O t h e r   G M S   P r e m i s e 	 G M S - G e n e r a l 	 B E R K S H I R E   S H A R E D   S E R V I C E S 	 1 1 3 9 5 6 3 0 	 2 7 6 1 9 . 7 8  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 A d m i n   &   C l e r i c a l   b a n d   6 	 H & W B B - P u b l i c   H e a l t h 	 D E R B Y   C I T Y   C O U N C I L 	 1 1 3 8 1 7 1 2 	 5 6 3 6 5  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 I n d e p e n d e n t   S e c t o r 	 C C - F u l l y   F u n d - M H - O v e r   6 5 	 D E R B Y   C I T Y   C O U N C I L 	 1 1 3 8 1 7 2 7 	 3 1 3 1 8 . 0 7  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 A d m i n   &   C l e r i c a l   b a n d   6 	 H & W B B - P u b l i c   H e a l t h 	 D E R B Y   C I T Y   C O U N C I L 	 1 1 3 8 1 7 9 4 	 - 5 6 3 6 5  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 S e r v i c e s   f r o m   L o c a l   A u t h 	 H & W B B - P u b l i c   H e a l t h 	 D E R B Y   C I T Y   C O U N C I L 	 1 1 3 9 5 6 2 9 	 3 6 3 0 8  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 A d m i n   &   C l e r i c a l   b a n d   6 	 H & W B B - P u b l i c   H e a l t h 	 D E R B Y   C I T Y   C O U N C I L 	 1 1 3 9 5 6 3 1 	 2 8 2 1 0 . 2  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 O u t   o f   H o u r s   D e v   F u n d   P M S 	 1 1 1   S e r v i c e 	 D E R B Y S H I R E   H E A L T H   U N I T E D   L T D 	 1 1 3 9 5 7 9 2 	 2 6 7 8 6 . 7 5  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 O u t   o f   H o u r s   D e v   F u n d   P M S 	 O u t   O f   H o u r s 	 D E R B Y S H I R E   H E A L T H   U N I T E D   L T D 	 1 1 3 9 5 7 9 2 	 2 4 1 2 4 3 . 7 7  
+ D e p a r t m e n t   o f   H e a l t h 	 N H S   D e r b y   C i t y 	 0 2 / 1 0 / 2 0 1 2 	 V o l u n t a r y   S e c t o r 	 S 2 8   D e r b y   M i n d   -   A d v o c a c y 	 D E R B Y S H I R E   M I N D 	 1 1 3 9 5 7 8 8 	 3 7 1 0 8 . 7 5  
+
+
+
+../../files/csv/4b52a0f6-2b32-422a-903b-b620b40bff94
+
+
+
+
+../../files/csv/a47008ad-1b6c-49cb-9ddd-c68d9a4eef05
+Site,Meter,Unit,Date,00:00,00:30,01:00,01:30,02:00,02:30,03:00,03:30,04:00,04:30,05:00,05:30,06:00,06:30,07:00,07:30,08:00,08:30,09:00,09:30,10:00,10:30,11:00,11:30,12:00,12:30,13:00,13:30,14:00,14:30,15:00,15:30,16:00,16:30,17:00,17:30,18:00,18:30,19:00,19:30,20:00,20:30,21:00,21:30,22:00,22:30,23:00,23:30
+1 Palace Street,Total Natural Gas 1PS,kWh,01/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,5.480476,2.740238,5.480476,5.480476,5.480476,2.740238,5.480476,8.220714,5.480476,5.480476,2.740238,5.480476,0.000000,2.740238,2.740238,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,02/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,5.480476,2.740238,2.740238,5.480476,8.220714,2.740238,10.960952,10.960952,5.480476,10.960952,8.220714,8.220714,10.960952,5.480476,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,03/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,2.740238,2.740238,2.740238,2.740238,2.740238,5.480476,2.740238,2.740238,5.480476,5.480476,8.220714,8.220714,5.480476,8.220714,5.480476,2.740238,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,04/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,05/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,27.401502,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,06/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,2.740238,2.740238,5.480476,2.740238,10.960952,8.220714,2.740238,5.480476,2.740238,5.480476,8.220714,2.740238,2.740238,2.740238,2.740238,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,07/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,5.480476,5.480476,5.480476,5.480476,8.220714,5.480476,5.480476,2.740238,5.480476,8.220714,2.740238,5.480476,2.740238,2.740238,2.740238,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,08/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,5.480476,2.740238,5.480476,10.960952,5.480476,2.740238,8.220714,5.480476,5.480476,5.480476,2.740238,2.740238,2.740238,5.480476,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+1 Palace Street,Total Natural Gas 1PS,kWh,09/06/2011,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,8.220714,5.480476,8.220714,5.480476,5.480476,5.480476,5.480476,5.480476,5.480476,5.480476,10.960952,2.740238,2.740238,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000
+
+
+
+../../files/csv/456a013d-0e80-4c79-b411-8b656c143382
+Department Family,Entity,Date,Expense Type,Expense Area,Supplier,Transaction Number, Amount 
+BIS,STFC,29/11/2010,Advertising & Promotion,Science In Society,National Maritime Museum,192065,40000
+BIS,STFC,09/12/2010,Electricity,DL - Estates Management - General,EDF Energy,205247,21885.77
+BIS,STFC,09/12/2010,Electricity,"Photonics Projects	",EDF Energy,205247,1162.61
+BIS,STFC,09/12/2010,Electricity,PP+NP Facilities ø Design Studies,EDF Energy,205247,617.24
+BIS,STFC,09/12/2010,Electricity,High Brightness Experiments (ALICE),EDF Energy,205247,4291.22
+BIS,STFC,09/12/2010,Electricity,"CICT IS Infrastructure Support	",EDF Energy,205247,15562.98
+BIS,STFC,09/12/2010,Electricity,Nuclear Physics,EDF Energy,205247,1576.23
+BIS,STFC,09/12/2010,Electricity,DL Property & Tenants,EDF Energy,205247,158.47
+BIS,STFC,09/12/2010,Electricity,Restructuring for Initiatives,EDF Energy,205247,6267.77
+
+
+
+../../files/csv/3daa7495-8fab-4baf-82d7-1b5dd48fa635
+CPS outcomes by principal offence category surrey,Number of Defendants convicted,Convictions Percentage,Number of Defendants Unsuccessful Prosecutions,Unsuccessful Prosecutions Percentage
+A Homicide,4,100.0%,0,0.0%
+B Offences Against The Person,95,76.0%,30,24.0%
+C Sexual Offences,9,90.0%,1,10.0%
+D Burglary,28,90.3%,3,9.7%
+E Robbery,7,53.8%,6,46.2%
+F Theft And Handling,101,93.5%,7,6.5%
+G Fraud And Forgery,10,100.0%,0,0.0%
+H Criminal Damage,33,89.2%,4,10.8%
+I Drugs Offences,53,93.0%,4,7.0%
+
+
+
+../../files/csv/d9783267-87f6-4a0e-baab-07266d776838
+Body,Body name,Service label,Service divison label,Expenditure category,Detailed expenditure type,Detailed expenditure code,Date paid,Transaction number,Net amount,Capital or revenue,Supplier name
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Central & Corporate Functions,Commercial Services Trading Services,Supplies and Services,Operational Materials,205,15/07/2011,1107-00001,540.21,R,A & A Electrical Distributors Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Central & Corporate Functions,Commercial Services Trading Services,Supplies and Services,Operational Materials,205,22/07/2011,1107-00002,1885.55,R,A & A Electrical Distributors Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Central & Corporate Functions,Commercial Services Trading Services,Supplies and Services,Operational Materials,205,22/07/2011,1107-00003,749.55,R,A & A Electrical Distributors Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Central & Corporate Functions,Commercial Services Trading Services,Supplies and Services,Operational Materials,205,29/07/2011,1107-00004,740.48,R,A & A Electrical Distributors Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,East - North East,East - North East,Construction Services,Supplies and Services,Other Materials,205,22/07/2011,1107-00005,430.00,R,A Andrews & Sons (Marbles & Tiles)
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Adult Social Care,Roseville Enterprises,Supplies and Services,Operational Furniture And Equipment,203,07/07/2011,1107-00006,1200.00,R,A D G Engineering Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Adult Social Care,Roseville Enterprises,Supplies and Services,Operational Furniture And Equipment,203,19/07/2011,1107-00007,745.00,R,A D G Engineering Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Adult Social Care,Roseville Enterprises,Supplies and Services,Operational Furniture And Equipment,203,19/07/2011,1107-00008,700.00,R,A D G Engineering Ltd
+http://statistics.data.gov.uk/doc/local-authority/00DA,Leeds City Council,Adult Social Care,Roseville Enterprises,Supplies and Services,Operational Furniture And Equipment,203,19/07/2011,1107-00009,2140.00,R,A D G Engineering Ltd
+
+
+
