@@ -15,6 +15,7 @@ import csv2rdf.tabular.mapping
 import csv2rdf.tabular.refine
 import csv2rdf.lodstats
 from csv2rdf.classification.classify import Classifier
+from csv2rdf.classification.lov import LovClassifier
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -189,9 +190,18 @@ class CSV2RDFRefineAPI(object):
     @cherrypy.expose
     def classes(self, resourceId):
         cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
         classifier = Classifier()
         return json.dumps(classifier.getClassesJson(resourceId))
 
+    @cherrypy.expose
+    def classeslov(self, label):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        lovClassifier = LovClassifier()
+        return json.dumps(lovClassifier.getEntities(label))
 
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
