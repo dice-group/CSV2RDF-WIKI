@@ -22,11 +22,13 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
 
-    def update_mapping_header(self, header):
+    def update_mapping(self, header, class_):
+        print header, class_
         self.init_mappings_only()
         mapping = self.get_mapping_by_name('default-tranformation-configuration')
         new_mapping = copy(mapping)
         new_mapping['name'] = 'csv2rdf-interface-generated'
+        new_mapping['class'] = class_['value']
         for num, item in enumerate(header):
             key = "col" + str(num + 1)
             if(item['uri'] == ''):
@@ -209,10 +211,12 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         return '\n'.join(output)
 
     def convert_mapping_to_wiki_template(self, mapping, resource_id = None):
+        print mapping
         if(not resource_id):
             resource_id = self.resource_id
 
         result_mapping = mapping.copy()
+        result_mapping['class'] = str(mapping['class'])
         result_mapping['header'] = str(mapping['header'])[1:-1]
         result_mapping['omitCols'] = str(mapping['omitCols'])[1:-1]
         result_mapping['omitRows'] = str(mapping['omitRows'])[1:-1]
