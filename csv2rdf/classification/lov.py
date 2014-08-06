@@ -1,5 +1,3 @@
-from csv2rdf.classification.interfaces import ClassifierInterface
-from csv2rdf.classification.interfaces import ClassifierDataInterface
 from lovpy.lovscraper import LovScraper
 
 class LovClassifier(object):

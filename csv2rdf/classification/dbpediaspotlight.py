@@ -1,13 +1,13 @@
 import spotlight
 
 from csv2rdf.classification.interfaces import ClassifierInterface
-from csv2rdf.classification.interfaces import ClassifierDataInterface
+from csv2rdf.interfaces.data import DataInterface
 
 class DbpediaspotlightClassifier(ClassifierInterface,
-                          ClassifierDataInterface):
+                                 DataInterface):
     def __init__(self):
         ClassifierInterface.__init__(self)
-        ClassifierDataInterface.__init__(self)
+        DataInterface.__init__(self)
 
     def _recognizeEntities(self, text):
         annotationServiceUri = 'http://spotlight.dbpedia.org/rest/annotate'

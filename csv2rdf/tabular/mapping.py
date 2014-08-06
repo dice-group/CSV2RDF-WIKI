@@ -498,10 +498,12 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         return names
     
     def get_mapping_by_name(self, mapping_name):
-        for mapping in self.mappings:
+        return self.get_by_name(mapping_name, self.mappings)
+
+    def get_by_name(self, mapping_name, mappings):
+        for mapping in mappings:
             if(mapping['name'] == mapping_name):
                 return mapping
-        #Nothing was found
         return False
 
     def get_outdated_and_new_wiki_pages(self):
@@ -536,6 +538,12 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
             header[mapping['name']].sort()
             headers.append(header)
         return headers
+
+    def get_header_by_name(self, mapping_name):
+        headers = self.get_mapping_headers()
+        for header in headers:
+            if(mapping_name in header.keys()):
+                return header
 
     def create_default_wiki_page(self, resource_id=None):
         default_wiki_page = self.generate_default_wiki_page(resource_id)

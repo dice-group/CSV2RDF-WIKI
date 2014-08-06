@@ -2,16 +2,16 @@ import json
 
 import foxpy.fox
 from csv2rdf.classification.interfaces import ClassifierInterface
-from csv2rdf.classification.interfaces import ClassifierDataInterface
+from csv2rdf.interfaces.data import DataInterface
 
 class FoxClassifier(ClassifierInterface,
-                    ClassifierDataInterface):
+                    DataInterface):
     def __init__(self, foxlight=4):
         """
             TODO: feed scmc.eu to spotlight
         """
         ClassifierInterface.__init__(self)
-        ClassifierDataInterface.__init__(self)
+        DataInterface.__init__(self)
         self.fox = foxpy.fox.Fox(foxlight) #foxlight stands for NER method, see Fox class for details
 
     def _recognizeEntities(self, text):
@@ -22,6 +22,7 @@ class FoxClassifier(ClassifierInterface,
         fox = self._recognizeEntitiesResource(resourceId)
         entitiesRecognized = set()
         for structuralElement in fox:
+            print structuralElement
             structuralElementName = structuralElement.keys()[0]
             (text, entities, log) = structuralElement[structuralElementName]
             entities = json.loads(entities)
@@ -33,4 +34,4 @@ class FoxClassifier(ClassifierInterface,
 if __name__ == "__main__":
     testResourceId = "5e8ff30e-86c2-42ff-889e-c950f9d7e8c4"
     foxClassifier = FoxClassifier()
-    print foxClassifier.getEntitiesWithClasses(testResourceId)
+    #print foxClassifier.getEntitiesWithClasses(testResourceId)

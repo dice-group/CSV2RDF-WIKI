@@ -50,6 +50,9 @@ data_rdf_and_sparql_csv = "rdf_and_sparql_csv"
 data_for_lodstats = "rdf_for_lodstats"
 data_licenses = "licenses"
 
+#virtuoso connect
+virtuosoDSN = "DSN=VOS;UID=dba;PWD=dba"
+
 #logging configuration
 import logging
 main_log_folder = root_path + "/logs/"

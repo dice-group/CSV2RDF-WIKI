@@ -1,9 +1,15 @@
 import requests
-
+from bs4 import BeautifulSoup
 
 class PrefixCC:
     def __init__(self):
         pass
+
+    def reverse_lookup(self, uri):
+        r_string = 'http://prefix.cc/reverse?uri='+uri+'&format=ini'
+        r = requests.get(r_string)
+        bs = BeautifulSoup(r.text)
+        return bs.find("div").text.strip()
     
     def get_namespace(self, prefix):
         r_string = 'http://prefix.cc/' + prefix + '.file.ini'
@@ -30,4 +36,5 @@ class PrefixCC:
     
 if __name__ == '__main__':
     prefixcc = PrefixCC()
-    print prefixcc.getSparqlifyNamespace('rdfs')
+    #print prefixcc.getSparqlifyNamespace('rdfs')
+    print prefixcc.reverse_lookup("http://dbpedia.org/ontology/Organisation")
