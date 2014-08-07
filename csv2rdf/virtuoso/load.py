@@ -11,6 +11,14 @@ class VirtuosoLoader(object):
         command = "DB.DBA.TTLP_MT (file_to_string_output ('%s'), '', '%s')" % (filepath, graphUri, )
         return self.cursor.execute(command)
 
+    def drop(self, graphUri):
+        command = "SPARQL DROP SILENT GRAPH <%s>" % (graphUri,)
+        return self.cursor.execute(command)
+
+    def reload(self, filepath, graphUri):
+        self.drop(graphUri)
+        self.load(filepath, graphUri)
+
     def getPathById(self, resourceId):
         sparqlify = Sparqlify(resourceId)
         return sparqlify.get_rdf_file_path('csv2rdf-interface-generated')
@@ -20,5 +28,5 @@ if __name__ == "__main__":
     resourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
     resourcePath = vl.getPathById(resourceId)
     resourceGraphUri = "http://data.publicdata.eu/%s"%(resourceId,)
-    command = vl.load(resourcePath, resourceGraphUri)
+    command = vl.reload(resourcePath, resourceGraphUri)
     import ipdb; ipdb.set_trace()

@@ -10,6 +10,8 @@ import subprocess
 import os
 import json
 
+from csv2rdf.virtuoso.load import VirtuosoLoader
+
 class SparqlifyJavaHandler(object):
     def __init__(self, resource_id, mapping_name):
         self.resource_id = resource_id
@@ -102,6 +104,11 @@ class SparqlifyJavaHandler(object):
         
         #update metadata
         mapping.update_metadata()
+
+        #upload to triplestore
+        virtuoso = VirtuosoLoader()
+        graphUri = "http://data.publicdata.eu/%s/%s" % (str(resource_id),str(mapping_name))
+        virtuoso.reload(rdf_file, graphUri)
         
         return process.returncode
 

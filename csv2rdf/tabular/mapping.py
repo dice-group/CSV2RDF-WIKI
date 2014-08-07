@@ -16,6 +16,8 @@ import csv2rdf.ckan.resource
 import csv2rdf.tabular.tabularfile
 import csv2rdf.interfaces
 
+from csv2rdf.tabular.sparqlify import Sparqlify
+
 class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     def __init__(self, resource_id = None):
         self.resource_id = resource_id
@@ -24,10 +26,11 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
 
     def update_mapping(self, header, class_):
         print header, class_
+        generated_mapping_name = 'csv2rdf-interface-generated'
         self.init_mappings_only()
         mapping = self.get_mapping_by_name('default-tranformation-configuration')
         new_mapping = copy(mapping)
-        new_mapping['name'] = 'csv2rdf-interface-generated'
+        new_mapping['name'] = generated_mapping_name
         new_mapping['class'] = class_['value']
         for num, item in enumerate(header):
             key = "col" + str(num + 1)
@@ -44,6 +47,9 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.add_mapping_to_wiki_page(wikified_mapping)
         self.create_wiki_page(self.wiki_page)
         self.update_metadata()
+        #fire_up the conversion process for this mapping
+        sparqlify = Sparqlify(self.resource_id)
+        sparqlify.transform_resource_to_rdf(generated_mapping_name)
 
     def init_mappings_only(self):
         self.wiki_page = self.request_wiki_page()
