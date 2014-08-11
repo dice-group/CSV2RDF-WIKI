@@ -89,6 +89,8 @@ class Resource(csv2rdf.interfaces.AuxilaryInterface):
         resource = resource["result"]["results"]
         try:
             resource = resource[0]
+            self.unpack_object_to_self(resource)
+            self.package_name = self.request_package_name()
         except BaseException as e:
             logger.warning("No resource found with URI: %s"%uri)
             logger.warning("Exception occured %s"%str(e))
