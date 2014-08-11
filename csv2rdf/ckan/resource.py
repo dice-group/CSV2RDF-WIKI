@@ -91,7 +91,6 @@ class Resource(csv2rdf.interfaces.AuxilaryInterface):
             resource = resource[0]
             self.unpack_object_to_self(resource)
             self.package_name = self.request_package_name()
-            import ipdb; ipdb.set_trace()
         except BaseException as e:
             logger.warning("No resource found with URI: %s"%uri)
             logger.warning("Exception occured %s"%str(e))
