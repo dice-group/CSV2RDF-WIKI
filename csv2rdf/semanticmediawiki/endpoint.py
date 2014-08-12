@@ -73,7 +73,7 @@ class SMWEndpoint(object):
             res = self.execute(query)
             import ipdb; ipdb.set_trace()
 
-    def findResourceInSameDataset(self, resourceId):
+    def _getResourcesFromDataset(self, resourceId):
         """
             Returns other resources in the dataset.
             We assume that all resources in the same dataset have the same structure.
@@ -92,8 +92,22 @@ class SMWEndpoint(object):
         similarResourcesResult = distinctResourceUris.execute(model)
         for resource in similarResourcesResult:
             similarResources.append(str(resource['s']))
-        
         return similarResources
+
+    def getResourcesFromDatasetIds(self, resourceId):
+        resourceIds = []
+        resourceUris = self._getResourcesFromDataset(resourceId)
+        for resourceUri in resourceUris:
+            sparqlId = resourceUri.split('Csv2rdf-')[-1]
+            resourceId = self._convertSparqlIdToResourceId(sparqlId)
+            resourceIds.append(resourceId)
+        return resourceIds
+
+    def _convertSparqlIdToResourceId(self, sparqlId):
+        sparqlId = sparqlId.split("-")
+        for num, _id in enumerate(sparqlId):
+            sparqlId[num] = _id[2:]
+        return "-".join(sparqlId)
 
     def _convertResourceIdToSparql(self, resourceId):
         resourceId = resourceId.split("-")
@@ -110,4 +124,4 @@ class SMWEndpoint(object):
 if __name__ == "__main__":
     resourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
     endpoint = SMWEndpoint()
-    print endpoint.findResourceInSameDataset(resourceId)
+    print endpoint.getResourcesFromDatasetIds(resourceId)
