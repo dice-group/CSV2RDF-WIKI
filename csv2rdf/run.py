@@ -16,6 +16,7 @@ import csv2rdf.tabular.refine
 import csv2rdf.lodstats
 from csv2rdf.classification.classify import Classifier
 from csv2rdf.classification.lov import LovClassifier
+from csv2rdf.semanticmediawiki.query import SMWQuery
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -122,6 +123,9 @@ class CSV2RDFApp(object):
         return resource.get_metadata()
 
 class CSV2RDFRefineAPI(object):
+    def __init__(self):
+        pass
+
     ####### csv2rdf-interface (ember): AJAX calls
     @cherrypy.expose(alias="refines")
     def getDataForRefine(self, resourceId):
@@ -204,6 +208,18 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
         lovClassifier = LovClassifier()
         return json.dumps(lovClassifier.getEntities(label))
+
+    @cherrypy.expose
+    def similar_resources(self, resourceId):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        smwquery = SMWQuery()
+        resources = smwquery.fetchAllResourceIdsFromDataset(resourceId)
+        response = {
+                'count': len(resources)
+                }
+        return json.dumps(response)
 
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
