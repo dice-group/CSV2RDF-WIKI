@@ -36,28 +36,7 @@ class SMWQuery(object):
         resources = self.fetchAllResourcesFromDataset(resourceId)
         resourceDistinctSubjectQuery = RDF.Query(self.querygen.getDistinctSubjectQuery())
         for resource in resourceDistinctSubjectQuery.execute(resources):
-            resourceId = self.querygen._convertSparqlIdToResourceId(str(resource['s']).split("Csv2rdf-")[-1])
-            resourceIds.append(resourceId)
-        return resourceIds
-
-    def _getResourcesFromDataset(self, resourceId):
-        similarResourcesQuery = self._genDatasetQuery(resourceDataset)
-        model = RDF.Model()
-        parser = RDF.NTriplesParser()
-        ntriplesString = self._sendPostToVirtuoso(similarResourcesQuery)
-        parser.parse_string_into_model(model, ntriplesString, 'http://localhost/')
-        distinctResourceUris = RDF.Query("SELECT DISTINCT ?s WHERE {?s ?p ?o.}")
-        similarResourcesResult = distinctResourceUris.execute(model)
-        for resource in similarResourcesResult:
-            similarResources.append(str(resource['s']))
-        return similarResources
-
-    def getResourcesFromDatasetIds(self, resourceId):
-        resourceIds = []
-        resourceUris = self._getResourcesFromDataset(resourceId)
-        for resourceUri in resourceUris:
-            sparqlId = resourceUri.split('Csv2rdf-')[-1]
-            resourceId = self._convertSparqlIdToResourceId(sparqlId)
+            resourceId = self.querygen._convertSparqlIdToResourceId(str(resource['s']).split("Csv2rdf-")[-1].lower())
             resourceIds.append(resourceId)
         return resourceIds
 
