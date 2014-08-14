@@ -172,6 +172,29 @@ class CSV2RDFRefineAPI(object):
     refine.exposed = True
     #refine._cp_config = {'tools.json_in.on': True}
 
+    @cherrypy.expose
+    def refine_all_similar(self, *args, **kw):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        cherrypy.response.headers["Accept"] = "application/json"
+        #cl = cherrypy.request.headers['Content-Length']
+        #rawbody = cherrypy.request.body.read(cl)
+        print cherrypy.request.params
+        json_load = ' '.join(cherrypy.request.params.keys())
+        json_load = json.loads(json_load)
+        id = json_load['id']
+        header = json_load['header']
+        class_ = json_load['class']
+        from csv2rdf.semanticmediawiki.query import SMWQuery
+        smwquery = SMWQuery()
+        idList = smwquery.fetchAllResourceIdsFromDataset(id)
+        for id in idList:
+            mapping = csv2rdf.tabular.mapping.Mapping(id)
+            mapping.update_mapping(header, class_)
+        return "In a queue now!"
+    refine.exposed = True
+
     @cherrypy.expose(alias="linking_candidates_search")
     def linking_candidates_search(self, *args, **kw):
         cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
