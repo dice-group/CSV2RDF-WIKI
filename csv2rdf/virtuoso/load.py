@@ -1,6 +1,6 @@
 import pypyodbc
 from csv2rdf.config.config import virtuosoDSN
-from csv2rdf.tabular.sparqlify import Sparqlify
+import csv2rdf.tabular.sparqlify# import Sparqlify
 
 class VirtuosoLoader(object):
     def __init__(self):
@@ -19,14 +19,14 @@ class VirtuosoLoader(object):
         self.drop(graphUri)
         self.load(filepath, graphUri)
 
-    def getPathById(self, resourceId):
-        sparqlify = Sparqlify(resourceId)
-        return sparqlify.get_rdf_file_path('csv2rdf-interface-generated')
+    def getPathById(self, resourceId, mappingName):
+        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(resourceId)
+        return sparqlify.get_rdf_file_path(mappingName)
 
 if __name__ == "__main__":
     vl = VirtuosoLoader()
     resourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
-    resourcePath = vl.getPathById(resourceId)
+    resourcePath = vl.getPathById(resourceId, 'csv2rdf-interface-generated-with-datatype')
     resourceGraphUri = "http://data.publicdata.eu/%s"%(resourceId,)
     command = vl.reload(resourcePath, resourceGraphUri)
     import ipdb; ipdb.set_trace()

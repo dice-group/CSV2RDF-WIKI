@@ -16,7 +16,7 @@ import csv2rdf.ckan.resource
 import csv2rdf.tabular.tabularfile
 import csv2rdf.interfaces
 
-from csv2rdf.tabular.sparqlify import Sparqlify
+import csv2rdf.tabular.sparqlify
 
 class Mapping(csv2rdf.interfaces.AuxilaryInterface):
     def __init__(self, resource_id = None):
@@ -48,7 +48,7 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.create_wiki_page(self.wiki_page)
         self.update_metadata()
         #fire_up the conversion process for this mapping
-        sparqlify = Sparqlify(self.resource_id)
+        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(self.resource_id)
         sparqlify.transform_resource_to_rdf(generated_mapping_name)
 
     def init_mappings_only(self):
@@ -574,6 +574,6 @@ if __name__ == '__main__':
     #mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #mapping.create_wiki_page('Testing the test page!', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     mapping = Mapping()
-    print mapping.create_default_wiki_page(resource_id='e3d9aedb-8820-4543-8a3d-f0508748c796')
+    #print mapping.create_default_wiki_page(resource_id='e3d9aedb-8820-4543-8a3d-f0508748c796')
     #print mapping.get_mapping_path('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
     #print mapping.get_mapping_url('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')

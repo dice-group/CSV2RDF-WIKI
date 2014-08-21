@@ -80,6 +80,12 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface,
         else:
             return False
 
+    def getCsvFilePathDownload(self):
+        if(self.get_csv_file_path()):
+            return self.get_csv_file_path()
+        else:
+            return self.download()
+
     def is_exists(self):
         if(self.get_csv_file_path()):
             return True
