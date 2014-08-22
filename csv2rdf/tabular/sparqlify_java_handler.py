@@ -28,23 +28,27 @@ class SparqlifyJavaHandler(object):
         return tabular_file.is_exists()
 
     def validateCsv(self, resource_id, mapping_name):
-        validator = csv2rdf.csv.validation.CsvValidator(resource_id, mapping_name)
+        validator = csv2rdf.csv.validation.CsvDatatypeValidator(resource_id, mapping_name)
         return validator.validate()
 
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
             resource_id = self.resource_id
                 
+        logging.info("Getting the CSV filepath...")
         tabular_file = csv2rdf.tabular.tabularfile.TabularFile(resource_id)
         file_path = tabular_file.getCsvFilePathDownload()
 
+        logging.info("Fetching the mapping...")
         mapping = csv2rdf.tabular.mapping.Mapping(resource_id)
         mapping.init()
         mapping_path = mapping.get_mapping_path(mapping_name)
         mapping_current = mapping.get_mapping_by_name(mapping_name)
 
         #validate cSV to comply with xsd types
-        self.validateCsv(resource_id, mapping_name)
+        logging.info("Validating CSV...")
+        file_path = self.validateCsv(resource_id, mapping_name)
+        logging.info("Validated CSV is: %s" % (file_path,))
 
         #process file based on the mapping_current options
         processed_file = mapping.process_file(file_path, mapping_current)

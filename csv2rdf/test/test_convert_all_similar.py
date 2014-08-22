@@ -16,4 +16,9 @@ for item in header[mappingName]:
                   'uri': item[1]}
     headerJson.append(headerItem)
 
-mappings.update_mapping(headerJson, class_)
+from csv2rdf.semanticmediawiki.query import SMWQuery
+smwquery = SMWQuery()
+idList = smwquery.fetchAllResourceIdsFromDataset(testResourceId)
+for id in idList:
+    mapping = Mapping(id)
+    mapping.update_mapping(headerJson, class_)
