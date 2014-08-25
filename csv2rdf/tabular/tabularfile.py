@@ -124,6 +124,12 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface,
                 return []
 
     def validate(self):
+        try:
+            self._validate()
+        except BaseException as e:
+            logging.error(str(self.id) + ": " + str(e))
+
+    def _validate(self):
         filename = self.filename
         (encoding, info) = self.get_info_about()
         logging.debug("File encoding: %s" % encoding)
