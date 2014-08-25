@@ -10,10 +10,9 @@ import csv2rdf.tabular.tabularfile
 import csv2rdf.messaging
 
 
-class Sparqlify():
+class Sparqlify(object):
     def __init__(self, resource_id):
         self.resource_id = resource_id
-
     
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
@@ -61,7 +60,9 @@ class Sparqlify():
 
 
 if __name__ == '__main__':
-    sparqlify = Sparqlify('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    print sparqlify.transform_resource_to_rdf('default-tranformation-configuration')
+    testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
+    sparqlify = Sparqlify(testResourceId)
+    testMapping = "csv2rdf-interface-generated"
+    print sparqlify.transform_resource_to_rdf(testMapping)
     #print sparqlify.get_rdf_file_path('default-tranformation-configuration')
     #print sparqlify.get_rdf_file_url('default-tranformation-configuration')

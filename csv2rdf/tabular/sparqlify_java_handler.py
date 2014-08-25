@@ -4,11 +4,14 @@ import csv2rdf.tabular.tabularfile
 import csv2rdf.tabular.mapping
 import csv2rdf.messaging
 import csv2rdf.config
+import csv2rdf.csv.validation
 import logging
 import time
 import subprocess
 import os
 import json
+
+from csv2rdf.virtuoso.load import VirtuosoLoader
 
 class SparqlifyJavaHandler(object):
     def __init__(self, resource_id, mapping_name):
@@ -24,20 +27,28 @@ class SparqlifyJavaHandler(object):
         tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id)
         return tabular_file.is_exists()
 
+    def validateCsv(self, resource_id, mapping_name):
+        validator = csv2rdf.csv.validation.CsvDatatypeValidator(resource_id, mapping_name)
+        return validator.validate()
+
     def transform_resource_to_rdf(self, mapping_name, resource_id = None):
         if(not resource_id):
             resource_id = self.resource_id
                 
+        logging.info("Getting the CSV filepath...")
         tabular_file = csv2rdf.tabular.tabularfile.TabularFile(resource_id)
-        if(tabular_file.get_csv_file_path()):
-            file_path = tabular_file.get_csv_file_path()
-        else:
-            file_path = tabular_file.download()
+        file_path = tabular_file.getCsvFilePathDownload()
 
+        logging.info("Fetching the mapping...")
         mapping = csv2rdf.tabular.mapping.Mapping(resource_id)
         mapping.init()
         mapping_path = mapping.get_mapping_path(mapping_name)
         mapping_current = mapping.get_mapping_by_name(mapping_name)
+
+        #validate cSV to comply with xsd types
+        logging.info("Validating CSV...")
+        file_path = self.validateCsv(resource_id, mapping_name)
+        logging.info("Validated CSV is: %s" % (file_path,))
 
         #process file based on the mapping_current options
         processed_file = mapping.process_file(file_path, mapping_current)
@@ -102,6 +113,12 @@ class SparqlifyJavaHandler(object):
         
         #update metadata
         mapping.update_metadata()
+
+        #upload to triplestore
+        logging.warn("loading resource to virtuoso!")
+        virtuoso = VirtuosoLoader()
+        graphUri = "http://data.publicdata.eu/%s/%s" % (str(resource_id),str(mapping_name))
+        virtuoso.reload(rdf_file, graphUri)
         
         return process.returncode
 

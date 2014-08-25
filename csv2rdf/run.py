@@ -14,6 +14,9 @@ import csv2rdf.tabular.sparqlify
 import csv2rdf.tabular.mapping
 import csv2rdf.tabular.refine
 import csv2rdf.lodstats
+from csv2rdf.classification.classify import Classifier
+from csv2rdf.classification.lov import LovClassifier
+from csv2rdf.semanticmediawiki.query import SMWQuery
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -120,6 +123,9 @@ class CSV2RDFApp(object):
         return resource.get_metadata()
 
 class CSV2RDFRefineAPI(object):
+    def __init__(self):
+        pass
+
     ####### csv2rdf-interface (ember): AJAX calls
     @cherrypy.expose(alias="refines")
     def getDataForRefine(self, resourceId):
@@ -154,15 +160,40 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Accept"] = "application/json"
         #cl = cherrypy.request.headers['Content-Length']
         #rawbody = cherrypy.request.body.read(cl)
+        print cherrypy.request.params
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         id = json_load['id']
         header = json_load['header']
+        class_ = json_load['class']
         mapping = csv2rdf.tabular.mapping.Mapping(id)
-        mapping.update_mapping_header(header)
+        mapping.update_mapping(header, class_)
         return "In a queue now!"
     refine.exposed = True
     #refine._cp_config = {'tools.json_in.on': True}
+
+    @cherrypy.expose
+    def refine_all_similar(self, *args, **kw):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        cherrypy.response.headers["Accept"] = "application/json"
+        #cl = cherrypy.request.headers['Content-Length']
+        #rawbody = cherrypy.request.body.read(cl)
+        print cherrypy.request.params
+        json_load = ' '.join(cherrypy.request.params.keys())
+        json_load = json.loads(json_load)
+        id = json_load['id']
+        header = json_load['header']
+        class_ = json_load['class']
+        from csv2rdf.semanticmediawiki.query import SMWQuery
+        smwquery = SMWQuery()
+        idList = smwquery.fetchAllResourceIdsFromDataset(id)
+        for id in idList:
+            mapping = csv2rdf.tabular.mapping.Mapping(id)
+            mapping.update_mapping(header, class_)
+        return "In a queue now!"
+    refine.exposed = True
 
     @cherrypy.expose(alias="linking_candidates_search")
     def linking_candidates_search(self, *args, **kw):
@@ -184,12 +215,43 @@ class CSV2RDFRefineAPI(object):
         #send request to the LODStats server
         return "In a queue now!"
     refine.exposed = True
+    
+    @cherrypy.expose
+    def classes(self, resourceId):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        classifier = Classifier()
+        return json.dumps(classifier.getClassesJson(resourceId))
 
+    @cherrypy.expose
+    def classeslov(self, label):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        lovClassifier = LovClassifier()
+        return json.dumps(lovClassifier.getEntities(label))
+
+    @cherrypy.expose
+    def similar_resources(self, resourceId):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        smwquery = SMWQuery()
+        resources = smwquery.fetchAllResourceIdsFromDataset(resourceId)
+        response = {
+                'count': len(resources)
+                }
+        return json.dumps(response)
 
 if __name__ == '__main__':
     publicdataeu = CSV2RDFApp()
-    cherrypy.quickstart(publicdataeu, '/', 'server/config')
-    cherrypy.config.update('server/config')
+    cherrypy.tree.mount(CSV2RDFApp(), '/', 'server/config')
+    cherrypy.tree.mount(CSV2RDFRefineAPI(), '/api/', 'server/config')
+    cherrypy.engine.start()
+    #cherrypy.tree(environ, start_response)
+    #cherrypy.quickstart(publicdataeu, '/', 'server/config')
+    #cherrypy.config.update('server/config')
 
 def application(environ, start_response):
     cherrypy.tree.mount(CSV2RDFApp(), '/', 'csv2rdf/server/config')

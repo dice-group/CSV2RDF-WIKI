@@ -13,7 +13,7 @@ class TestClassifier(TestInterface):
         for resourceId in resourceIds:
             print resourceId
             try:
-                pprinter.pprint(self.classifier.getEntitiesWithClasses(resourceId))
+                pprinter.pprint(self.classifier.getClasses(resourceId))
             except BaseException as e:
                 print str(e)
 

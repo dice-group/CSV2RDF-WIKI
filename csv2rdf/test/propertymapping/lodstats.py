@@ -8,7 +8,7 @@ class TestLodstatsMapper(TestInterface):
 
     def maprandom20(self):
         resourceIds = self.getRandom20Resources()
-        for resourceId in resourceIds[4:]:
+        for resourceId in resourceIds:
             print resourceId
             try:
                 mappings = self.lodstatsMapper.getMappings(resourceId)
