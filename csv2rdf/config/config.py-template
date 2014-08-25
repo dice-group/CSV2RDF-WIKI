@@ -13,6 +13,7 @@ wiki_csv2rdf_namespace = "__WIKI_CSV2RDF_NAMESPACE__" #Csv2rdf:
 wiki_api_url = "__WIKI_BASEURI__/api.php"
 wiki_username = "__WIKI_USERNAME__"
 wiki_password = "__WIKI_PASSWORD__"
+wiki_sparql_url = "http://wiki.publicdata.eu/sparql"
 
 #NERD API
 nerd_api_key = ''
