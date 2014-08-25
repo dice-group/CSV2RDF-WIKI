@@ -33,6 +33,8 @@ rdf_files_exposed_path = root_path + "/sparqlified_exposed/" #contains soft link
 
 #data files
 data_csv_resources_path = root_path + "/data/csv_resources/"
+data_classified_path = root_path + "/data/classified/"
+data_classified_cache_path = root_path + "/data/classified/cache/"
 data_path = root_path + "/data/"
 data_csv2rdf_wiki_pages_file = data_path + "csv2rdf_wiki_pages/"
 data_all_csv2rdf_pages = data_path + "all_csv2rdf_pages"
