@@ -9,3 +9,4 @@ pandas
 python-magic
 pika
 foxpy
+beautifulsoup4

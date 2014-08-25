@@ -2,6 +2,7 @@ import os
 import glob
 import subprocess
 import logging
+import json
 
 from ckanclient import CkanClient
 
@@ -145,10 +146,12 @@ class CkanApplication():
             os.remove(file)
         #update list - make soft links to the files
         rdf_files = os.listdir(csv2rdf.config.config.rdf_files_path)
+        resourceIds = []
         for rdf_file in rdf_files:
             #make a soft link
             link_to = os.path.abspath(csv2rdf.config.config.rdf_files_path + rdf_file)
             resource_id = rdf_file[:36] #take resource_id part only
+            resourceIds.append(resource_id)
             link = csv2rdf.config.config.rdf_files_exposed_path + resource_id
             make_soft_link = ["ln",
                               "-f",
@@ -157,6 +160,10 @@ class CkanApplication():
                               link]
             pipe = subprocess.Popen(make_soft_link, stdout=subprocess.PIPE)
             #pipe_message = pipe.stdout.read()
+        get_exposed_rdf_list_handle = open(os.path.join(csv2rdf.config.config.root_path, "get_exposed_rdf_list"), 'wb')
+        resourceIds = json.dumps(resourceIds)
+        get_exposed_rdf_list_handle.write(resourceIds)
+        get_exposed_rdf_list_handle.close()
 
     def update_metadata_for_all_resources(self):
         resources_list = self.get_csv_resource_list_current()
