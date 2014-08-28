@@ -303,9 +303,11 @@ class TabularFile(csv2rdf.interfaces.StringMatchInterface,
         return csv_list
 
 if __name__ == '__main__':
-    tf = TabularFile('8b133b79-7adc-4277-8969-aa500f62504d')
-    tf.download()
-    tf.validate()
+    #tf = TabularFile('8b133b79-7adc-4277-8969-aa500f62504d')
+    #tf.download()
+    #tf.validate()
+    tf = TabularFile('02f31d80-40cc-496d-ad79-2cf02daa5675')
+    print tf.get_csv_data()
 
     #Case 1: good CSV file
     #tabular_file = TabularFile('2daa0e60-4c36-487d-bb29-b3eba4e5ff0e')
