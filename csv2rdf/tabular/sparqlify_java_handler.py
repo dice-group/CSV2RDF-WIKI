@@ -22,6 +22,7 @@ class SparqlifyJavaHandler(object):
         logging.info("Processing %s %s" % (self.mapping_name, self.resource_id))
         process_return_code = self.transform_resource_to_rdf(self.mapping_name, self.resource_id)
         print "Process returned %s" % process_return_code
+        return True
 
     def file_is_exists(self):
         tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id)

@@ -40,10 +40,14 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
                 new_mapping[key] = item['uri']
         wikified_mapping = self.convert_mapping_to_wiki_template(new_mapping)
         old_mapping = self.get_mapping_by_name(new_mapping['name'])
-        if(old_mapping):
-            old_mapping_start = self.mappings_start[new_mapping['name']]
-            old_mapping_end = self.mappings_end[new_mapping['name']]
-            self.delete_template_from_wiki_page(old_mapping_start, old_mapping_end)
+        try:
+            if(old_mapping):
+                old_mapping_start = self.mappings_start[new_mapping['name']]
+                old_mapping_end = self.mappings_end[new_mapping['name']]
+                self.delete_template_from_wiki_page(old_mapping_start, old_mapping_end)
+
+        except BaseException as e:
+            logging.error("could not delete mapping %s, exception %s" % (str(old_mapping), str(e),))
         self.add_mapping_to_wiki_page(wikified_mapping)
         self.create_wiki_page(self.wiki_page)
         self.update_metadata()

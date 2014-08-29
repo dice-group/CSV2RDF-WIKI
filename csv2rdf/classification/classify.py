@@ -50,7 +50,8 @@ class Classifier(ClassifierInterface):
 
 if __name__ == "__main__":
     #testResourceId = "8b51874e-cda8-4910-a3c0-9140e11164a3"
-    testResourceId = "5e8ff30e-86c2-42ff-889e-c950f9d7e8c4"
+    #testResourceId = "5e8ff30e-86c2-42ff-889e-c950f9d7e8c4"
+    testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
     classifier = Classifier()
     classes = classifier.getClassesJson(testResourceId)
     import pprint

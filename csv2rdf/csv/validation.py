@@ -1,6 +1,7 @@
 import re
 import csv
 import datetime
+import logging
 from csv2rdf.tabular.tabularfile import TabularFile
 from csv2rdf.tabular.mapping import Mapping
 
@@ -41,24 +42,24 @@ class CsvDatatypeValidator(object):
                 self.datatypeCols.append(headerItem)
 
     def validate(self):
-        with open(self.csvFilePath, 'rb') as csvfile, open(self.csvValidatedFilePath, 'wb+') as validatedcsvfile:
-            csvReader = csv.DictReader(csvfile, delimiter=self.csvDelimiter, quotechar='"')
+        with open(self.csvFilePath, 'rb+') as csvfile, open(self.csvValidatedFilePath, 'wb+') as validatedcsvfile:
+            csvReader = csv.DictReader([x.replace('\0', '') for x in csvfile], delimiter=self.csvDelimiter, quotechar='"')
             csvWriter = csv.DictWriter(validatedcsvfile, delimiter=self.csvDelimiter, quotechar='"', fieldnames=csvReader.fieldnames)
-            try:
-                for row in csvReader:
-                    for column in self.datatypeCols:
-                        columnIndex = int(column[0]) - 1
-                        columnValue = column[1]
-                        columnDatatype = columnValue.split("^^")[-1]
-                        row[csvReader.fieldnames[columnIndex]] = self.validateValue(columnDatatype, row[csvReader.fieldnames[columnIndex]])
-                    csvWriter.writerow(row)
-            except BaseException as e:
-                import ipdb; ipdb.set_trace()
+            for row in csvReader:
+                for column in self.datatypeCols:
+                    columnIndex = int(column[0]) - 1
+                    columnValue = column[1]
+                    columnDatatype = columnValue.split("^^")[-1]
+                    row[csvReader.fieldnames[columnIndex]] = self.validateValue(columnDatatype, row[csvReader.fieldnames[columnIndex]])
+                csvWriter.writerow(row)
 
         return self.csvValidatedFilePath
 
     def validateValue(self, datatype, value):
         value = value.strip()
+        if(value == ""):
+            return ""
+
         if(re.search("integer", datatype)):
             return self.validateInteger(value)
 
@@ -79,6 +80,17 @@ class CsvDatatypeValidator(object):
             format = "%d-%b-%Y"
             value = datetime.datetime.strptime(value, format)
 
+        #24-Sep-10
+        elif(re.match("\d{2}-\w{3}-\d{2}", value)):
+            value = value.split("-")
+            if(int(value[2]) < 40):
+                value[2] = "20%s"%value[2]
+                format = "%d-%b-%Y"
+            else:
+                format = "%d-%b-%y"
+            value = "-".join(value)
+            value = datetime.datetime.strptime(value, format)
+
         return value.isoformat()
 
     def validateFloat(self, value):
@@ -96,8 +108,11 @@ class CsvDatatypeValidator(object):
 
 if __name__ == "__main__":
     testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
-    testMappingName = "csv2rdf-interface-generated-with-datatype"
+    testResourceId = "daacea8c-789a-4cfd-b685-c927e9adf54c"
+    testResourceId = "e8b8eb07-148f-492e-a2a1-95a663644ec5"
+    testResourceId = "141cd493-3237-428b-a56b-b88fd5f9da7c"
+    testMappingName = "csv2rdf-interface-generated"
     v = CsvDatatypeValidator(testResourceId, testMappingName)
-    v.readCsv()
+    v.validate()
     import ipdb; ipdb.set_trace()
 
