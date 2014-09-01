@@ -24,13 +24,14 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.wiki_site = wikitools.Wiki(csv2rdf.config.config.wiki_api_url)
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
 
-    def update_mapping(self, header, class_):
-        print header, class_
+    def update_mapping(self, header, class_, mappingName):
+        print header
+        print class_
+        print mappingName
         generated_mapping_name = 'csv2rdf-interface-generated'
         self.init_mappings_only()
-        mapping = self.get_mapping_by_name('default-tranformation-configuration')
+        mapping = self.get_mapping_by_name(mappingName)
         new_mapping = copy(mapping)
-        new_mapping['name'] = generated_mapping_name
         new_mapping['class'] = class_['value']
         for num, item in enumerate(header):
             key = "col" + str(num + 1)
@@ -38,22 +39,21 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
                 new_mapping[key] = item['label']
             else:
                 new_mapping[key] = item['uri']
-        wikified_mapping = self.convert_mapping_to_wiki_template(new_mapping)
-        old_mapping = self.get_mapping_by_name(new_mapping['name'])
-        try:
-            if(old_mapping):
-                old_mapping_start = self.mappings_start[new_mapping['name']]
-                old_mapping_end = self.mappings_end[new_mapping['name']]
-                self.delete_template_from_wiki_page(old_mapping_start, old_mapping_end)
 
-        except BaseException as e:
-            logging.error("could not delete mapping %s, exception %s" % (str(old_mapping), str(e),))
+            if('datatype' in item and item['datatype'] != ''):
+                new_mapping[key] = "%s^^%s"%(new_mapping[key], item['datatype']['uri']) 
+
+        wikified_mapping = self.convert_mapping_to_wiki_template(new_mapping)
+        #delete mapping
+        mapping_start = self.mappings_start[mappingName]
+        mapping_end = self.mappings_end[mappingName]
+        self.delete_template_from_wiki_page(mapping_start, mapping_end)
         self.add_mapping_to_wiki_page(wikified_mapping)
         self.create_wiki_page(self.wiki_page)
         self.update_metadata()
         #fire_up the conversion process for this mapping
-        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(self.resource_id)
-        sparqlify.transform_resource_to_rdf(generated_mapping_name)
+        #sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(self.resource_id)
+        #sparqlify.transform_resource_to_rdf(generated_mapping_name)
 
     def init_mappings_only(self):
         self.wiki_page = self.request_wiki_page()
@@ -221,7 +221,6 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         return '\n'.join(output)
 
     def convert_mapping_to_wiki_template(self, mapping, resource_id = None):
-        print mapping
         if(not resource_id):
             resource_id = self.resource_id
 

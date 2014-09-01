@@ -160,14 +160,14 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Accept"] = "application/json"
         #cl = cherrypy.request.headers['Content-Length']
         #rawbody = cherrypy.request.body.read(cl)
-        print cherrypy.request.params
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         id = json_load['id']
         header = json_load['header']
         class_ = json_load['class']
+        mappingName = json_load['mappingName']
         mapping = csv2rdf.tabular.mapping.Mapping(id)
-        mapping.update_mapping(header, class_)
+        mapping.update_mapping(header, class_, mappingName)
         return "In a queue now!"
     refine.exposed = True
     #refine._cp_config = {'tools.json_in.on': True}
@@ -193,7 +193,7 @@ class CSV2RDFRefineAPI(object):
             mapping = csv2rdf.tabular.mapping.Mapping(id)
             mapping.update_mapping(header, class_)
         return "In a queue now!"
-    refine.exposed = True
+    refine_all_similar.exposed = True
 
     @cherrypy.expose(alias="linking_candidates_search")
     def linking_candidates_search(self, *args, **kw):
