@@ -64,7 +64,7 @@ class CSV2RDFApp(object):
         resource.init()
         sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(resource_id)
 
-        if(sparqlify.transform_resource_to_rdf(mapping_name)):
+        if(sparqlify.addResourceToProcessingQueue(mapping_name)):
             logging.info("The resource %s %s was sent to the queue." % (resource_id, mapping_name))
 
             rdf_edit = RdfEditTemplate(resource, mapping_name)
@@ -102,11 +102,6 @@ class CSV2RDFApp(object):
         resource = csv2rdf.ckan.resource.Resource(resource_id)
         resource.init()
         return json.dumps(resource.url)
-
-    @cherrypy.expose
-    def get_exposed_rdf_list(self):
-        ckan = csv2rdf.ckan.application.CkanApplication()
-        return json.dumps(ckan.get_sparqlified_list())
 
     def _get_black_list(self):
         f = open('files_over_50MB', 'rU')

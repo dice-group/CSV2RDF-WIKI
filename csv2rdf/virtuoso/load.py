@@ -21,7 +21,7 @@ class VirtuosoLoader(object):
 
     def getPathById(self, resourceId, mappingName):
         sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(resourceId)
-        return sparqlify.get_rdf_file_path(mappingName)
+        return sparqlify.getRdfFilePath(mappingName)
 
 if __name__ == "__main__":
     vl = VirtuosoLoader()

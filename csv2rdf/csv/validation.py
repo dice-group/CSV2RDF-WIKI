@@ -2,8 +2,8 @@ import re
 import csv
 import datetime
 import logging
-from csv2rdf.tabular.tabularfile import TabularFile
-from csv2rdf.tabular.mapping import Mapping
+import csv2rdf.tabular.tabularfile
+import csv2rdf.tabular.mapping
 
 class CsvDatatypeValidator(object):
     csvDelimiter = ""
@@ -24,7 +24,7 @@ class CsvDatatypeValidator(object):
         self._identifyDatatypeCols()
 
     def _parseMapping(self):
-        mappings = Mapping(self.resourceId)
+        mappings = csv2rdf.tabular.mapping.Mapping(self.resourceId)
         mappings.init_mappings_only()
         mapping = mappings.get_mapping_by_name(self.mappingName)
         self.csvDelimiter = mapping['delimiter']
@@ -32,7 +32,7 @@ class CsvDatatypeValidator(object):
         self.csvHeader = mappings.get_header_by_name(self.mappingName)
 
     def _getCsvPath(self):
-        tabularFile = TabularFile(self.resourceId)
+        tabularFile = csv2rdf.tabular.tabularfile.TabularFile(self.resourceId)
         self.csvFilePath = tabularFile.getCsvFilePathDownload()
         self.csvValidatedFilePath = self.csvFilePath + ".validated"
 

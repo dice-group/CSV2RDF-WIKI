@@ -25,10 +25,6 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.wiki_site.login(csv2rdf.config.config.wiki_username, password=csv2rdf.config.config.wiki_password)
 
     def update_mapping(self, header, class_, mappingName):
-        print header
-        print class_
-        print mappingName
-        generated_mapping_name = 'csv2rdf-interface-generated'
         self.init_mappings_only()
         mapping = self.get_mapping_by_name(mappingName)
         new_mapping = copy(mapping)
@@ -50,10 +46,10 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.delete_template_from_wiki_page(mapping_start, mapping_end)
         self.add_mapping_to_wiki_page(wikified_mapping)
         self.create_wiki_page(self.wiki_page)
-        self.update_metadata()
+        self.updateMetadata(self.resourceId, mappingName)
         #fire_up the conversion process for this mapping
-        #sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(self.resource_id)
-        #sparqlify.transform_resource_to_rdf(generated_mapping_name)
+        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(self.resource_id)
+        sparqlify.addResourceToProcessingQueue(mappingName)
 
     def init_mappings_only(self):
         self.wiki_page = self.request_wiki_page()
@@ -299,7 +295,7 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
             t = wikiString.split('%5E%5E')[1]
             #t = t.split('^^')[0]
             t = ':'.join(t.split('%3A')) 
-            return "typedLiteral(?"+column_number+", "+t+")"
+            return "typedLiteral(?"+column_number+", '"+t+"')"
         except:
             return "plainLiteral(?"+column_number+")"
         
@@ -391,43 +387,44 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
                 
         return page
 
-    def update_metadata(self):
-        self.update_metadata_csv_filesize()
-        self.update_metadata_csv_number_of_lines()
-        self.update_metadata_csv_number_of_columns()
-        self.update_metadata_rdf_number_of_triples()
-        self.update_metadata_rdf_last_sparqlified()
+    def updateMetadata(self, resourceId, mappingName):
+        self.update_metadata_csv_filesize(resourceId)
+        self.update_metadata_csv_number_of_lines(resourceId)
+        self.update_metadata_csv_number_of_columns(mappingName)
+        self.update_metadata_rdf_number_of_triples(mappingName)
+        self.update_metadata_rdf_last_sparqlified(mappingName)
         self.add_metadata_to_wiki_page()
         self.create_wiki_page(self.wiki_page)
         
-    def update_metadata_csv_filesize(self):
-        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id) 
+    def update_metadata_csv_filesize(self, resourceId):
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(resourceId) 
         csv_filesize = tabular_file.get_csv_filesize()
         self.metadata['filesize'] = str(csv_filesize)
 
-    def update_metadata_csv_number_of_lines(self):
-        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(self.resource_id)
+    def update_metadata_csv_number_of_lines(self, resourceId):
+        tabular_file = csv2rdf.tabular.tabularfile.TabularFile(resourceId)
         csv_number_of_lines = tabular_file.get_csv_number_of_lines()
         self.metadata['csv_number_of_lines'] = str(csv_number_of_lines)
 
-    def update_metadata_csv_number_of_columns(self):
+    def update_metadata_csv_number_of_columns(self, mappingName):
         cols = 0
-        for key in self.mappings[0].keys():
+        currentMapping = self.get_mapping_by_name(mappingName)
+        for key in currentMapping.keys():
             if(re.match("^col.*", key)):
                 cols += 1
         self.metadata['csv_number_of_columns'] = str(cols)
 
-    def update_metadata_rdf_number_of_triples(self):
+    def update_metadata_rdf_number_of_triples(self, mappingName):
         """
             using the default mapping here (mapping 0)
         """
-        rdf_filename = self.resource_id + "_" + self.mappings[0]['name'] + ".rdf"
+        rdf_filename = self.resource_id + "_" + mappingName + ".rdf"
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.rdf_files_path)
         rdf_number_of_triples = db.count_line_number(rdf_filename)
         self.metadata['rdf_number_of_triples'] = str(rdf_number_of_triples)
 
-    def update_metadata_rdf_last_sparqlified(self):
-        rdf_filename = self.resource_id + "_" + self.mappings[0]['name'] + ".rdf"
+    def update_metadata_rdf_last_sparqlified(self, mappingName):
+        rdf_filename = self.resource_id + "_" + mappingName + ".rdf"
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.rdf_files_path)
         rdf_last_sparqlified = db.get_last_access_time(rdf_filename)
         self.metadata['rdf_last_sparqlified'] = str(rdf_last_sparqlified)
@@ -559,24 +556,9 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         self.create_wiki_page(default_wiki_page, resource_id)
     
 if __name__ == '__main__':
-    #mapping = Mapping('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #mapping = Mapping('00e0737c-6920-479a-9916-ff83b9de692c')
-    #mapping.init_mappings_only()
-    #mapping.get_mapping_headers()
-    #import ipdb; ipdb.set_trace()
-    #mapping.init()
-    #mapping.update_metadata()
-    #print mapping.wiki_page
-    #print mapping.metadata
-    #print mapping.mappings
-    #print mapping.update_csv2rdf_wiki_page_list()
-    #print mapping.get_mapping_names()
-    #wiki_page = mapping.request_wiki_page('1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #mappings = mapping.extract_mappings_from_wiki_page(wiki_page)
-    #sparqlified_mapping = mapping.convert_mapping_to_sparqlifyml(mappings[0], resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #mapping.save_csv_mappings(mappings, resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #mapping.create_wiki_page('Testing the test page!', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    mapping = Mapping()
-    #print mapping.create_default_wiki_page(resource_id='e3d9aedb-8820-4543-8a3d-f0508748c796')
-    #print mapping.get_mapping_path('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
-    #print mapping.get_mapping_url('ijfosij', resource_id='1aa9c015-3c65-4385-8d34-60ca0a875728')
+    #Test #1 update metadata
+    testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
+    testMappingName = "csv2rdf-interface-generated"
+    mapping = Mapping(testResourceId)
+    mapping.init_mappings_only()
+    mapping.updateMetadata(testResourceId, testMappingName)
