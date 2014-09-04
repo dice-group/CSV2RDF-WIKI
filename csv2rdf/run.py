@@ -17,6 +17,7 @@ import csv2rdf.lodstats
 from csv2rdf.classification.classify import Classifier
 from csv2rdf.classification.lov import LovClassifier
 from csv2rdf.semanticmediawiki.query import SMWQuery
+from csv2rdf.tabular.sparqlify import Sparqlify
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -59,18 +60,27 @@ class CSV2RDFApp(object):
     def rdf_edit(self, resource_id, configuration_name='default-tranformation-configuration'):
         mapping_name = configuration_name
         resource_id = resource_id.lower()
-
         resource = csv2rdf.ckan.resource.Resource(resource_id)
         resource.init()
-        sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(resource_id)
+        rdf_edit = RdfEditTemplate(resource, mapping_name)
+        return self.renderer.render(rdf_edit)
 
-        if(sparqlify.addResourceToProcessingQueue(mapping_name)):
-            logging.info("The resource %s %s was sent to the queue." % (resource_id, mapping_name))
+    #@cherrypy.expose(alias="rdf_edit.html")
+    #def rdf_edit(self, resource_id, configuration_name='default-tranformation-configuration'):
+    #    mapping_name = configuration_name
+    #    resource_id = resource_id.lower()
 
-            rdf_edit = RdfEditTemplate(resource, mapping_name)
-            return self.renderer.render(rdf_edit)
-        else:
-            return self.renderer.render(rdf_edit)
+    #    resource = csv2rdf.ckan.resource.Resource(resource_id)
+    #    resource.init()
+    #    sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(resource_id)
+
+    #    if(sparqlify.addResourceToProcessingQueue(mapping_name)):
+    #        logging.info("The resource %s %s was sent to the queue." % (resource_id, mapping_name))
+
+    #        rdf_edit = RdfEditTemplate(resource, mapping_name)
+    #        return self.renderer.render(rdf_edit)
+    #    else:
+    #        return self.renderer.render(rdf_edit)
 
     @cherrypy.expose(alias="mapping_edit_interface.html")
     def mapping_edit_interface(self,
@@ -146,8 +156,35 @@ class CSV2RDFRefineAPI(object):
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_resource_json()
 
-    #@cherrypy.expose(alias="refine")
-    #def refine(self, **jsonText):
+    def transform_one(self, *args, **kw):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        cherrypy.response.headers["Accept"] = "application/json"
+        json_load = ' '.join(cherrypy.request.params.keys())
+        json_load = json.loads(json_load)
+        resourceId = json_load['resourceId']
+        mappingName = json_load['mappingName']
+        sparqlify = Sparqlify(resourceId)
+        status = sparqlify.addResourceToProcessingQueue(mappingName)
+        return str(status)
+    transform_one.exposed = True
+
+    def transform_all_related(self, *args, **kw):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        cherrypy.response.headers["Accept"] = "application/json"
+        json_load = ' '.join(cherrypy.request.params.keys())
+        json_load = json.loads(json_load)
+        resourceIds = json_load['resourceIds']
+        mappingName = json_load['mappingName']
+        sparqlify = Sparqlify("")
+        for resourceId in resourceIds:
+            status = sparqlify.addResourceToProcessingQueue(mappingName, resourceId=resourceId)
+        return "True"
+    transform_all_related.exposed = True
+
     def refine(self, *args, **kw):
         cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
         cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
@@ -165,7 +202,6 @@ class CSV2RDFRefineAPI(object):
         mapping.update_mapping(header, class_, mappingName)
         return "In a queue now!"
     refine.exposed = True
-    #refine._cp_config = {'tools.json_in.on': True}
 
     @cherrypy.expose
     def refine_all_similar(self, *args, **kw):
@@ -235,7 +271,8 @@ class CSV2RDFRefineAPI(object):
         smwquery = SMWQuery()
         resources = smwquery.fetchAllResourceIdsFromDataset(resourceId)
         response = {
-                'count': len(resources)
+                'count': len(resources),
+                'resourceIds': resources
                 }
         return json.dumps(response)
 
