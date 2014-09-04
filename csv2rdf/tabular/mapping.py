@@ -45,6 +45,7 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         mapping_end = self.mappings_end[mappingName]
         self.delete_template_from_wiki_page(mapping_start, mapping_end)
         self.add_mapping_to_wiki_page(wikified_mapping)
+        self.wiki_page = self.remove_blank_lines_from_wiki_page(self.wiki_page)
         self.create_wiki_page(self.wiki_page)
         self.updateMetadata(self.resourceId, mappingName)
         #fire_up the conversion process for this mapping
@@ -240,12 +241,13 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
         csv2rdf_mapping = ''
         prefixcc = csv2rdf.prefixcc.PrefixCC()
         #scan all colX values and extract prefixes
-        prefixes = []
+        prefixes = set()
         properties = {} #properties['col1'] = id >>>> ?obs myprefix:id ?col1
         for key in mapping.keys():
             if(re.match('^col', key)):
-                prefixes += prefixcc.extract_prefixes(mapping[key])
+                prefixes = set(list(prefixes) + list(prefixcc.extract_prefixes(mapping[key])))
                 properties[key] = mapping[key]
+        prefixes = list(prefixes)
         #delete omitCols from the properties array and rearrange it
         for key in properties.keys():
             if(int(key[3:]) in mapping['omitCols']):
@@ -295,7 +297,8 @@ class Mapping(csv2rdf.interfaces.AuxilaryInterface):
             t = wikiString.split('%5E%5E')[1]
             #t = t.split('^^')[0]
             t = ':'.join(t.split('%3A')) 
-            return "typedLiteral(?"+column_number+", '"+t+"')"
+            t = urllib.unquote(t)
+            return "typedLiteral(?"+column_number+", \""+t+"\")"
         except:
             return "plainLiteral(?"+column_number+")"
         

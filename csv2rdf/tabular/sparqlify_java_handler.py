@@ -4,9 +4,10 @@ import json
 import csv2rdf.tabular.sparqlify
 
 class SparqlifyJavaHandler(object):
-    def __init__(self, resourceId, mappingName):
+    def __init__(self, resourceId, mappingName, mappingResourceId):
         self.resourceId = resourceId
         self.mappingName = mappingName
+        self.mappingResourceId = mappingResourceId
 
     def processResource(self):
         logging.info("Processing %s %s" % (self.mappingName, self.resourceId))
@@ -15,7 +16,10 @@ class SparqlifyJavaHandler(object):
         print "init sparqlify"
         sparqlify = csv2rdf.tabular.sparqlify.Sparqlify(self.resourceId)
         print "start processing"
-        processReturnCode = sparqlify.transformResourceToRdf(self.mappingName, self.resourceId)
+        print self.mappingName
+        print self.resourceId
+        print self.mappingResourceId
+        processReturnCode = sparqlify.transformResourceToRdf(self.mappingName, self.resourceId, self.mappingResourceId)
         logging.info("Process returned %s" % processReturnCode)
         print "Process returned %s" % processReturnCode
         return True
@@ -33,7 +37,8 @@ def messagingCallback(ch, method, properties, body):
     payload = json.loads(body)
     resourceId = payload["resourceId"]
     mappingName = payload["mappingName"]
-    sparqlifyJavaHandler = SparqlifyJavaHandler(resourceId, mappingName)
+    mappingResourceId = payload["mappingResourceId"]
+    sparqlifyJavaHandler = SparqlifyJavaHandler(resourceId, mappingName, mappingResourceId)
     if(sparqlifyJavaHandler.fileIsExists()):
         logging.info("Started resource processing...")
         sparqlifyJavaHandler.processResource()

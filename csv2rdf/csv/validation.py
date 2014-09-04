@@ -13,9 +13,10 @@ class CsvDatatypeValidator(object):
     csvValidatedFilePath = "" 
     datatypeCols = []
 
-    def __init__(self, resourceId, mappingName):
+    def __init__(self, resourceId, mappingName, mappingResourceId):
         self.resourceId = resourceId
         self.mappingName = mappingName
+        self.mappingResourceId = mappingResourceId
         self.init()
 
     def init(self):
@@ -24,7 +25,7 @@ class CsvDatatypeValidator(object):
         self._identifyDatatypeCols()
 
     def _parseMapping(self):
-        mappings = csv2rdf.tabular.mapping.Mapping(self.resourceId)
+        mappings = csv2rdf.tabular.mapping.Mapping(self.mappingResourceId)
         mappings.init_mappings_only()
         mapping = mappings.get_mapping_by_name(self.mappingName)
         self.csvDelimiter = mapping['delimiter']

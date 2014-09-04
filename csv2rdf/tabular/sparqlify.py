@@ -19,12 +19,14 @@ class Sparqlify(object):
     def __init__(self, resourceId):
         self.resourceId = resourceId
     
-    def addResourceToProcessingQueue(self, mappingName, resourceId = None):
+    def addResourceToProcessingQueue(self, mappingName, resourceId = None, mappingResourceId = None):
         """
             Send the message to the queue
         """
         if(not resourceId):
             resourceId = self.resourceId
+        if(not mappingResourceId):
+            mappingResourceId = resourceId
 
         #send message to one of the java handlers
         exchange = "sparqlify_java_exchange"
@@ -33,7 +35,7 @@ class Sparqlify(object):
         messageBroker.declareDirectExchange(exchange)
         messageBroker.declareQueue(queue)
         messageBroker.bindExchangeToQueue(exchange, queue)
-        message = json.dumps({'mappingName': mappingName, 'resourceId': resourceId})
+        message = json.dumps({'mappingName': mappingName, 'resourceId': resourceId, 'mappingResourceId': mappingResourceId})
         #message_broker.send_message(exchange, message)
         messageBroker.sendMessageToQueue(queue, message)
         return True #Message sent!
@@ -66,27 +68,30 @@ class Sparqlify(object):
         db = csv2rdf.database.DatabasePlainFiles(csv2rdf.config.config.root_path)
         db.saveDbaseRaw('get_exposed_rdf_list', json.dumps(self.getSparqlifiedList()))
 
-    def validateCsv(self, resourceId, mappingName):
-        validator = csv2rdf.csv.validation.CsvDatatypeValidator(resourceId, mappingName)
+    def validateCsv(self, resourceId, mappingName, mappingResourceId):
+        validator = csv2rdf.csv.validation.CsvDatatypeValidator(resourceId, mappingName, mappingResourceId)
         return validator.validate()
 
-    def transformResourceToRdf(self, mappingName, resourceId = None):
+    def transformResourceToRdf(self, mappingName, resourceId = None, mappingResourceId = None):
         if(not resourceId):
             resourceId = self.resourceId
+
+        if(not mappingResourceId):
+            mappingResourceId = resourceId 
                 
         logging.info("Getting the CSV filepath...")
         tabularFile = csv2rdf.tabular.tabularfile.TabularFile(resourceId)
         filePath = tabularFile.getCsvFilePathDownload()
 
         logging.info("Fetching the mapping...")
-        mapping = csv2rdf.tabular.mapping.Mapping(resourceId)
+        mapping = csv2rdf.tabular.mapping.Mapping(mappingResourceId)
         mapping.init()
         mappingPath = mapping.get_mapping_path(mappingName)
         mappingCurrent = mapping.get_mapping_by_name(mappingName)
 
         #validate cSV to comply with xsd types
         logging.info("Validating CSV...")
-        filePath = self.validateCsv(resourceId, mappingName)
+        filePath = self.validateCsv(resourceId, mappingName, mappingResourceId)
         logging.info("Validated CSV is: %s" % (filePath,))
 
         #process file based on the mapping_current options
@@ -173,5 +178,6 @@ if __name__ == '__main__':
     #transformation test
     testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
     sparqlify = Sparqlify(testResourceId)
-    testMapping = "csv2rdf-interface-generated"
+    #testMapping = "csv2rdf-interface-generated"
+    testMapping = "csv2rdf-interface-generated-with-datatype"
     print sparqlify.transformResourceToRdf(testMapping)

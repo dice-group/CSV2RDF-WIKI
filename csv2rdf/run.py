@@ -178,10 +178,12 @@ class CSV2RDFRefineAPI(object):
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         resourceIds = json_load['resourceIds']
+        primaryResourceId = json_load['primaryResourceId']
         mappingName = json_load['mappingName']
+
         sparqlify = Sparqlify("")
         for resourceId in resourceIds:
-            status = sparqlify.addResourceToProcessingQueue(mappingName, resourceId=resourceId)
+            status = sparqlify.addResourceToProcessingQueue(mappingName, resourceId=resourceId, mappingResourceId=primaryResourceId)
         return "True"
     transform_all_related.exposed = True
 
