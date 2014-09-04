@@ -165,13 +165,13 @@ class Sparqlify(object):
 
 if __name__ == '__main__':
     #send message to queue for testing
-    testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
-    sparqlify = Sparqlify(testResourceId)
-    testMapping = "csv2rdf-interface-generated"
-    print sparqlify.addResourceToProcessingQueue(testMapping)
-
-    #transformation test
     #testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
     #sparqlify = Sparqlify(testResourceId)
     #testMapping = "csv2rdf-interface-generated"
-    #print sparqlify.transformResourceToRdf(testMapping)
+    #print sparqlify.addResourceToProcessingQueue(testMapping)
+
+    #transformation test
+    testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
+    sparqlify = Sparqlify(testResourceId)
+    testMapping = "csv2rdf-interface-generated"
+    print sparqlify.transformResourceToRdf(testMapping)

@@ -94,6 +94,7 @@ class CsvDatatypeValidator(object):
         return value.isoformat()
 
     def validateFloat(self, value):
+        print value
         #243.91
         if(re.match("-*\d+\.\d+", value)):
             value = float(value)
@@ -104,13 +105,16 @@ class CsvDatatypeValidator(object):
             value = "".join(value.split(","))
             value = float(value)
 
+        else:
+            value = float(0)
+
         return value
 
 if __name__ == "__main__":
     testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
-    testResourceId = "daacea8c-789a-4cfd-b685-c927e9adf54c"
-    testResourceId = "e8b8eb07-148f-492e-a2a1-95a663644ec5"
-    testResourceId = "141cd493-3237-428b-a56b-b88fd5f9da7c"
+    #testResourceId = "daacea8c-789a-4cfd-b685-c927e9adf54c"
+    #testResourceId = "e8b8eb07-148f-492e-a2a1-95a663644ec5"
+    #testResourceId = "141cd493-3237-428b-a56b-b88fd5f9da7c"
     testMappingName = "csv2rdf-interface-generated"
     v = CsvDatatypeValidator(testResourceId, testMappingName)
     v.validate()

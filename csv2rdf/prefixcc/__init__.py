@@ -24,11 +24,11 @@ class PrefixCC:
     
     def extract_prefixes(self, string):
         #format here: foaf:birthday->xsd:date
-        if(string.startswith('http')):
-            return ''
         prefixes = []
         string = string.split('%5E%5E') # ^^
         for substr in string:
+            if(substr.startswith('http')):
+                continue
             substr = substr.split('%3A') # %3A = :
             if(len(substr) > 1):
                 prefixes.append(substr[0])
