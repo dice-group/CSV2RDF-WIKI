@@ -91,8 +91,8 @@ class CkanApplication():
             try:
                 delete_result = mapping.delete_wiki_page()
                 logging.info("Removing the wiki page ... %s" % delete_result)
-                os.remove( os.path.join(csv2rdf.config.config.resources_path, resource_id) )
-                logging.info("File removed successfully.")
+                #os.remove( os.path.join(csv2rdf.config.config.resources_path, resource_id) )
+                #logging.info("File removed successfully.")
             except BaseException as e:
                 logging.info("An exception occurred, while deleting item: %s" % str(e))
         logging.info("Deleting outdated resources ... Complete.")
@@ -113,10 +113,10 @@ class CkanApplication():
 
         logging.info("Outdated RDF files found: %d" % len(outdated_sparqlified))
         
-        for resource_id in outdated_sparqlified:
-            for filename in glob.glob( os.path.join(csv2rdf.config.config.rdf_files_path, resource_id+"*")):
-                logging.info("Removing %s" % filename)
-                os.remove(filename)
+        #for resource_id in outdated_sparqlified:
+        #    for filename in glob.glob( os.path.join(csv2rdf.config.config.rdf_files_path, resource_id+"*")):
+        #        logging.info("Removing %s" % filename)
+        #        os.remove(filename)
 
         logging.info("Removing outdated RDF files ... Complete.")
 
@@ -127,8 +127,11 @@ class CkanApplication():
             logging.info("Processing resource: %s" % resource_id)
             logging.info("%d left to process." % (len(new_resources) - num + 1))
             tabularfile = csv2rdf.tabular.tabularfile.TabularFile(resource_id)
-            if(tabularfile.download()): #if 200 response code
-                tabularfile.validate()
+            try:
+                if(tabularfile.download()): #if 200 response code
+                    tabularfile.validate()
+            except BaseException as e:
+                logging.error("Error Downloading or validating resource %s : %s"%(resource_id,str(e)))
         logging.info("Downloading new resources ... Complete.")
 
     def create_new_wiki_pages(self, new_wiki_page_ids):

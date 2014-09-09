@@ -53,6 +53,22 @@ class Queries():
                 formats.append(resource['format'])
         return sorted(formats)
 
+    def get_format_stats(self):
+        stats = {}
+        from csv2rdf.ckan.ckanio.clustered_formats_pdeu import ClusteredFormats
+        clusteredFormats = ClusteredFormats()
+        resource_list = self.io.get_full_resource_list()
+        stats['total'] = len(resource_list)
+        for format_ in dir(clusteredFormats):
+            stats[format_] = 0
+        for resource in resource_list:
+            for format_ in dir(clusteredFormats):
+                exec("current_formats = clusteredFormats."+format_)
+                if(resource['format'] in current_formats):
+                    stats[format_] += 1
+                    break
+        return stats
+
     def get_rdf_and_sparql_list(self):
         rdf = self.io.get_resource_list("rdf")
         rdf_compressed = self.io.get_resource_list("rdf_compressed")
@@ -142,7 +158,9 @@ class Queries():
 if __name__ == "__main__":
     q = Queries()
 
-    #print q.get_available_formats()
+    #available_formats = q.get_available_formats()
+    stats = q.get_format_stats()
+    import ipdb; ipdb.set_trace()
     #print q.get_rdf_and_sparql_list()
     #print q.get_rdf_for_lodstats()
     #(outdated, new) = q.get_outdated_and_new_csv_resources()
