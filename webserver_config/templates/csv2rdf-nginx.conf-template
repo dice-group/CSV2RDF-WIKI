@@ -1,5 +1,8 @@
 # mysite_nginx.conf
 
+upstream node_boxes {
+    server 127.0.0.1:4711;
+}
 # the upstream component nginx needs to connect to
 upstream cherrypy {
     server unix://__CSV2RDF__/csv2rdf.sock; # for a file socket
@@ -41,11 +44,43 @@ server {
         alias __CSV2RDF__/get_exposed_rdf_list;
     }
 
+    location /pdeu-dump.n3.gz {
+        alias __CSV2RDF__/dumps/pdeu-dump.n3.gz;
+    }
+
+    #I am a hack!
+    location /css {
+        alias __CSV2RDFINTERACE__/site/css;
+    }
+    #I am a hack!
+    location /bower_components {
+        alias __CSV2RDFINTERACE__/site/bower_components;
+    }
+    #I am a hack!
+    location /js {
+        alias __CSV2RDFINTERACE__/site/js;
+    }
+
+    location ~ ^/mapping-interface/ {
+        #proxy_http_version 1.1;
+        #proxy_set_header Upgrade $http_upgrade;
+        #proxy_set_header Connection 'upgrade';
+        #proxy_cache_bypass $http_upgrade;
+        rewrite /mapping-interface/(.*) /$1  break;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-NginX-Proxy true;
+        proxy_redirect off;
+        proxy_pass http://node_boxes;
+    }
+
     # Finally, send all non-media requests to the Django server.
     location / {
         uwsgi_pass  cherrypy;
         include     __CSV2RDF__/webserver_config/uwsgi_params; # the uwsgi_params file you installed
-        }
+    }
+
     access_log /var/log/nginx/__HOSTNAME__.access.log;
     error_log /var/log/nginx/__HOSTNAME__.error.log;
 }
