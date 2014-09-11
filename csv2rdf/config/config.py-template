@@ -27,24 +27,25 @@ limes_jar_path = root_path + "/csv2rdf/libs/limes.jar"
 limes_dtd_path = root_path + "/csv2rdf/libs/limes.dtd"
 
 #pathes to local folders
-resources_path = root_path + "/files/csv/" #contains downloaded and cleaned csv files
-sparqlify_mappings_path = root_path + "/files/sparqlify_mappings/" #contains mappings for every config in the mappings wiki
-rdf_files_path = root_path + "/sparqlified/" #contains converted to RDF files
-rdf_files_exposed_path = root_path + "/sparqlified_exposed/" #contains soft links to each (only one) resource
+csv2rdf_server_data_path = "__CSV2RDF_DATA_PATH__"
+resources_path = csv2rdf_server_data_path + "/csv/" #contains downloaded and cleaned csv files
+sparqlify_mappings_path = csv2rdf_server_data_path + "/sparqlify_mappings/" #contains mappings for every config in the mappings wiki
+rdf_files_path = csv2rdf_server_data_path + "/sparqlified/" #contains converted to RDF files
+rdf_files_exposed_path = csv2rdf_server_data_path + "/sparqlified_exposed/" #contains soft links to each (only one) resource
 
-#data files
-data_csv_resources_path = root_path + "/data/csv_resources/"
-data_classified_path = root_path + "/data/classified/"
-data_classified_cache_path = root_path + "/data/classified/cache/"
-data_path = root_path + "/data/"
-data_csv2rdf_wiki_pages_file = data_path + "csv2rdf_wiki_pages/"
-data_all_csv2rdf_pages = data_path + "all_csv2rdf_pages"
-data_packages_path = data_path + "packages/"
-data_packages_metadata_path = data_path + "packages_metadata/"
-data_full_package_list = data_path + "full_package_list"
-data_resources_path = data_path + "resources/"
-data_full_resource_list = data_path + "full_resource_list"
-data_csv_resource_list = data_path + "csv_resource_list"
+#cache files
+csv2rdf_server_cache_path = "__CSV2RDF_CACHE_PATH__"
+data_csv_resources_path = csv2rdf_server_cache_path + "/csv_resources/"
+data_classified_path = csv2rdf_server_cache_path + "/classified/"
+data_classified_cache_path = csv2rdf_server_cache_path + "/classified/cache/"
+data_csv2rdf_wiki_pages_file = csv2rdf_server_cache_path + "csv2rdf_wiki_pages/"
+data_all_csv2rdf_pages = csv2rdf_server_cache_path + "all_csv2rdf_pages"
+data_packages_path = csv2rdf_server_cache_path + "packages/"
+data_packages_metadata_path = csv2rdf_server_cache_path + "packages_metadata/"
+data_full_package_list = csv2rdf_server_cache_path + "full_package_list"
+data_resources_path = csv2rdf_server_cache_path + "resources/"
+data_full_resource_list = csv2rdf_server_cache_path + "full_resource_list"
+data_csv_resource_list = csv2rdf_server_cache_path + "csv_resource_list"
 data_rdf_resource_list = "rdf"
 data_rdf_compressed_resource_list = "rdf_compressed"
 data_endpoint_resource_list = "endpoints"
