@@ -26,7 +26,7 @@ class VirtuosoLoader(object):
 if __name__ == "__main__":
     vl = VirtuosoLoader()
     resourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
-    resourcePath = vl.getPathById(resourceId, 'csv2rdf-interface-generated-with-datatype')
+    resourcePath = vl.getPathById(resourceId, 'default-tranformation-configuration')
     resourceGraphUri = "http://data.publicdata.eu/%s"%(resourceId,)
     command = vl.reload(resourcePath, resourceGraphUri)
     import ipdb; ipdb.set_trace()
