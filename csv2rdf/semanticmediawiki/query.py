@@ -23,7 +23,6 @@ class SMWQuery(object):
     def fetchResourceDataset(self, resourceId):
         resource = self.fetchResource(resourceId)
         queryString = self.querygen.getResourceDatasetQuery()
-        import ipdb; ipdb.set_trace()
         resourceDatasetQuery = RDF.Query(self.querygen.getResourceDatasetQuery())
         resourceDataset = "<%s>" %(str(resourceDatasetQuery.execute(resource).next()['o']),)
         return resourceDataset
