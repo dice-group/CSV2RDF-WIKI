@@ -8,7 +8,6 @@ requests
 pandas
 python-magic
 pika
-foxpy
 beautifulsoup4
 pypyodbc
 SPARQLWrapper

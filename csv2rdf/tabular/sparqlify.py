@@ -179,5 +179,5 @@ if __name__ == '__main__':
     testResourceId = "02f31d80-40cc-496d-ad79-2cf02daa5675"
     sparqlify = Sparqlify(testResourceId)
     #testMapping = "csv2rdf-interface-generated"
-    testMapping = "csv2rdf-interface-generated-with-datatype"
+    testMapping = "default-tranformation-configuration"
     print sparqlify.transformResourceToRdf(testMapping)
