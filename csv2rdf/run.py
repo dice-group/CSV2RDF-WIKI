@@ -255,7 +255,7 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
         classifier = Classifier(resourceId)
-        return json.dumps(classifier.getClassesJson(resourceId))
+        return json.dumps(classifier.getClassesJsonDummy(resourceId))
 
     @cherrypy.expose
     def classeslov(self, label):

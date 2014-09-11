@@ -9,10 +9,11 @@ class Classifier(ClassifierInterface):
                 "dbpediaspotlight"
             ]
     def __init__(self, resourceId=None):
-        if(not (resourceId != None and 
-           self.isCached(resourceId))):
-            ClassifierInterface.__init__(self)
-            self._initClassifiers()
+        pass
+        #if(not (resourceId != None and 
+        #   self.isCached(resourceId))):
+        #    ClassifierInterface.__init__(self)
+        #    self._initClassifiers()
 
     def _initClassifiers(self):
         for classifierName in self.enabledClassifiers:
@@ -34,6 +35,11 @@ class Classifier(ClassifierInterface):
                           "class": entityclass}
             entitiesJson.append(entityJson)
         return entitiesJson
+
+    def getClassesJsonDummy(self, resourceId):
+        return [{'class': u'http://dbpedia.org/ontology/Organisation',
+                 'structureElement': 'package.extras',
+                 'uri': u'http://dbpedia.org/resource/Southampton_City_Primary_Care_Trust'}]
 
     def isCached(self, resourceId):
         db = DatabasePlainFiles(data_classified_cache_path + resourceId)
