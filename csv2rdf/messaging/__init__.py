@@ -1,13 +1,19 @@
 import pika
 
 class Messaging(object):
+    rabbitmqHost = "__RABBITMQHOST__"
+
     def __init__(self):
         self.connection = self.connectToRabbit()
         self.channel = self.retrieveChannel(self.connection)
 
     def connectToRabbit(self):
         credentials = pika.PlainCredentials("guest","guest")
-        connectionParams = pika.ConnectionParameters("localhost", credentials=credentials)
+        if(self.rabbitmqHost != "__RABBITMQHOST__"):
+            connectionParams = pika.ConnectionParameters(self.rabbitmqHost, credentials=credentials)
+        else:
+            connectionParams = pika.ConnectionParameters("localhost", credentials=credentials)
+
         connection = pika.BlockingConnection(connectionParams)
         return connection
 
