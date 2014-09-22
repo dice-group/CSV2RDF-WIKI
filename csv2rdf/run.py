@@ -15,9 +15,9 @@ import csv2rdf.tabular.mapping
 import csv2rdf.tabular.refine
 import csv2rdf.lodstats
 from csv2rdf.classification.classify import Classifier
-from csv2rdf.classification.lov import LovClassifier
 from csv2rdf.semanticmediawiki.query import SMWQuery
 from csv2rdf.tabular.sparqlify import Sparqlify
+from lovpy.lov import Lov
 
 # Template objects
 from csv2rdf.server.pystachetempl.index import IndexTemplate
@@ -258,12 +258,20 @@ class CSV2RDFRefineAPI(object):
         return json.dumps(classifier.getClassesJsonDummy(resourceId))
 
     @cherrypy.expose
-    def classeslov(self, label):
+    def lovClass(self, label):
         cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
         cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
-        lovClassifier = LovClassifier()
-        return json.dumps(lovClassifier.getEntities(label))
+        lov = Lov()
+        return json.dumps(lov.searchClass(label))
+
+    @cherrypy.expose
+    def lovProperty(self, label):
+        cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
+        cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        lov = Lov()
+        return json.dumps(lov.searchProperty(label))
 
     @cherrypy.expose
     def similar_resources(self, resourceId):
