@@ -135,24 +135,28 @@ class CSV2RDFRefineAPI(object):
     @cherrypy.expose(alias="refines")
     def getDataForRefine(self, resourceId):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        resourceId = resourceId.lower()
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_data_json()
 
     @cherrypy.expose(alias="tables")
     def getDataTable(self, resourceId):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        resourceId = resourceId.lower()
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_csv_table_json()
 
     @cherrypy.expose(alias="mappings")
     def getDataMappings(self, resourceId):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        resourceId = resourceId.lower()
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_mappings_json()
 
     @cherrypy.expose(alias="resources")
     def getDataResource(self, resourceId):
         cherrypy.response.headers['Access-Control-Allow-Origin'] = "*"
+        resourceId = resourceId.lower()
         refine = csv2rdf.tabular.refine.Refine(resourceId)
         return refine.get_resource_json()
 
@@ -164,6 +168,7 @@ class CSV2RDFRefineAPI(object):
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         resourceId = json_load['resourceId']
+        resourceId = resourceId.lower()
         mappingName = json_load['mappingName']
         sparqlify = Sparqlify(resourceId)
         status = sparqlify.addResourceToProcessingQueue(mappingName)
@@ -197,6 +202,7 @@ class CSV2RDFRefineAPI(object):
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         id = json_load['id']
+        id = id.lower()
         header = json_load['header']
         class_ = json_load['class']
         mappingName = json_load['mappingName']
@@ -217,6 +223,7 @@ class CSV2RDFRefineAPI(object):
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         id = json_load['id']
+        id = id.lower()
         header = json_load['header']
         class_ = json_load['class']
         from csv2rdf.semanticmediawiki.query import SMWQuery
@@ -239,9 +246,8 @@ class CSV2RDFRefineAPI(object):
         json_load = ' '.join(cherrypy.request.params.keys())
         json_load = json.loads(json_load)
         id = json_load['id']
+        id = id.lower()
         header = json_load['header']
-        print id
-        print header
         lodstats = csv2rdf.lodstats.LODStats()
         lodstats.set_table_id(id)
         lodstats.set_table_header(header)
@@ -254,6 +260,7 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
         cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        resourceId = resourceId.lower()
         classifier = Classifier(resourceId)
         return json.dumps(classifier.getClassesJsonDummy(resourceId))
 
@@ -278,6 +285,7 @@ class CSV2RDFRefineAPI(object):
         cherrypy.response.headers["Access-Control-Allow-Origin"] = "*"
         cherrypy.response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         cherrypy.response.headers["Access-Control-Allow-Headers"] = "Cache-Control, X-Proxy-Authorization, X-Requested-With"
+        resourceId = resourceId.lower()
         smwquery = SMWQuery()
         resources = smwquery.fetchAllResourceIdsFromDataset(resourceId)
         response = {
